@@ -51,7 +51,8 @@ internal class Program
         root.AddCommand(ViewCommands.BuildCommands());
         root.AddCommand(SourceEntityCommands.BuildCommands());
 
-        root.AddGlobalOption(new Option<OutputStyle>(new[] { "--output", "-o" }, "Set output to json or table") {IsHidden = true});
+        root.AddGlobalOption(new Option<OutputStyle>(new[] { "--output", "-o" }, "Set output to json or table") { IsHidden = true });
+        root.AddGlobalOption(new Option<string>(new[] { "--apiKey", "-k" }, "Value of API key") { IsRequired = false });
 
         return new CommandLineBuilder(root);
     }
