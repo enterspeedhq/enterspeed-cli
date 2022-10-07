@@ -2,16 +2,11 @@ namespace Enterspeed.Cli.Configuration
 {
     public class ApiKey
     {
-        private static string _apiKey { get; set; }
+        public string Value { get; private set; }
 
-        public static void Set(string apiKey)
+        public void Set(string value)
         {
-            _apiKey = apiKey;
-        }
-
-        public static string Get()
-        {
-            return _apiKey;
+            Value = value;
         }
     }
 }

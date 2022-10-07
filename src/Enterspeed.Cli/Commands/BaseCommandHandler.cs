@@ -1,22 +1,12 @@
 ﻿using System.CommandLine.Invocation;
-using Enterspeed.Cli.Configuration;
 
 namespace Enterspeed.Cli.Commands;
 
 public class BaseCommandHandler
 {
     public OutputStyle Output { get; set; }
-    public string ApiKey { get; set; }
-    public bool Yes { get; set; }
 
-    public BaseCommandHandler()
-    {
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-        if (!string.IsNullOrEmpty(ApiKey))
-        {
-            Enterspeed.Cli.Configuration.ApiKey.Set(ApiKey);
-        }
-    }
+    public bool Yes { get; set; }
 
     public int Invoke(InvocationContext context)
     {
@@ -33,4 +23,4 @@ public class BaseCommandHandler
             return true;
         return false;
     }
-}
+}   

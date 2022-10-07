@@ -2,7 +2,7 @@
   "profiles": {
     "Enterspeed.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "tenant set 0d62b9cf-f8dc-4778-9c3b-5ee8d2470a57"
+      "commandLineArgs": "tenant set 0d62b9cf-f8dc-4778-9c3b-5ee8d2470a57 --apiKey apiKeyValue"
     }
   }
 }

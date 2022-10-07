@@ -2,7 +2,6 @@
 using MediatR;
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using Enterspeed.Cli.Api.Environment;
 
 namespace Enterspeed.Cli.Commands.EnvironmentClient;
 

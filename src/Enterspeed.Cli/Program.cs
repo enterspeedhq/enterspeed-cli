@@ -18,6 +18,8 @@ namespace Enterspeed.Cli;
 
 internal class Program
 {
+    private static readonly Option<string> ApiKeyOption = new("--apiKey");
+
     internal static IHostBuilder CreateHostBuilder(string[] args) => Host.CreateDefaultBuilder(args);
 
     public static async Task<int> Main(string[] args)
@@ -34,7 +36,11 @@ internal class Program
                     services.AddCli();
                     services.AddApplication();
                 })
-                .UseCommands()).UseDefaults().Build();
+                .UseCommands()
+            )
+            .AddMiddleware(MiddleWare.ApiKey(ApiKeyOption))
+            .UseDefaults()
+            .Build();
 
         return await runner.InvokeAsync(args);
     }
@@ -52,7 +58,7 @@ internal class Program
         root.AddCommand(SourceEntityCommands.BuildCommands());
 
         root.AddGlobalOption(new Option<OutputStyle>(new[] { "--output", "-o" }, "Set output to json or table") { IsHidden = true });
-        root.AddGlobalOption(new Option<string>(new[] { "--apiKey", "-k" }, "Value of API key") { IsRequired = false });
+        root.AddGlobalOption(ApiKeyOption);
 
         return new CommandLineBuilder(root);
     }

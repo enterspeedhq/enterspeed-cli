@@ -13,20 +13,18 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
     private readonly ILogger<EnterspeedClient> _logger;
     private readonly IStateService _stateService;
     private readonly RestClient _client;
-    private readonly string _apiKey;
+    private readonly string _apiKeyValue;
 
-    public EnterspeedClient(ILogger<EnterspeedClient> logger, IConfiguration configuration, IStateService stateService)
+    public EnterspeedClient(ILogger<EnterspeedClient> logger, IConfiguration configuration, IStateService stateService, ApiKey apiKey)
     {
         _logger = logger;
         _stateService = stateService;
-        _apiKey = ApiKey.Get();
+        _apiKeyValue = apiKey?.Value;
 
         var settings = configuration.GetRequiredSection("Settings").Get<Settings>();
         var options = new RestClientOptions(settings.EnterspeedApiUri);
 
-        _client = new RestClient(options)
-        {
-        };
+        _client = new RestClient(options);
     }
 
     public async Task<T> ExecuteAsync<T>(RestRequest request, CancellationToken cancellationToken = default)
@@ -60,9 +58,9 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
 
         request.AddHeader("X-Tenant-Id", tenantId.IdValue);
 
-        if (!string.IsNullOrEmpty(_apiKey))
+        if (!string.IsNullOrEmpty(_apiKeyValue))
         {
-            request.AddHeader("X-Api-Key", _apiKey);
+            request.AddHeader("X-Api-Key", _apiKeyValue);
         }
         else
         {
@@ -72,7 +70,7 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
 
     private async Task HandleUnauthorized<T>(RestRequest request, CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrEmpty(_apiKey))
+        if (!string.IsNullOrEmpty(_apiKeyValue))
         {
             _logger.LogError("Unauthorized, make sure that you are using the correct api key");
         }
@@ -96,7 +94,7 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
 
     private bool IsAuthenticationSetUp()
     {
-        if (!string.IsNullOrEmpty(_apiKey))
+        if (!string.IsNullOrEmpty(_apiKeyValue))
         {
             return true;
         }

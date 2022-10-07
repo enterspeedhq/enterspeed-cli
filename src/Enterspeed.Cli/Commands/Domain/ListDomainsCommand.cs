@@ -1,7 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
 using Enterspeed.Cli.Api.Domain;
-using Enterspeed.Cli.Commands.Environment;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using MediatR;
 

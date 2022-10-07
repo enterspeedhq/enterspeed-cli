@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using Enterspeed.Cli.Configuration;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.EnterspeedClient;
 using MediatR;
@@ -39,6 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddMediatR(Assembly.GetExecutingAssembly());
         services.AddTransient<IEnterspeedClient, EnterspeedClient>();
         services.AddTransient<IOutputService, OutputService>();
+        services.AddSingleton<ApiKey>();
         return services;
     }
 }
