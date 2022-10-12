@@ -27,7 +27,7 @@ public class ListDomainsCommand : Command
         {
             var domains = await _mediator.Send(new GetDomainsRequest());
 
-            _outputService.Write(domains, Output);
+            _outputService.Write(domains);
             return 0;
         }
     }

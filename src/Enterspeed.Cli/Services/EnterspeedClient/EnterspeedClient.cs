@@ -15,11 +15,11 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
     private readonly RestClient _client;
     private readonly string _apiKeyValue;
 
-    public EnterspeedClient(ILogger<EnterspeedClient> logger, IConfiguration configuration, IStateService stateService, ApiKey apiKey)
+    public EnterspeedClient(ILogger<EnterspeedClient> logger, IConfiguration configuration, IStateService stateService, GlobalOptions globalOptions)
     {
         _logger = logger;
         _stateService = stateService;
-        _apiKeyValue = apiKey?.Value;
+        _apiKeyValue = globalOptions?.ApiKeyValue;
 
         var settings = configuration.GetRequiredSection("Settings").Get<Settings>();
         var options = new RestClientOptions(settings.EnterspeedApiUri);
@@ -53,17 +53,16 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
 
     private void AddHeaders(RestRequest request)
     {
-        var tenantId = _stateService.ActiveTenant();
-        _logger.LogInformation($"TenantId: {tenantId.IdValue}");
-
-        request.AddHeader("X-Tenant-Id", tenantId.IdValue);
-
         if (!string.IsNullOrEmpty(_apiKeyValue))
         {
             request.AddHeader("X-Api-Key", _apiKeyValue);
         }
         else
         {
+            var tenantId = _stateService.ActiveTenant();
+            _logger.LogInformation($"TenantId: {tenantId.IdValue}");
+
+            request.AddHeader("X-Tenant-Id", tenantId.IdValue);
             request.AddHeader("Authorization", $"Bearer {_stateService.Token.AccessToken}");
         }
     }

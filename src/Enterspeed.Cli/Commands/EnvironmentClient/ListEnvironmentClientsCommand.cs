@@ -27,7 +27,7 @@ public class ListEnvironmentClientsCommand : Command
         {
             var environmentClients = await _mediator.Send(new GetEnvironmentClientsRequest());
 
-            _outputService.Write(environmentClients, Output);
+            _outputService.Write(environmentClients);
             return 0;
         }
     }

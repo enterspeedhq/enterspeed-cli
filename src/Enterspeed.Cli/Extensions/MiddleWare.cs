@@ -8,21 +8,17 @@ namespace Enterspeed.Cli.Extensions
 {
     public class MiddleWare
     {
-        public static Action<InvocationContext> ApiKey(Option<string> apiKeyOption)
+        public static Action<InvocationContext> ApiKeyAuth(Option<string> apiKeyOption, Option<OutputStyle> outPutStyle)
         {
             return (context) =>
             {
                 var apiKeyValue = context.ParseResult.GetValueForOption(apiKeyOption);
-
-                if (string.IsNullOrEmpty(apiKeyValue))
-                {
-                    return;
-                }
+                var outPutStyleValue = context.ParseResult.GetValueForOption(outPutStyle);
 
                 var host = context.BindingContext.GetService<IHost>();
+                var apiKey = host?.Services.GetService<GlobalOptions>();
 
-                var apiKey = host?.Services.GetService<ApiKey>();
-                apiKey?.Set(apiKeyValue);
+                apiKey?.Set(apiKeyValue, outPutStyleValue);
             };
         }
     }

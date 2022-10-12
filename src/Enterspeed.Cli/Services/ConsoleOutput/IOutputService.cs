@@ -2,5 +2,5 @@
 
 public interface IOutputService
 {
-    void Write<T>(T value, OutputStyle style = OutputStyle.Json);
+    void Write<T>(T value);
 }

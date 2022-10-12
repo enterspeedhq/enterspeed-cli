@@ -27,7 +27,7 @@ public class ListEnvironmentsCommand : Command
         {
             var environments = await _mediator.Send(new GetEnvironmentsRequest());
 
-            _outputService.Write(environments, Output);
+            _outputService.Write(environments);
             return 0;
         }
     }

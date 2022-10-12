@@ -40,7 +40,7 @@ public class ListSourceEntitiesCommand : Command
                 PageSize = 10
             });
 
-            _outputService.Write(viewsResponse.Results, Output);
+            _outputService.Write(viewsResponse.Results);
             return 0;
         }
     }

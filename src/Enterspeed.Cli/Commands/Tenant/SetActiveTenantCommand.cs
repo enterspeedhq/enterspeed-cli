@@ -10,7 +10,7 @@ public class SetActiveTenantCommand : Command
 {
     public SetActiveTenantCommand() : base(name: "set", "Set the active tenant")
     {
-        AddArgument(new Argument<string>("id", "Id of the tenant") {  });
+        AddArgument(new Argument<string>("id", "Id of the tenant") { });
     }
 
     public new class Handler : BaseCommandHandler, ICommandHandler
@@ -27,7 +27,7 @@ public class SetActiveTenantCommand : Command
         public string Id { get; set; }
 
         public Task<int> InvokeAsync(InvocationContext context)
-        {
+        {   
             var tenantIds = _stateService.User?.Tenants?.Keys;
 
             if (tenantIds == null || !tenantIds.Any())

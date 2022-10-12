@@ -40,7 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddMediatR(Assembly.GetExecutingAssembly());
         services.AddTransient<IEnterspeedClient, EnterspeedClient>();
         services.AddTransient<IOutputService, OutputService>();
-        services.AddSingleton<ApiKey>();
+        services.AddSingleton<GlobalOptions>();
         return services;
     }
 }

@@ -27,7 +27,7 @@ public class ListSourceGroupsCommand : Command
         {
             var sourceGroups = await _mediator.Send(new GetSourceGroupsRequest());
 
-            _outputService.Write(sourceGroups, Output);
+            _outputService.Write(sourceGroups);
             return 0;
         }
     }

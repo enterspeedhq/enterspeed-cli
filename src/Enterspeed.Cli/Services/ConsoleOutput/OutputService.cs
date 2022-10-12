@@ -1,25 +1,27 @@
 ﻿using System.Text.Json;
+using Enterspeed.Cli.Configuration;
 using Enterspeed.Cli.Domain.JsonConverters;
 
 namespace Enterspeed.Cli.Services.ConsoleOutput;
 
 public class OutputService : IOutputService
 {
-    public OutputService()
+    private readonly GlobalOptions _globalOptions;
+
+    public OutputService(GlobalOptions globalOptions)
     {
-            
+        _globalOptions = globalOptions;
     }
 
-    public void Write<T>(T value, OutputStyle style = OutputStyle.Json)
+    public void Write<T>(T value)
     {
-        switch (style)
+        if (_globalOptions.OutPutStyle == OutputStyle.Table)
         {
-            case OutputStyle.Json:
-                WriteJson(value);
-                return;
-            case OutputStyle.Table:
-                WriteTable(value);
-                return;
+            WriteTable(value);
+        }
+        else
+        {
+            WriteJson(value);
         }
     }
 
