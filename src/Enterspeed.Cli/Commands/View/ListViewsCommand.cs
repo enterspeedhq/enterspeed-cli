@@ -44,7 +44,7 @@ public class ListViewsCommand : Command
                     
             });
 
-            _outputService.Write(viewsResponse.Results, Output);
+            _outputService.Write(viewsResponse.Results);
             return 0;
         }
     }

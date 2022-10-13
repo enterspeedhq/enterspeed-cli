@@ -18,6 +18,13 @@ namespace Enterspeed.Cli;
 
 internal class Program
 {
+    private static readonly Option<string> ApiKeyOption = new("--apiKey");
+
+    private static readonly Option<OutputStyle> OutPutStyle = new(new[] { "--output", "-o" }, "Set output to json or table")
+    {
+        IsHidden = true
+    };
+
     internal static IHostBuilder CreateHostBuilder(string[] args) => Host.CreateDefaultBuilder(args);
 
     public static async Task<int> Main(string[] args)
@@ -28,13 +35,17 @@ internal class Program
                 {
                     configuration.AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true);
                 })
-                .ConfigureServices((hostContext, services) =>
+                .ConfigureServices((_, services) =>
                 {
                     services.AddSerilog();
                     services.AddCli();
                     services.AddApplication();
                 })
-                .UseCommands()).UseDefaults().Build();
+                .UseCommands()
+            )
+            .AddMiddleware(MiddleWare.ApiKeyAuth(ApiKeyOption, OutPutStyle))
+            .UseDefaults()
+            .Build();
 
         return await runner.InvokeAsync(args);
     }
@@ -51,7 +62,8 @@ internal class Program
         root.AddCommand(ViewCommands.BuildCommands());
         root.AddCommand(SourceEntityCommands.BuildCommands());
 
-        root.AddGlobalOption(new Option<OutputStyle>(new[] { "--output", "-o" }, "Set output to json or table") {IsHidden = true});
+        root.AddGlobalOption(OutPutStyle);
+        root.AddGlobalOption(ApiKeyOption);
 
         return new CommandLineBuilder(root);
     }

@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using Enterspeed.Cli.Configuration;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.EnterspeedClient;
 using MediatR;
-using Enterspeed.Cli.Common.Behaviours;
 using Enterspeed.Cli.Services.StateService;
-using MediatR.Pipeline;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 
@@ -15,7 +14,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddCli(this IServiceCollection services)
     {
-        //services.AddTransient(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
         services.AddSingleton<IStateService, StateService>();
         return services;
     }
@@ -42,6 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddMediatR(Assembly.GetExecutingAssembly());
         services.AddTransient<IEnterspeedClient, EnterspeedClient>();
         services.AddTransient<IOutputService, OutputService>();
+        services.AddSingleton<GlobalOptions>();
         return services;
     }
 }

@@ -1,5 +1,4 @@
-﻿using Enterspeed.Cli.Commands.EnvironmentClient;
-using System.CommandLine;
+﻿using System.CommandLine;
 
 namespace Enterspeed.Cli.Commands.View;
 

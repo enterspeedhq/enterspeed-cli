@@ -36,7 +36,7 @@ public  class ListTenantsCommand : Command
 
             var tenants = await _mediator.Send(new GetTenantsRequest {TenantIds = tenantGuids });
 
-            _outputService.Write(tenants, Output);
+            _outputService.Write(tenants);
             return 0;
         }
     }

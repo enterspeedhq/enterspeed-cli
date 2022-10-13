@@ -1,7 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
 using Enterspeed.Cli.Api.Domain;
-using Enterspeed.Cli.Commands.Environment;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using MediatR;
 
@@ -28,7 +27,7 @@ public class ListDomainsCommand : Command
         {
             var domains = await _mediator.Send(new GetDomainsRequest());
 
-            _outputService.Write(domains, Output);
+            _outputService.Write(domains);
             return 0;
         }
     }

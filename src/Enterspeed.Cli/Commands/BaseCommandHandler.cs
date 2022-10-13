@@ -5,12 +5,8 @@ namespace Enterspeed.Cli.Commands;
 public class BaseCommandHandler
 {
     public OutputStyle Output { get; set; }
-    public bool Yes { get; set; }
 
-    public BaseCommandHandler()
-    {
-        
-    }
+    public bool Yes { get; set; }
 
     public int Invoke(InvocationContext context)
     {
@@ -23,8 +19,8 @@ public class BaseCommandHandler
 
         Console.WriteLine("Are you sure?");
         var confirm = Console.ReadLine();
-        if (confirm != null && (confirm.ToLower() == "y" || confirm.ToLower() == "yes")) 
+        if (confirm != null && (confirm.ToLower() == "y" || confirm.ToLower() == "yes"))
             return true;
         return false;
     }
-}
+}   

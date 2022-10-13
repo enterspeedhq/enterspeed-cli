@@ -50,7 +50,7 @@ public class GetDomainCommand : Command
                 result = domains?.FirstOrDefault(x => x.Name.Equals(Name, StringComparison.InvariantCulture));
             }
 
-            _outputService.Write(result, Output);
+            _outputService.Write(result);
             return 0;
         }
     }
