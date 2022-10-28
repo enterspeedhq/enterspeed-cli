@@ -6,6 +6,7 @@ using Enterspeed.Cli.Commands.Domain;
 using Enterspeed.Cli.Commands.Environment;
 using Enterspeed.Cli.Commands.EnvironmentClient;
 using Enterspeed.Cli.Commands.Login;
+using Enterspeed.Cli.Commands.Schema;
 using Enterspeed.Cli.Commands.SourceEntity;
 using Enterspeed.Cli.Commands.SourceGroup;
 using Enterspeed.Cli.Commands.Tenant;
@@ -61,6 +62,7 @@ internal class Program
         root.AddCommand(SourceGroupCommands.BuildCommands());
         root.AddCommand(ViewCommands.BuildCommands());
         root.AddCommand(SourceEntityCommands.BuildCommands());
+        root.AddCommand(SchemaCommands.BuildCommands());
 
         root.AddGlobalOption(OutPutStyle);
         root.AddGlobalOption(ApiKeyOption);
