@@ -8,6 +8,7 @@ public class SchemaCommands
     {
         var command = new Command("schema", "Schemas")
         {
+            new CreateSchemaCommand()
         };
 
         return command;
