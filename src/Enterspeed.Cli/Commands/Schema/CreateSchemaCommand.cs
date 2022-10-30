@@ -3,47 +3,61 @@ using System.CommandLine.Invocation;
 using Enterspeed.Cli.Api.Schema;
 using Enterspeed.Cli.Exceptions;
 using Enterspeed.Cli.Services.ConsoleOutput;
+using Enterspeed.Cli.Services.FileService;
 using MediatR;
 
-namespace Enterspeed.Cli.Commands.Schema;
-
-internal class CreateSchemaCommand : Command
+namespace Enterspeed.Cli.Commands.Schema
 {
-    public CreateSchemaCommand() : base(name: "create", "Creates schema")
+    internal class CreateSchemaCommand : Command
     {
-        AddArgument(new Argument<string>("alias", "Alias of the schema") { });
-        AddOption(new Option<string>(new[] { "--name", "-n" }, "Name of the schema"));
-    }
-
-    public new class Handler : BaseCommandHandler, ICommandHandler
-    {
-        private readonly IMediator _mediator;
-        private readonly IOutputService _outputService;
-
-        public Handler(IMediator mediator, IOutputService outputService)
+        public CreateSchemaCommand() : base(name: "create", "Creates schema")
         {
-            _mediator = mediator;
-            _outputService = outputService;
+            AddArgument(new Argument<string>("alias", "Alias of the schema") { });
+            AddOption(new Option<string>(new[] { "--name", "-n" }, "Name of the schema"));
         }
 
-        public string Alias { get; set; }
-        public string Name { get; set; }
-
-        public async Task<int> InvokeAsync(InvocationContext context)
+        public new class Handler : BaseCommandHandler, ICommandHandler
         {
-            if (string.IsNullOrEmpty(Alias))
+            private readonly IMediator _mediator;
+            private readonly IOutputService _outputService;
+            private readonly IFileService _fileService;
+
+            public Handler(IMediator mediator, IOutputService outputService, IFileService fileService)
             {
-                throw new ConsoleArgumentException("Please specify an alias for your schema");
+                _mediator = mediator;
+                _outputService = outputService;
+                _fileService = fileService;
             }
-            
-            var createSchemaResponse = await _mediator.Send(new CreateSchemaRequest()
+
+            public string Alias { get; set; }
+            public string Name { get; set; }
+
+            public async Task<int> InvokeAsync(InvocationContext context)
             {
-                Name = Name ?? Alias,
-                ViewHandle = Alias
-            });
-            
-            _outputService.Write(createSchemaResponse);
-            return 0;
+                if (string.IsNullOrEmpty(Alias))
+                {
+                    throw new ConsoleArgumentException("Please specify an alias for your schema");
+                }
+
+                var createSchemaResponse = await _mediator.Send(new CreateSchemaRequest()
+                {
+                    Name = Name ?? Alias,
+                    ViewHandle = Alias
+                });
+
+                if (createSchemaResponse.IdValue != null && !string.IsNullOrEmpty(createSchemaResponse.MappingSchemaGuid))
+                {
+                    _fileService.CreateSchema(Alias, createSchemaResponse.Version, createSchemaResponse.MappingSchemaGuid);
+                }
+                else
+                {
+                    throw new ArgumentNullException("MappingSchemaGuid", "Could not create schema. Something went wrong.");
+                }
+
+                _outputService.Write("Successfully created new schema : " + Alias);
+
+                return 0;
+            }
         }
     }
 }
