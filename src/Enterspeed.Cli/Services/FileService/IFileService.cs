@@ -1,6 +1,9 @@
-﻿namespace Enterspeed.Cli.Services.FileService;
+﻿using Enterspeed.Cli.Services.FileService.Models;
+
+namespace Enterspeed.Cli.Services.FileService;
 
 public interface IFileService
 {
-    void CreateSchema(string schemaAlias, int version);
+    void CreateSchema(string alias, int version);
+    SchemaBaseProperties GetSchema(string alias, string filePath = null);
 }

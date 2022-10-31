@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.AccessControl;
+using System.Text;
 using System.Text.Json;
 using Enterspeed.Cli.Services.FileService.Models;
 
@@ -11,14 +12,15 @@ namespace Enterspeed.Cli.Services.FileService
         private bool SchemaFolderExist => Directory.Exists(SchemaDirectory);
         private bool DeploymentPlanExist => File.Exists(Path.Combine(Directory.GetCurrentDirectory(), DeploymentPlanFileName));
 
-        public void CreateSchema(string schemaAlias, int version)
+
+        public void CreateSchema(string alias, int version)
         {
             if (!SchemaFolderExist)
             {
                 Directory.CreateDirectory(SchemaDirectory);
             }
 
-            using (var fs = File.Create(SchemaDirectory + "/" + schemaAlias + ".json"))
+            using (var fs = File.Create(GetSchemaFilePath(alias)))
             {
                 var json = JsonSerializer.Serialize(new SchemaBaseProperties()
                 {
@@ -29,6 +31,19 @@ namespace Enterspeed.Cli.Services.FileService
                 var baseProperties = Encoding.UTF8.GetBytes(json);
                 fs.Write(baseProperties, 0, baseProperties.Length);
             }
+        }
+
+        public SchemaBaseProperties GetSchema(string alias, string filePath = null)
+        {
+            var schemaFilePath = filePath ?? GetSchemaFilePath(alias);
+            var schemaFile = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), schemaFilePath));
+            var schemaProperties = JsonSerializer.Deserialize<SchemaBaseProperties>(schemaFile);
+            return schemaProperties;
+        }
+
+        private string GetSchemaFilePath(string alias)
+        {
+            return SchemaDirectory + "/" + alias + ".json";
         }
 
         private void UpdateDeploymentPlan(string schemaAlias, int version)

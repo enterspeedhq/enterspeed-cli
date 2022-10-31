@@ -1,6 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
-using Enterspeed.Cli.Api.Schema;
+using Enterspeed.Cli.Api.MappingSchema;
 using Enterspeed.Cli.Exceptions;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;
@@ -39,7 +39,7 @@ namespace Enterspeed.Cli.Commands.Schema
                     throw new ConsoleArgumentException("Please specify an alias for your schema");
                 }
 
-                var createSchemaResponse = await _mediator.Send(new CreateSchemaRequest()
+                var createSchemaResponse = await _mediator.Send(new CreateMappingSchemaRequest()
                 {
                     Name = Name ?? Alias,
                     ViewHandle = Alias
