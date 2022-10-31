@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Enterspeed.Cli": {
-      "commandName": "Project",
-      "commandLineArgs": "source-groups list --apiKey environment-7514135c-f737-48b8-a7f6-aae22ff807ac --output Table"
-    }
-  }
-}
