@@ -1,4 +1,5 @@
-﻿using Enterspeed.Cli.Services.EnterspeedClient;
+﻿using Enterspeed.Cli.Domain.Models;
+using Enterspeed.Cli.Services.EnterspeedClient;
 using MediatR;
 using RestSharp;
 
@@ -18,12 +19,6 @@ namespace Enterspeed.Cli.Api.MappingSchema
         public string Name { get; set; }
         public string ViewHandle { get; set; }
         public MappingSchemaId Id { get; set; }
-    }
-
-    public class MappingSchemaId
-    {
-        public string IdValue { get; set; }
-        public string MappingSchemaGuid { get; set; }
     }
 
     public class QueryMappingSchemasRequestHandler : IRequestHandler<QueryMappingSchemasRequest, QueryMappingSchemasResponse>
