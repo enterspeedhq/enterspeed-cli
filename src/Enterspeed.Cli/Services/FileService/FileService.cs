@@ -1,17 +1,17 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Enterspeed.Cli.Services.FileService.Models;
 
 namespace Enterspeed.Cli.Services.FileService
 {
     public class FileService : IFileService
     {
-        // Should this be in root?
         private string SchemaDirectory => "schemas";
         private string DeploymentPlanFileName => "deploymentplan.json";
         private bool SchemaFolderExist => Directory.Exists(SchemaDirectory);
         private bool DeploymentPlanExist => File.Exists(Path.Combine(Directory.GetCurrentDirectory(), DeploymentPlanFileName));
 
-        public void CreateSchema(string schemaAlias, int version, string mappingSchemaGuid)
+        public void CreateSchema(string schemaAlias, int version)
         {
             if (!SchemaFolderExist)
             {
@@ -29,14 +29,12 @@ namespace Enterspeed.Cli.Services.FileService
                 var baseProperties = Encoding.UTF8.GetBytes(json);
                 fs.Write(baseProperties, 0, baseProperties.Length);
             }
-
-            UpdateDeploymentPlan(schemaAlias, version, mappingSchemaGuid);
         }
 
-        private void UpdateDeploymentPlan(string schemaAlias, int version, string mappingSchemaGuid)
+        private void UpdateDeploymentPlan(string schemaAlias, int version)
         {
             var deploymentPlanProperties = GetDeploymentPlanProperties();
-            MapDeploymentPlanProperties(schemaAlias, version, mappingSchemaGuid, deploymentPlanProperties);
+            MapDeploymentPlanProperties(schemaAlias, version, deploymentPlanProperties);
             UpdateDeploymentPlan(deploymentPlanProperties);
         }
 
@@ -64,7 +62,7 @@ namespace Enterspeed.Cli.Services.FileService
 
             using (var fs = File.Create(DeploymentPlanFileName))
             {
-                var json = JsonSerializer.Serialize(deploymentPlanProperties ?? new DeploymentPlanProperties());
+                var json = JsonSerializer.Serialize(deploymentPlanProperties);
                 var baseProperties = Encoding.UTF8.GetBytes(json);
                 fs.Write(baseProperties, 0, baseProperties.Length);
             }
@@ -75,17 +73,16 @@ namespace Enterspeed.Cli.Services.FileService
             File.Delete(Path.Combine(Directory.GetCurrentDirectory(), DeploymentPlanFileName));
         }
 
-        private void MapDeploymentPlanProperties(string schemaAlias, int version, string mappingSchemaGuid, DeploymentPlanProperties deploymentPlanProperties)
+        private void MapDeploymentPlanProperties(string schemaAlias, int version, DeploymentPlanProperties deploymentPlanProperties)
         {
             var existingDeploymentPlanSchema = deploymentPlanProperties?.Schemas.FirstOrDefault(dp => dp.Schema == schemaAlias);
             if (existingDeploymentPlanSchema != null)
             {
                 existingDeploymentPlanSchema.Version = version;
-                existingDeploymentPlanSchema.MappingSchemaGuid = mappingSchemaGuid;
             }
             else
             {
-                deploymentPlanProperties?.Schemas?.Add(new DeploymentPlanSchema(schemaAlias, version, mappingSchemaGuid));
+                deploymentPlanProperties?.Schemas?.Add(new DeploymentPlanSchema(schemaAlias, version));
             }
         }
     }

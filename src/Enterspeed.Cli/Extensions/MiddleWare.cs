@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
 using Enterspeed.Cli.Configuration;
+using Enterspeed.Cli.Services.ConsoleOutput;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 

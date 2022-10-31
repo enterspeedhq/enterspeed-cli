@@ -1,14 +1,13 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Enterspeed.Cli.Services.FileService;
+namespace Enterspeed.Cli.Services.FileService.Models;
 
 public class DeploymentPlanSchema
 {
-    public DeploymentPlanSchema(string schema, int version, string mappingSchemaGuid)
+    public DeploymentPlanSchema(string schema, int version)
     {
         Schema = schema;
         Version = version;
-        MappingSchemaGuid = mappingSchemaGuid;
     }
 
     [JsonPropertyName("schema")]
@@ -16,7 +15,4 @@ public class DeploymentPlanSchema
 
     [JsonPropertyName("version")]
     public int Version { get; set; }
-
-    [JsonPropertyName("mappingSchemaGuid")]
-    public string MappingSchemaGuid { get; set; }
 }

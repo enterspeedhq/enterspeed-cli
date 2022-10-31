@@ -12,6 +12,7 @@ using Enterspeed.Cli.Commands.SourceGroup;
 using Enterspeed.Cli.Commands.Tenant;
 using Enterspeed.Cli.Commands.View;
 using Enterspeed.Cli.Extensions;
+using Enterspeed.Cli.Services.ConsoleOutput;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 

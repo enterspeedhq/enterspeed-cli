@@ -2,5 +2,5 @@
 
 public interface IFileService
 {
-    void CreateSchema(string schemaAlias, int version, string mappingSchemaGuid);
+    void CreateSchema(string schemaAlias, int version);
 }

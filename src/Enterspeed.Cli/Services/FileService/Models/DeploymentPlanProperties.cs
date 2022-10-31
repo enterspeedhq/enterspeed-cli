@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Enterspeed.Cli.Services.FileService;
+namespace Enterspeed.Cli.Services.FileService.Models;
 
 public class DeploymentPlanProperties
 {
