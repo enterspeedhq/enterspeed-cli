@@ -2,6 +2,7 @@
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
 using System.CommandLine.Parsing;
+using Enterspeed.Cli.Commands.Deploy;
 using Enterspeed.Cli.Commands.Domain;
 using Enterspeed.Cli.Commands.Environment;
 using Enterspeed.Cli.Commands.EnvironmentClient;
@@ -61,6 +62,7 @@ internal class Program
         root.AddCommand(SourceGroupCommands.BuildCommands());
         root.AddCommand(ViewCommands.BuildCommands());
         root.AddCommand(SourceEntityCommands.BuildCommands());
+        root.AddCommand(new DeployCommand());
 
         root.AddGlobalOption(OutPutStyle);
         root.AddGlobalOption(ApiKeyOption);

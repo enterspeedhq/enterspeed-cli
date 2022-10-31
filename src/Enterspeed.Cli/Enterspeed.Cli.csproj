@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,6 +6,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <Company>Enterspeed</Company>
+    <Version>0.1.0</Version>
+	  
+	  <PublishSingleFile>true</PublishSingleFile>
+	  
+	  <AssemblyName>es-cli</AssemblyName>
   </PropertyGroup>
 
 	<ItemGroup>
@@ -29,6 +34,10 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageReference Include="System.CommandLine.Hosting" Version="0.4.0-alpha.22272.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Commands\Schema\" />
   </ItemGroup>
 
 </Project>
