@@ -51,6 +51,25 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
         return response.Data;
     }
 
+    public async Task<RestResponse> ExecuteAsync(RestRequest request, CancellationToken cancellationToken = default)
+    {
+        if (!IsAuthenticationSetUp())
+        {
+            return default;
+        }
+
+        AddHeaders(request);
+
+        var response = await _client.ExecuteAsync(request, cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            await HandleUnauthorized(request, cancellationToken);
+        }
+
+        return response;
+    }
+
     private void AddHeaders(RestRequest request)
     {
         if (!string.IsNullOrEmpty(_apiKeyValue))
@@ -83,6 +102,30 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
             {
                 request.AddOrUpdateHeader("Authorization", $"Bearer {_stateService.Token.AccessToken}");
                 var response = await _client.ExecuteAsync<T>(request, cancellationToken);
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    _logger.LogError("Unauthorized! You need to run 'es-cli login' again");
+                }
+            }
+        }
+    }
+
+    private async Task HandleUnauthorized(RestRequest request, CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrEmpty(_apiKeyValue))
+        {
+            _logger.LogError("Unauthorized, make sure that you are using the correct api key");
+        }
+        else
+        {
+            // If Unauthorized, refresh token and try again
+            _logger.LogInformation("Unauthorized, trying to refresh token");
+            var refreshResult = await RefreshToken(_stateService.Token.RefreshToken);
+
+            if (refreshResult.IsValid)
+            {
+                request.AddOrUpdateHeader("Authorization", $"Bearer {_stateService.Token.AccessToken}");
+                var response = await _client.ExecuteAsync(request, cancellationToken);
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
                     _logger.LogError("Unauthorized! You need to run 'es-cli login' again");

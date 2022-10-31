@@ -5,13 +5,8 @@ using RestSharp;
 
 namespace Enterspeed.Cli.Api.MappingSchema
 {
-    public class QueryMappingSchemasRequest : IRequest<QueryMappingSchemasResponse>
+    public class QueryMappingSchemasRequest : IRequest<QueryMappingSchemaResponse[]>
     {
-    }
-
-    public class QueryMappingSchemasResponse
-    {
-        public QueryMappingSchemaResponse[] Results { get; set; }
     }
 
     public class QueryMappingSchemaResponse
@@ -21,7 +16,7 @@ namespace Enterspeed.Cli.Api.MappingSchema
         public MappingSchemaId Id { get; set; }
     }
 
-    public class QueryMappingSchemasRequestHandler : IRequestHandler<QueryMappingSchemasRequest, QueryMappingSchemasResponse>
+    public class QueryMappingSchemasRequestHandler : IRequestHandler<QueryMappingSchemasRequest, QueryMappingSchemaResponse[]>
     {
         private readonly IEnterspeedClient _enterspeedClient;
 
@@ -30,10 +25,10 @@ namespace Enterspeed.Cli.Api.MappingSchema
             _enterspeedClient = enterspeedClient;
         }
 
-        public async Task<QueryMappingSchemasResponse> Handle(QueryMappingSchemasRequest queryMappingSchemasRequest, CancellationToken cancellationToken)
+        public async Task<QueryMappingSchemaResponse[]> Handle(QueryMappingSchemasRequest queryMappingSchemasRequest, CancellationToken cancellationToken)
         {
-            var request = new RestRequest("tenant/mapping-schemas", Method.Get).AddJsonBody(queryMappingSchemasRequest);
-            var response = await _enterspeedClient.ExecuteAsync<QueryMappingSchemasResponse>(request, cancellationToken);
+            var request = new RestRequest("tenant/mapping-schemas", Method.Get);
+            var response = await _enterspeedClient.ExecuteAsync<QueryMappingSchemaResponse[]>(request, cancellationToken);
             return response;
         }
     }

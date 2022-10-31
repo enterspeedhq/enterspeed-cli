@@ -2,7 +2,10 @@
   "profiles": {
     "Enterspeed.Cli": {
       "commandName": "Project",
-      "commandLineArgs": "source-groups list --apiKey environment-7514135c-f737-48b8-a7f6-aae22ff807ac --output Table"
+      "commandLineArgs": "deploy -e dev --apiKey management-oiZ3sZgYTitsnK0H9lpbJxmXIb88wVwXyxsEw6a56E",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     }
   }
 }
