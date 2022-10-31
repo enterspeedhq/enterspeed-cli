@@ -3,6 +3,7 @@ using System.Reflection;
 using Enterspeed.Cli.Configuration;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.EnterspeedClient;
+using Enterspeed.Cli.Services.FileService;
 using MediatR;
 using Enterspeed.Cli.Services.StateService;
 using Microsoft.Extensions.Configuration;
@@ -40,6 +41,7 @@ public static class ServiceCollectionExtensions
         services.AddMediatR(Assembly.GetExecutingAssembly());
         services.AddTransient<IEnterspeedClient, EnterspeedClient>();
         services.AddTransient<IOutputService, OutputService>();
+        services.AddTransient<IFileService, FileService>();
         services.AddSingleton<GlobalOptions>();
         return services;
     }

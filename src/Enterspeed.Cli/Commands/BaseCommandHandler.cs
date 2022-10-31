@@ -1,4 +1,5 @@
 ﻿using System.CommandLine.Invocation;
+using Enterspeed.Cli.Services.ConsoleOutput;
 
 namespace Enterspeed.Cli.Commands;
 

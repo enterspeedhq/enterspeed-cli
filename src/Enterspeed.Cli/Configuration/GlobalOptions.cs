@@ -1,3 +1,5 @@
+using Enterspeed.Cli.Services.ConsoleOutput;
+
 namespace Enterspeed.Cli.Configuration
 {
     public class GlobalOptions
