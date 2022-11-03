@@ -27,7 +27,7 @@ namespace Enterspeed.Cli.Api.MappingSchema
 
         public async Task<QueryMappingSchemaResponse[]> Handle(QueryMappingSchemasRequest queryMappingSchemasRequest, CancellationToken cancellationToken)
         {
-            var request = new RestRequest("tenant/mapping-schemas", Method.Get);
+            var request = new RestRequest("tenant/mapping-schemas");
             var response = await _enterspeedClient.ExecuteAsync<QueryMappingSchemaResponse[]>(request, cancellationToken);
             return response;
         }

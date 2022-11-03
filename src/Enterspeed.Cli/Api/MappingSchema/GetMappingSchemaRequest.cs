@@ -1,5 +1,4 @@
 ﻿using Enterspeed.Cli.Api.MappingSchema.Models;
-using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Services.EnterspeedClient;
 using MediatR;
 using RestSharp;

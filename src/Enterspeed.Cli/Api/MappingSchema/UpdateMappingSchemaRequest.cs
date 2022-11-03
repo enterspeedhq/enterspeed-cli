@@ -30,7 +30,7 @@ namespace Enterspeed.Cli.Api.MappingSchema
         public async Task<UpdateMappingSchemaResponse> Handle(UpdateMappingSchemaRequest updateMappingSchemaRequest, CancellationToken cancellationToken)
         {
             var request = new RestRequest(
-                $"https://management.enterspeed.com/api/v1/tenant/mapping-schemas/{updateMappingSchemaRequest.MappingSchemaId}/version/{updateMappingSchemaRequest.Version}",
+                $"tenant/mapping-schemas/{updateMappingSchemaRequest.MappingSchemaId}/version/{updateMappingSchemaRequest.Version}",
                 Method.Put).AddJsonBody(updateMappingSchemaRequest);
 
             var response = await _enterspeedClient.ExecuteAsync<UpdateMappingSchemaResponse>(request, cancellationToken);

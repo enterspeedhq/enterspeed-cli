@@ -56,7 +56,7 @@ namespace Enterspeed.Cli.Commands.Schema
                 // Create update schema request
                 var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest()
                 {
-                    Format = "string",
+                    Format = "json",
                     MappingSchemaId = matchingSchemaFromEnterspeed?.Id.MappingSchemaGuid,
                     Version = 1, // TODO: Get version from a valid place.
                     Schema = JsonSerializer.Serialize(schema)
