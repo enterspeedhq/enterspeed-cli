@@ -1,9 +1,10 @@
 ﻿using Enterspeed.Cli.Services.EnterspeedClient;
+using MediatR;
 using RestSharp;
 
 namespace Enterspeed.Cli.Api.MappingSchema
 {
-    public class UpdateMappingSchemaRequest
+    public class UpdateMappingSchemaRequest : IRequest<UpdateMappingSchemaResponse>
     {
         public string MappingSchemaId { get; set; }
         public int Version { get; set; }
@@ -18,7 +19,7 @@ namespace Enterspeed.Cli.Api.MappingSchema
         public int Version { get; set; }
     }
 
-    public class UpdateMappingSchemaRequestHandler
+    public class UpdateMappingSchemaRequestHandler : IRequestHandler<UpdateMappingSchemaRequest, UpdateMappingSchemaResponse>
     {
         private readonly IEnterspeedClient _enterspeedClient;
 

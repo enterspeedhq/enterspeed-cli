@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json;
 using Enterspeed.Cli.Api.Identity.Models;
 using Enterspeed.Cli.Configuration;
 using Enterspeed.Cli.Services.StateService;
@@ -40,13 +41,16 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
-            await HandleUnauthorized<T>(request, cancellationToken);
+            response = await HandleUnauthorized<T>(request, cancellationToken);
         }
 
         if (!response.IsSuccessful)
         {
             _logger.LogError($"Unsuccessful: {response.StatusCode}");
+            _logger.LogWarning(JsonSerializer.Serialize(response.Data));
         }
+
+        //_logger.LogInformation(JsonSerializer.Serialize(response.Data));
 
         return response.Data;
     }
@@ -86,11 +90,12 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
         }
     }
 
-    private async Task HandleUnauthorized<T>(RestRequest request, CancellationToken cancellationToken)
+    private async Task<RestResponse<T>> HandleUnauthorized<T>(RestRequest request, CancellationToken cancellationToken)
     {
         if (!string.IsNullOrEmpty(_apiKeyValue))
         {
             _logger.LogError("Unauthorized, make sure that you are using the correct api key");
+            throw new Exception("Unauthorized");
         }
         else
         {
@@ -106,7 +111,12 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
                 {
                     _logger.LogError("Unauthorized! You need to run 'es-cli login' again");
                 }
+
+                return response;
             }
+
+            _logger.LogError("Unauthorized, refresh token failed");
+            throw new Exception("Unauthorized");
         }
     }
 

@@ -1,10 +1,12 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
 using Enterspeed.Cli.Api.MappingSchema;
+using Enterspeed.Cli.Commands.Deploy;
 using Enterspeed.Cli.Exceptions;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Enterspeed.Cli.Commands.Schema
 {
@@ -21,12 +23,14 @@ namespace Enterspeed.Cli.Commands.Schema
             private readonly IMediator _mediator;
             private readonly IOutputService _outputService;
             private readonly IFileService _fileService;
+            private readonly ILogger<CreateSchemaCommand> _logger;
 
-            public Handler(IMediator mediator, IOutputService outputService, IFileService fileService)
+            public Handler(IMediator mediator, IOutputService outputService, IFileService fileService, ILogger<CreateSchemaCommand> logger)
             {
                 _mediator = mediator;
                 _outputService = outputService;
                 _fileService = fileService;
+                _logger = logger;
             }
 
             public string Alias { get; set; }
@@ -45,13 +49,14 @@ namespace Enterspeed.Cli.Commands.Schema
                     ViewHandle = Alias
                 });
 
-                if (createSchemaResponse.IdValue != null && !string.IsNullOrEmpty(createSchemaResponse.MappingSchemaGuid))
+                if (createSchemaResponse?.IdValue != null && !string.IsNullOrEmpty(createSchemaResponse.MappingSchemaGuid))
                 {
                     _fileService.CreateSchema(Alias, createSchemaResponse.Version);
                 }
                 else
                 {
-                    throw new ArgumentNullException("MappingSchemaGuid", "Could not create schema. Something went wrong.");
+                    _logger.LogError($"Could not create schema {Alias}");
+                    return 1;
                 }
 
                 _outputService.Write("Successfully created new schema : " + Alias);

@@ -50,9 +50,4 @@ public sealed class TenantId : Id
             TenantGuid = guid.ToString()
         };
     }
-
-    public override string ToString()
-    {
-        return "Hello";
-    }
 }

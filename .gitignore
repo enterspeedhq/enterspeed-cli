@@ -367,3 +367,4 @@ FodyWeavers.xsd
 
 #launchSettings.json
 Properties/launchSettings.json
+/src/Enterspeed.Cli/Properties/launchSettings.json
