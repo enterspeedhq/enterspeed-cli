@@ -45,7 +45,7 @@ namespace Enterspeed.Cli.Commands.Schema
 
                 // Get mapping schema guid 
                 var schemas = await _mediator.Send(new QueryMappingSchemasRequest());
-                var matchingSchemaFromEnterspeed = schemas.Results.FirstOrDefault(sc => sc.ViewHandle == Alias);
+                var matchingSchemaFromEnterspeed = schemas.FirstOrDefault(sc => sc.ViewHandle == Alias);
 
                 // Get mapping schema version
                 
