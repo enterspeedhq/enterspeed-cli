@@ -12,7 +12,6 @@ public class FileService : IFileService
     private static bool SchemaFolderExist => Directory.Exists(SchemaDirectory);
     private static bool DeploymentPlanExist => File.Exists(Path.Combine(Directory.GetCurrentDirectory(), DefaultDeploymentPlanFileName));
 
-
     public void CreateSchema(string alias, int version)
     {
         if (!SchemaFolderExist)
@@ -52,7 +51,7 @@ public class FileService : IFileService
         return $"{SchemaDirectory}/{alias}.json";
     }
 
-    private void UpdateDeploymentPlan(string schemaAlias, int version)
+    public void UpdateDeploymentPlan(string schemaAlias, int version)
     {
         var deploymentPlanProperties = GetDeploymentPlanProperties();
         MapDeploymentPlanProperties(schemaAlias, version, deploymentPlanProperties);
@@ -104,5 +103,13 @@ public class FileService : IFileService
         {
             deploymentPlanProperties?.Schemas?.Add(new DeploymentPlanSchema(schemaAlias, version));
         }
+    }
+
+    public bool ValidateSchemaOnDisk(string externalSchema, string schemaAlias)
+    {
+        var external = JsonSerializer.Deserialize<SchemaBaseProperties>(externalSchema);
+        var local = GetSchema(schemaAlias);
+        
+        return external == local;
     }
 }

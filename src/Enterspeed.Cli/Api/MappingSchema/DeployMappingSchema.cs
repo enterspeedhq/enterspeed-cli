@@ -27,7 +27,6 @@ public class DeployMappingSchemaResponse
     public ApiErrorResponse Error { get; set; }
 }
 
-
 public class DeployMappingSchemaRequestHandler : IRequestHandler<DeployMappingSchemaRequest, DeployMappingSchemaResponse>
 {
     private readonly IEnterspeedClient _enterspeedClient;

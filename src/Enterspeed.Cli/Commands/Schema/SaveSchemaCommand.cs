@@ -1,8 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Text.Json;
 using Enterspeed.Cli.Api.MappingSchema;
-using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Exceptions;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;
@@ -26,7 +24,11 @@ namespace Enterspeed.Cli.Commands.Schema
             private readonly IFileService _fileService;
             private readonly ILogger<SaveSchemaCommand> _logger;
 
-            public Handler(IMediator mediator, IOutputService outputService, IFileService fileService, ILogger<SaveSchemaCommand> logger)
+            public Handler(
+                IMediator mediator,
+                IOutputService outputService,
+                IFileService fileService,
+                ILogger<SaveSchemaCommand> logger)
             {
                 _mediator = mediator;
                 _outputService = outputService;
@@ -67,10 +69,7 @@ namespace Enterspeed.Cli.Commands.Schema
                     _logger.LogError("Schema not found!");
                     return 1;
                 }
-
-                // Validate
-                // TODO : Management API being prepared for this currently. 
-
+                
                 // Create update schema request
                 var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest()
                 {
@@ -79,10 +78,6 @@ namespace Enterspeed.Cli.Commands.Schema
                     Version = existingSchema.LatestVersion,
                     Schema = schema
                 });
-
-                // Save to deployment file
-
-
 
                 var updatedSchema = await _mediator.Send(
                     new GetMappingSchemaRequest
