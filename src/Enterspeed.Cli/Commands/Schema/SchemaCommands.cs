@@ -10,6 +10,7 @@ public class SchemaCommands
         {
             new CreateSchemaCommand(),
             new SaveSchemaCommand(),
+            new DeploySchemaCommand()
         };
 
         return command;

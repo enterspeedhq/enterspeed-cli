@@ -3,7 +3,6 @@ using System.CommandLine.Invocation;
 using System.Text.Json;
 using Enterspeed.Cli.Api.Environment;
 using Enterspeed.Cli.Api.MappingSchema;
-using Enterspeed.Cli.Exceptions;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;
 using MediatR;
@@ -16,7 +15,10 @@ namespace Enterspeed.Cli.Commands.Schema
         public DeploySchemaCommand() : base("schema deploy", "Adds schema to deployment plan")
         {
             AddArgument(new Argument<string>("schemaAlias", "Alias of the schema") { });
-            AddOption(new Option<string>(new[] { "--environment", "-e" }, "Alias of environment"));
+            AddOption(new Option<string>(new[] { "--environment", "-e" }, "Alias of environment")
+            {
+                IsRequired = true
+            });
         }
 
         public new class Handler : BaseCommandHandler, ICommandHandler
@@ -43,9 +45,6 @@ namespace Enterspeed.Cli.Commands.Schema
 
             public async Task<int> InvokeAsync(InvocationContext context)
             {
-                // Validate value in arguments
-                ValidateArgs();
-
                 // Get mapping schema guid
                 var mappingSchemaGuid = await GetMappingSchemaGuid();
                 if (mappingSchemaGuid == null)
@@ -80,7 +79,25 @@ namespace Enterspeed.Cli.Commands.Schema
                 }
 
                 // Deploy schema
-                var deployMappingSchemaResponse = await DeployMappingSchema(existingSchema);
+                var environmentToDeployTo = await GetEnvironmentToDeployTo();
+                if (environmentToDeployTo == null)
+                {
+                    _logger.LogError("Environment to deploy to was not found");
+                    return 1;
+                }
+
+                var deployMappingSchemaResponse = await _mediator.Send(new DeployMappingSchemaRequest()
+                {
+                    Deployments = new List<DeployMappingSchemaRequest.EnvironmentSchemaDeployment>()
+                    {
+                        new DeployMappingSchemaRequest.EnvironmentSchemaDeployment()
+                        {
+                            Version = existingSchema.Version.Id.Version,
+                            EnvironmentId = environmentToDeployTo.Id.EnvironmentGuid
+                        }
+                    }
+                });
+
                 if (!deployMappingSchemaResponse.Success)
                 {
                     var error = JsonSerializer.Serialize(deployMappingSchemaResponse.Error);
@@ -95,37 +112,11 @@ namespace Enterspeed.Cli.Commands.Schema
                 return 0;
             }
 
-            private void ValidateArgs()
-            {
-                if (string.IsNullOrEmpty(SchemaAlias))
-                {
-                    throw new ConsoleArgumentException("Please specify a scheme alias");
-                }
-
-                if (string.IsNullOrEmpty(Environment))
-                {
-                    throw new ConsoleArgumentException("Please specify a scheme environment name");
-                }
-            }
-
-            private async Task<DeployMappingSchemaResponse> DeployMappingSchema(GetMappingSchemaResponse existingSchema)
+            private async Task<GetEnvironmentsResponse> GetEnvironmentToDeployTo()
             {
                 var environments = await _mediator.Send(new GetEnvironmentsRequest());
                 var environmentToDeployTo = environments.FirstOrDefault(e => e.Name == Environment);
-
-                var deployMappingSchemaResponse = await _mediator.Send(new DeployMappingSchemaRequest()
-                {
-                    Deployments = new List<DeployMappingSchemaRequest.EnvironmentSchemaDeployment>()
-                    {
-                        new DeployMappingSchemaRequest.EnvironmentSchemaDeployment()
-                        {
-                            Version = existingSchema.Version.Id.Version,
-                            EnvironmentId = environmentToDeployTo.Id.EnvironmentGuid
-                        }
-                    }
-                });
-                
-                return deployMappingSchemaResponse;
+                return environmentToDeployTo;
             }
 
             private async Task<ValidateMappingSchemaResponse> ValidateMappingSchema(GetMappingSchemaResponse existingSchema, string mappingSchemaGuid)
@@ -135,7 +126,7 @@ namespace Enterspeed.Cli.Commands.Schema
                     Version = existingSchema.LatestVersion,
                     MappingSchemaId = mappingSchemaGuid,
                 });
-                
+
                 return validationResponse;
             }
 
@@ -147,7 +138,7 @@ namespace Enterspeed.Cli.Commands.Schema
                         MappingSchemaId = mappingSchemaGuid,
                     }
                 );
-                
+
                 return existingSchema;
             }
 
