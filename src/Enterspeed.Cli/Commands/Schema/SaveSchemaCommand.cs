@@ -47,6 +47,11 @@ namespace Enterspeed.Cli.Commands.Schema
                 }
 
                 var schema = _fileService.GetSchema(Alias, File);
+                if (schema == null)
+                {
+                    _logger.LogError("Schema file not found!");
+                    return 1;
+                }
 
                 // Get mapping schema guid 
                 var schemas = await _mediator.Send(new QueryMappingSchemasRequest());
@@ -69,7 +74,7 @@ namespace Enterspeed.Cli.Commands.Schema
                     _logger.LogError("Schema not found!");
                     return 1;
                 }
-                
+
                 // Create update schema request
                 var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest()
                 {

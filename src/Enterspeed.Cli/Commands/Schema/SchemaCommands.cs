@@ -1,18 +1,19 @@
 ﻿using System.CommandLine;
 
-namespace Enterspeed.Cli.Commands.Schema;
-
-public class SchemaCommands
+namespace Enterspeed.Cli.Commands.Schema
 {
-    public static Command BuildCommands()
+    public class SchemaCommands
     {
-        var command = new Command("schema", "Schemas")
+        public static Command BuildCommands()
         {
-            new CreateSchemaCommand(),
-            new SaveSchemaCommand(),
-            new DeploySchemaCommand()
-        };
+            var command = new Command("schema", "Schemas")
+            {
+                new CreateSchemaCommand(),
+                new SaveSchemaCommand(),
+                new DeploySchemaCommand()
+            };
 
-        return command;
-    }
+            return command;
+        }
+    }    
 }

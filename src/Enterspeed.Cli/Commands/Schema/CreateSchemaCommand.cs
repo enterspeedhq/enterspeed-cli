@@ -1,7 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
 using Enterspeed.Cli.Api.MappingSchema;
-using Enterspeed.Cli.Commands.Deploy;
 using Enterspeed.Cli.Exceptions;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;

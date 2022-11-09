@@ -3,6 +3,7 @@ using System.CommandLine.Invocation;
 using System.Text.Json;
 using Enterspeed.Cli.Api.Environment;
 using Enterspeed.Cli.Api.MappingSchema;
+using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;
 using MediatR;
@@ -12,7 +13,7 @@ namespace Enterspeed.Cli.Commands.Schema
 {
     public class DeploySchemaCommand : Command
     {
-        public DeploySchemaCommand() : base("schema deploy", "Adds schema to deployment plan")
+        public DeploySchemaCommand() : base("deploy", "Adds schema to deployment plan")
         {
             AddArgument(new Argument<string>("schemaAlias", "Alias of the schema") { });
             AddOption(new Option<string>(new[] { "--environment", "-e" }, "Alias of environment")
@@ -46,15 +47,15 @@ namespace Enterspeed.Cli.Commands.Schema
             public async Task<int> InvokeAsync(InvocationContext context)
             {
                 // Get mapping schema guid
-                var mappingSchemaGuid = await GetMappingSchemaGuid();
-                if (mappingSchemaGuid == null)
+                var mappingSchemaId = await GetMappingSchemaGuid();
+                if (mappingSchemaId == null)
                 {
                     _logger.LogError("Mapping schema id not found!");
                     return 1;
                 }
 
                 // Get version from existing schema
-                var existingSchema = await GetExistingSchema(mappingSchemaGuid);
+                var existingSchema = await GetExistingSchema(mappingSchemaId.MappingSchemaGuid);
                 if (existingSchema == null)
                 {
                     _logger.LogError("Schema not found!");
@@ -70,7 +71,7 @@ namespace Enterspeed.Cli.Commands.Schema
                 }
 
                 // Ensure that content of schema is valid
-                var validationResponse = await ValidateMappingSchema(existingSchema, mappingSchemaGuid);
+                var validationResponse = await ValidateMappingSchema(existingSchema, mappingSchemaId.MappingSchemaGuid);
                 if (!validationResponse.Success)
                 {
                     var error = JsonSerializer.Serialize(validationResponse.Error);
@@ -88,12 +89,13 @@ namespace Enterspeed.Cli.Commands.Schema
 
                 var deployMappingSchemaResponse = await _mediator.Send(new DeployMappingSchemaRequest()
                 {
+                    SchemaId = mappingSchemaId.IdValue,
                     Deployments = new List<DeployMappingSchemaRequest.EnvironmentSchemaDeployment>()
                     {
                         new DeployMappingSchemaRequest.EnvironmentSchemaDeployment()
                         {
                             Version = existingSchema.Version.Id.Version,
-                            EnvironmentId = environmentToDeployTo.Id.EnvironmentGuid
+                            EnvironmentId = environmentToDeployTo.Id.IdValue
                         }
                     }
                 });
@@ -142,10 +144,10 @@ namespace Enterspeed.Cli.Commands.Schema
                 return existingSchema;
             }
 
-            private async Task<string> GetMappingSchemaGuid()
+            private async Task<MappingSchemaId> GetMappingSchemaGuid()
             {
                 var schemas = await _mediator.Send(new QueryMappingSchemasRequest());
-                var mappingSchemaGuid = schemas.FirstOrDefault(sc => sc.ViewHandle == SchemaAlias)?.Id.MappingSchemaGuid;
+                var mappingSchemaGuid = schemas.FirstOrDefault(sc => sc.ViewHandle == SchemaAlias)?.Id;
                 return mappingSchemaGuid;
             }
         }

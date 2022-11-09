@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Enterspeed.Cli.Services.FileService.Models;
 
 namespace Enterspeed.Cli.Services.FileService;
@@ -33,10 +34,15 @@ public class FileService : IFileService
 
     public SchemaBaseProperties GetSchema(string alias, string filePath = null)
     {
+        var schemaFile = GetSchemaFileContent(alias, filePath);
+        return JsonSerializer.Deserialize<SchemaBaseProperties>(schemaFile);
+    }
+
+    private string GetSchemaFileContent(string alias, string filePath = null)
+    {
         var schemaFilePath = filePath ?? GetSchemaFilePath(alias);
         var schemaFile = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), schemaFilePath));
-        var schemaProperties = JsonSerializer.Deserialize<SchemaBaseProperties>(schemaFile);
-        return schemaProperties;
+        return schemaFile;
     }
 
     public DeploymentPlanProperties GetDeploymentPlan(string filename = DefaultDeploymentPlanFileName)
@@ -107,9 +113,10 @@ public class FileService : IFileService
 
     public bool ValidateSchemaOnDisk(string externalSchema, string schemaAlias)
     {
-        var external = JsonSerializer.Deserialize<SchemaBaseProperties>(externalSchema);
-        var local = GetSchema(schemaAlias);
+        var local = GetSchemaFileContent(schemaAlias);
         
-        return external == local;
+        // TODO : Can we do this in a better way?
+        local = local.Replace("\n", "").Replace("\r", "").Replace(" ", "");
+        return local == externalSchema;
     }
 }
