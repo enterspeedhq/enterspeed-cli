@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Enterspeed.Cli.Commands.Schema
 {
-    public class DeploySchemaCommand : Command
+    internal class DeploySchemaCommand : Command
     {
         public DeploySchemaCommand() : base("deploy", "Adds schema to deployment plan")
         {
@@ -26,19 +26,22 @@ namespace Enterspeed.Cli.Commands.Schema
         {
             private readonly IMediator _mediator;
             private readonly IOutputService _outputService;
-            private readonly IFileService _fileService;
+            private readonly ISchemaFileService _schemaFileService;
             private readonly ILogger<DeploySchemaCommand> _logger;
+            private readonly IDeploymentPlanFileService _deploymentPlanFileService;
 
             public Handler(
                 IMediator mediator,
                 IOutputService outputService,
-                IFileService fileService,
-                ILogger<DeploySchemaCommand> logger)
+                ISchemaFileService schemaFileService,
+                ILogger<DeploySchemaCommand> logger,
+                IDeploymentPlanFileService deploymentPlanFileService)
             {
                 _outputService = outputService;
                 _mediator = mediator;
-                _fileService = fileService;
+                _schemaFileService = schemaFileService;
                 _logger = logger;
+                _deploymentPlanFileService = deploymentPlanFileService;
             }
 
             public string SchemaAlias { get; set; }
@@ -63,7 +66,7 @@ namespace Enterspeed.Cli.Commands.Schema
                 }
 
                 // Validate that schema on disk matches schema saved in Enterspeed.
-                var valid = _fileService.ValidateSchemaOnDisk(existingSchema.Version.Data, SchemaAlias);
+                var valid = _schemaFileService.ValidateSchemaOnDisk(existingSchema.Version.Data, SchemaAlias);
                 if (!valid)
                 {
                     _logger.LogError("Schema on disk does not match schema in Enterspeed. Save your schema before deploying it.");
@@ -107,7 +110,7 @@ namespace Enterspeed.Cli.Commands.Schema
                     return 1;
                 }
 
-                _fileService.UpdateDeploymentPlan(SchemaAlias, existingSchema.LatestVersion);
+                _deploymentPlanFileService.UpdateDeploymentPlan(SchemaAlias, existingSchema.LatestVersion);
 
                 _outputService.Write("Successfully deployed schema: " + SchemaAlias);
 
@@ -137,7 +140,7 @@ namespace Enterspeed.Cli.Commands.Schema
                 var existingSchema = await _mediator.Send(
                     new GetMappingSchemaRequest
                     {
-                        MappingSchemaId = mappingSchemaGuid,
+                        MappingSchemaId = mappingSchemaGuid
                     }
                 );
 

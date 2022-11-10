@@ -36,8 +36,4 @@
     <PackageReference Include="System.CommandLine.Hosting" Version="0.4.0-alpha.22272.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Commands\Schema\" />
-  </ItemGroup>
-
 </Project>

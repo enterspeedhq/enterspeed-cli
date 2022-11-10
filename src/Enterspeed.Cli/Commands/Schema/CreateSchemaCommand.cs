@@ -21,14 +21,17 @@ namespace Enterspeed.Cli.Commands.Schema
         {
             private readonly IMediator _mediator;
             private readonly IOutputService _outputService;
-            private readonly IFileService _fileService;
+            private readonly ISchemaFileService _schemaFileService;
             private readonly ILogger<CreateSchemaCommand> _logger;
 
-            public Handler(IMediator mediator, IOutputService outputService, IFileService fileService, ILogger<CreateSchemaCommand> logger)
+            public Handler(IMediator mediator, 
+                IOutputService outputService, 
+                ISchemaFileService schemaFileService, 
+                ILogger<CreateSchemaCommand> logger)
             {
                 _mediator = mediator;
                 _outputService = outputService;
-                _fileService = fileService;
+                _schemaFileService = schemaFileService;
                 _logger = logger;
             }
 
@@ -50,7 +53,7 @@ namespace Enterspeed.Cli.Commands.Schema
 
                 if (createSchemaResponse?.IdValue != null && !string.IsNullOrEmpty(createSchemaResponse.MappingSchemaGuid))
                 {
-                    _fileService.CreateSchema(Alias, createSchemaResponse.Version);
+                    _schemaFileService.CreateSchema(Alias, createSchemaResponse.Version);
                 }
                 else
                 {

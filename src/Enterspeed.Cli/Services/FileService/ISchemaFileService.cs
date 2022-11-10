@@ -2,11 +2,9 @@
 
 namespace Enterspeed.Cli.Services.FileService;
 
-public interface IFileService
+public interface ISchemaFileService
 {
     void CreateSchema(string alias, int version);
     SchemaBaseProperties GetSchema(string alias, string filePath = null);
-    DeploymentPlanProperties GetDeploymentPlan(string filename = FileService.DefaultDeploymentPlanFileName);
-    void UpdateDeploymentPlan(string schemaAlias, int version);
     bool ValidateSchemaOnDisk(string externalSchema, string schemaAlias);
 }

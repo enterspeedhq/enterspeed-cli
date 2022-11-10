@@ -14,34 +14,35 @@ namespace Enterspeed.Cli.Commands.Deploy
     {
         public DeployCommand() : base(name: "deploy", "Deploy schemas using deploymentplan")
         {
-            AddOption(new Option<string>(new[] {"--environment", "-e"}, "Target environment for deploy")
-                {IsRequired = true});
-            AddOption(new Option<string>(new[] {"--deploymentplan", "-dp"}, "Deploymentplan to use"));
+            AddOption(new Option<string>(new[] { "--environment", "-e" }, "Target environment for deploy") { IsRequired = true });
+            AddOption(new Option<string>(new[] { "--deploymentplan", "-dp" }, "Deploymentplan to use"));
         }
 
         public new class Handler : BaseCommandHandler, ICommandHandler
         {
             private readonly IMediator _mediator;
-            private readonly IFileService _fileService;
+            private readonly IDeploymentPlanFileService _deploymentPlanFileService;
             private readonly ILogger<DeployCommand> _logger;
 
-            public Handler(IMediator mediator, IFileService fileService, ILogger<DeployCommand> logger)
+            public Handler(IMediator mediator,
+                ILogger<DeployCommand> logger,
+                IDeploymentPlanFileService deploymentPlanFileService)
             {
                 _mediator = mediator;
-                _fileService = fileService;
                 _logger = logger;
+                _deploymentPlanFileService = deploymentPlanFileService;
             }
 
             public string Environment { get; set; }
 
-            public string DeploymentPlan { get; set; } = FileService.DefaultDeploymentPlanFileName;
+            public string DeploymentPlan { get; set; } = DedploymentPlanFileService.DefaultDeploymentPlanFileName;
 
             public async Task<int> InvokeAsync(InvocationContext context)
             {
                 _logger.LogInformation($"Deploy {DeploymentPlan} to {Environment}");
 
                 // Read deployment plan file
-                var plan = _fileService.GetDeploymentPlan(DeploymentPlan);
+                var plan = _deploymentPlanFileService.GetDeploymentPlan(DeploymentPlan);
                 if (plan == null)
                 {
                     _logger.LogError($"Deployment plan {DeploymentPlan} not found!");
@@ -120,7 +121,7 @@ namespace Enterspeed.Cli.Commands.Deploy
             private async Task<IReadOnlyList<GetMappingSchemaResponse>> FetchSchemas(List<DeploymentPlanSchema> planSchemas)
             {
                 var schemas = new List<GetMappingSchemaResponse>();
-                
+
                 // Resolve schema aliases
                 var schemaQueryResponse = await _mediator.Send(new QueryMappingSchemasRequest());
 

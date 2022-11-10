@@ -21,18 +21,18 @@ namespace Enterspeed.Cli.Commands.Schema
         {
             private readonly IMediator _mediator;
             private readonly IOutputService _outputService;
-            private readonly IFileService _fileService;
+            private readonly ISchemaFileService _schemaFileService;
             private readonly ILogger<SaveSchemaCommand> _logger;
 
             public Handler(
                 IMediator mediator,
                 IOutputService outputService,
-                IFileService fileService,
+                ISchemaFileService schmeaFileService,
                 ILogger<SaveSchemaCommand> logger)
             {
                 _mediator = mediator;
                 _outputService = outputService;
-                _fileService = fileService;
+                _schemaFileService = schmeaFileService;
                 _logger = logger;
             }
 
@@ -46,7 +46,7 @@ namespace Enterspeed.Cli.Commands.Schema
                     throw new ConsoleArgumentException("Please specify an alias for your schema");
                 }
 
-                var schema = _fileService.GetSchema(Alias, File);
+                var schema = _schemaFileService.GetSchema(Alias, File);
                 if (schema == null)
                 {
                     _logger.LogError("Schema file not found!");

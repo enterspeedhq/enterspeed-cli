@@ -41,7 +41,8 @@ public static class ServiceCollectionExtensions
         services.AddMediatR(Assembly.GetExecutingAssembly());
         services.AddTransient<IEnterspeedClient, EnterspeedClient>();
         services.AddTransient<IOutputService, OutputService>();
-        services.AddTransient<IFileService, FileService>();
+        services.AddTransient<ISchemaFileService, SchemaFileService>();
+        services.AddTransient<IDeploymentPlanFileService, DedploymentPlanFileService>();
         services.AddSingleton<GlobalOptions>();
         return services;
     }
