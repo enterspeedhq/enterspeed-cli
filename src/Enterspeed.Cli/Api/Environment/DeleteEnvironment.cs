@@ -7,7 +7,12 @@ namespace Enterspeed.Cli.Api.Environment
 {
     public class DeleteEnvironmentRequest : IRequest<DeleteEnvironmentResponse>
     {
-        public EnvironmentId EnvironmentId { get; set; }
+        public EnvironmentId EnvironmentId { get; }
+
+        public DeleteEnvironmentRequest(EnvironmentId environmentId)
+        {
+            EnvironmentId = environmentId;
+        }
     }
 
     public class DeleteEnvironmentResponse

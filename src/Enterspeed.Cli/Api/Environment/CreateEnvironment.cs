@@ -24,10 +24,10 @@ namespace Enterspeed.Cli.Api.Environment
             _enterspeedClient = enterspeedClient;
         }
 
-        public async Task<CreateEnvironmentResponse> Handle(CreateEnvironmentRequest createEnvironmentsRequest, CancellationToken cancellationToken)
+        public async Task<CreateEnvironmentResponse> Handle(CreateEnvironmentRequest createEnvironmentRequest, CancellationToken cancellationToken)
         {
             var request = new RestRequest("tenant/environments", Method.Post)
-                .AddJsonBody(createEnvironmentsRequest);
+                .AddJsonBody(createEnvironmentRequest);
 
             var response = await _enterspeedClient.ExecuteAsync<CreateEnvironmentResponse>(request, cancellationToken);
             return response;
