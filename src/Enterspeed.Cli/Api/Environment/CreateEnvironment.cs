@@ -1,4 +1,5 @@
-﻿using Enterspeed.Cli.Services.EnterspeedClient;
+﻿using Enterspeed.Cli.Domain.Models;
+using Enterspeed.Cli.Services.EnterspeedClient;
 using MediatR;
 using RestSharp;
 
@@ -11,6 +12,7 @@ namespace Enterspeed.Cli.Api.Environment
 
     public class CreateEnvironmentResponse
     {
+        public EnvironmentId EnvironmentId { get; set; }
     }
 
     public class CreateEnvironmentRequestRequestHandler : IRequestHandler<CreateEnvironmentRequest, CreateEnvironmentResponse>
