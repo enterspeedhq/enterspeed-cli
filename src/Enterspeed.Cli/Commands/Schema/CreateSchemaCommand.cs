@@ -53,7 +53,7 @@ namespace Enterspeed.Cli.Commands.Schema
 
                 if (createSchemaResponse?.IdValue != null && !string.IsNullOrEmpty(createSchemaResponse.MappingSchemaGuid))
                 {
-                    _schemaFileService.CreateSchema(Alias, createSchemaResponse.Version);
+                    _schemaFileService.CreateSchema(Alias);
                 }
                 else
                 {

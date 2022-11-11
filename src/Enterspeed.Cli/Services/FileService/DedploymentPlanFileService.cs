@@ -66,6 +66,7 @@ namespace Enterspeed.Cli.Services.FileService
         {
             if (!DeploymentPlanExist) return null;
             var deploymentPlanFile = File.ReadAllText(filename);
+
             return JsonSerializer.Deserialize<DeploymentPlanProperties>(deploymentPlanFile);
         }
     }

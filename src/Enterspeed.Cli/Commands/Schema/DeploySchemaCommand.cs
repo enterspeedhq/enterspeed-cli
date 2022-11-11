@@ -66,7 +66,7 @@ namespace Enterspeed.Cli.Commands.Schema
                 }
 
                 // Validate that schema on disk matches schema saved in Enterspeed.
-                var valid = _schemaFileService.ValidateSchemaOnDisk(existingSchema.Version.Data, SchemaAlias);
+                var valid = _schemaFileService.ValidateSchema(existingSchema.Version.Data, SchemaAlias);
                 if (!valid)
                 {
                     _logger.LogError("Schema on disk does not match schema in Enterspeed. Save your schema before deploying it.");

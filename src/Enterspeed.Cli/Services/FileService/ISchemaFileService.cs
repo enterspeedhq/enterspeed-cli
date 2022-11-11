@@ -4,7 +4,7 @@ namespace Enterspeed.Cli.Services.FileService;
 
 public interface ISchemaFileService
 {
-    void CreateSchema(string alias, int version);
+    void CreateSchema(string alias, string content = null);
     SchemaBaseProperties GetSchema(string alias, string filePath = null);
-    bool ValidateSchemaOnDisk(string externalSchema, string schemaAlias);
+    bool ValidateSchema(string externalSchema, string schemaAlias);
 }
