@@ -65,7 +65,7 @@ internal class Program
         root.AddCommand(ViewCommands.BuildCommands());
         root.AddCommand(SourceEntityCommands.BuildCommands());
         root.AddCommand(SchemaCommands.BuildCommands());
-        root.AddCommand(new DeployCommand());
+        root.AddCommand(DeployCommands.BuildCommands());
 
         root.AddGlobalOption(OutPutStyle);
         root.AddGlobalOption(ApiKeyOption);

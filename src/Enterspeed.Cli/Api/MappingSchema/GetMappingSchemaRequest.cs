@@ -17,6 +17,15 @@ namespace Enterspeed.Cli.Api.MappingSchema
         public string ViewHandle { get; set; }
         public int LatestVersion { get; set; }
         public MappingSchemaVersion Version { get; set; }
+        public List<DeploymentResponse> Deployments { get; set; }
+    }
+
+    public class DeploymentResponse
+    {
+        public string Comment { get; set; }
+        public string EnvironmentId { get; set; }
+        public int Version { get; set; }
+        public string[] SourceIds { get; set; }
     }
 
     public class GetMappingSchemaRequestHandler : IRequestHandler<GetMappingSchemaRequest, GetMappingSchemaResponse>
@@ -35,8 +44,7 @@ namespace Enterspeed.Cli.Api.MappingSchema
             {
                 request.AddParameter("version", getMappingSchemaRequest.Version.Value);
             }
-            var response = await _enterspeedClient.ExecuteAsync<GetMappingSchemaResponse>(request, cancellationToken);
-            return response;
+            return await _enterspeedClient.ExecuteAsync<GetMappingSchemaResponse>(request, cancellationToken);
         }
     }
 }
