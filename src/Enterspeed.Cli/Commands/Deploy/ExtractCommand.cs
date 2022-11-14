@@ -95,7 +95,7 @@ namespace Enterspeed.Cli.Commands.Deploy
                 }
                 else
                 {
-                    _logger.LogWarning("Use schema deploy to update deploymentplan with versions on disk");
+                    _logger.LogWarning($"Use schema deploy for {schemaResponse.ViewHandle}, to update deploymentplan with versions on disk");
                 }
             }
 
