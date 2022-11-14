@@ -59,6 +59,12 @@ namespace Enterspeed.Cli.Commands.Deploy
 
                     // Get deployment and check if latest version exists in environment
                     var deployment = GetDeployment(environment, schemaResponse);
+                    if (deployment == null)
+                    {
+                        _logger.LogInformation($"No deployments for {schemaResponse.ViewHandle}");
+                        continue;
+                    }
+
                     if (IsLatestVersion(schemaResponse, deployment))
                     {
                         ExtractSchema(schemaResponse);
