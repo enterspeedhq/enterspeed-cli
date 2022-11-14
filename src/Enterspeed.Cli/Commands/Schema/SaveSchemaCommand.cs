@@ -1,8 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Text.Json;
 using Enterspeed.Cli.Api.MappingSchema;
-using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Exceptions;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;
@@ -23,14 +21,18 @@ namespace Enterspeed.Cli.Commands.Schema
         {
             private readonly IMediator _mediator;
             private readonly IOutputService _outputService;
-            private readonly IFileService _fileService;
+            private readonly ISchemaFileService _schemaFileService;
             private readonly ILogger<SaveSchemaCommand> _logger;
 
-            public Handler(IMediator mediator, IOutputService outputService, IFileService fileService, ILogger<SaveSchemaCommand> logger)
+            public Handler(
+                IMediator mediator,
+                IOutputService outputService,
+                ISchemaFileService schmeaFileService,
+                ILogger<SaveSchemaCommand> logger)
             {
                 _mediator = mediator;
                 _outputService = outputService;
-                _fileService = fileService;
+                _schemaFileService = schmeaFileService;
                 _logger = logger;
             }
 
@@ -44,7 +46,12 @@ namespace Enterspeed.Cli.Commands.Schema
                     throw new ConsoleArgumentException("Please specify an alias for your schema");
                 }
 
-                var schema = _fileService.GetSchema(Alias, File);
+                var schema = _schemaFileService.GetSchema(Alias, File);
+                if (schema == null)
+                {
+                    _logger.LogError("Schema file not found!");
+                    return 1;
+                }
 
                 // Get mapping schema guid 
                 var schemas = await _mediator.Send(new QueryMappingSchemasRequest());
@@ -68,9 +75,6 @@ namespace Enterspeed.Cli.Commands.Schema
                     return 1;
                 }
 
-                // Validate
-                // TODO : Management API being prepared for this currently. 
-
                 // Create update schema request
                 var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest()
                 {
@@ -79,10 +83,6 @@ namespace Enterspeed.Cli.Commands.Schema
                     Version = existingSchema.LatestVersion,
                     Schema = schema
                 });
-
-                // Save to deployment file
-
-
 
                 var updatedSchema = await _mediator.Send(
                     new GetMappingSchemaRequest
