@@ -66,13 +66,18 @@ namespace Enterspeed.Cli.Services.FileService
             return JsonSerializer.Deserialize<SchemaBaseProperties>(schemaFile);
         }
 
-        public bool ValidateSchema(string externalSchema, string schemaAlias)
+        public bool SchemaValid(string externalSchema, string schemaAlias)
         {
-            var local = GetSchemaContent(schemaAlias);
+            if (SchemaExists(schemaAlias))
+            {
+                var local = GetSchemaContent(schemaAlias);
 
-            // TODO : Can we do this in a better way?
-            local = local.Replace("\n", "").Replace("\r", "").Replace(" ", "");
-            return local == externalSchema;
+                // TODO : Can we do this in a better way?
+                local = local.Replace("\n", "").Replace("\r", "").Replace(" ", "");
+                return local == externalSchema;
+            }
+
+            return false;
         }
 
         private void EnsureSchemaFolder()
@@ -83,7 +88,7 @@ namespace Enterspeed.Cli.Services.FileService
             }
         }
 
-        private bool SchemaExists(string alias)
+        public bool SchemaExists(string alias)
         {
             var schemaFilePath = GetFilePath(alias);
             return File.Exists(Path.Combine(Directory.GetCurrentDirectory(), schemaFilePath));

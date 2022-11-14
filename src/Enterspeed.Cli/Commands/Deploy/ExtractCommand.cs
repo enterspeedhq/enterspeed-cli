@@ -88,7 +88,12 @@ namespace Enterspeed.Cli.Commands.Deploy
 
             private void ExtractSchema(GetMappingSchemaResponse schemaResponse)
             {
-                if (_schemaFileService.ValidateSchema(schemaResponse.Version.Data, schemaResponse.ViewHandle))
+                // Add even though we dont have the schema locally.To support using older versions of schemas.
+                if (!_schemaFileService.SchemaExists(schemaResponse.ViewHandle))
+                {
+                    _deploymentPlanFileService.UpdateDeploymentPlan(schemaResponse.ViewHandle, schemaResponse.Version.Id.Version);
+                }
+                if (_schemaFileService.SchemaValid(schemaResponse.Version.Data, schemaResponse.ViewHandle))
                 {
                     _deploymentPlanFileService.UpdateDeploymentPlan(schemaResponse.ViewHandle, schemaResponse.Version.Id.Version);
                     _logger.LogInformation($"Successfully extracted {schemaResponse.ViewHandle} and added it to the deployment plan");
