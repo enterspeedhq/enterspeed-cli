@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Text.Json;
 using Enterspeed.Cli.Api.MappingSchema;
 using Enterspeed.Cli.Exceptions;
 using Enterspeed.Cli.Services.ConsoleOutput;
@@ -81,7 +82,7 @@ namespace Enterspeed.Cli.Commands.Schema
                     Format = "json",
                     MappingSchemaId = existingSchema.Version.Id.MappingSchemaGuid,
                     Version = existingSchema.LatestVersion,
-                    Schema = schema
+                    Schema = JsonSerializer.SerializeToDocument(schema, SchemaFileService.SerializerOptions)
                 });
 
                 var updatedSchema = await _mediator.Send(

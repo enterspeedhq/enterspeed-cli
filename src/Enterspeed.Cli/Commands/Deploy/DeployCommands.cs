@@ -6,9 +6,9 @@ namespace Enterspeed.Cli.Commands.Deploy
     {
         public static Command BuildCommands()
         {
-            var command = new Command("deploy")
+            var command = new Command("deployment")
             {
-                //new DeployCommand(),
+                new DeployCommand(),
                 new ExtractCommand()
             };
 

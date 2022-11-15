@@ -69,17 +69,19 @@ namespace Enterspeed.Cli.Commands.Deploy
                     {
                         ExtractSchema(schemaResponse);
                     }
-
-                    // Try and get schema based on version 
-                    var schemaResponseByVersion = await _mediator.Send(new GetMappingSchemaRequest()
+                    else
                     {
-                        MappingSchemaId = schema.Id.MappingSchemaGuid,
-                        Version = deployment.Version
-                    });
+                        // Try and get schema based on version 
+                        var schemaResponseByVersion = await _mediator.Send(new GetMappingSchemaRequest()
+                        {
+                            MappingSchemaId = schema.Id.MappingSchemaGuid,
+                            Version = deployment.Version
+                        });
 
-                    if (schemaResponseByVersion != null)
-                    {
-                        ExtractSchema(schemaResponseByVersion);
+                        if (schemaResponseByVersion != null)
+                        {
+                            ExtractSchema(schemaResponseByVersion);
+                        }
                     }
                 }
 
@@ -88,11 +90,6 @@ namespace Enterspeed.Cli.Commands.Deploy
 
             private void ExtractSchema(GetMappingSchemaResponse schemaResponse)
             {
-                // Add even though we dont have the schema locally.To support using older versions of schemas.
-                if (!_schemaFileService.SchemaExists(schemaResponse.ViewHandle))
-                {
-                    _deploymentPlanFileService.UpdateDeploymentPlan(schemaResponse.ViewHandle, schemaResponse.Version.Id.Version);
-                }
                 if (_schemaFileService.SchemaValid(schemaResponse.Version.Data, schemaResponse.ViewHandle))
                 {
                     _deploymentPlanFileService.UpdateDeploymentPlan(schemaResponse.ViewHandle, schemaResponse.Version.Id.Version);
