@@ -6,7 +6,7 @@ namespace Enterspeed.Cli.Services.FileService
     public class DedploymentPlanFileService : IDeploymentPlanFileService
     {
         public const string DefaultDeploymentPlanFileName = "deploymentplan.json";
-        
+
         private bool DeploymentPlanExist => File.Exists(Path.Combine(Directory.GetCurrentDirectory(), DefaultDeploymentPlanFileName));
 
         public void UpdateDeploymentPlan(string schemaAlias, int version)
@@ -44,7 +44,7 @@ namespace Enterspeed.Cli.Services.FileService
             }
         }
 
-        private void DeleteDeploymentPlan()
+        public void DeleteDeploymentPlan()
         {
             File.Delete(Path.Combine(Directory.GetCurrentDirectory(), DefaultDeploymentPlanFileName));
         }

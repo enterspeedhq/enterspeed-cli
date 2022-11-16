@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Enterspeed.Cli.Services.FileService.Models;
 using Microsoft.Extensions.Logging;
 
@@ -8,6 +9,10 @@ namespace Enterspeed.Cli.Services.FileService
     {
         private readonly ILogger<SchemaFileService> _logger;
         private const string SchemaDirectory = "schemas";
+        public static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
 
         public SchemaFileService(ILogger<SchemaFileService> logger)
         {
@@ -46,7 +51,7 @@ namespace Enterspeed.Cli.Services.FileService
 
         private void CreatePopulatedSchema(string alias, string content)
         {
-            CreateSchema(alias, JsonSerializer.Deserialize<SchemaBaseProperties>(content));
+            CreateSchema(alias, JsonSerializer.Deserialize<SchemaBaseProperties>(content, SerializerOptions));
         }
 
         private void CreateSchema(string alias, SchemaBaseProperties content)
@@ -55,7 +60,7 @@ namespace Enterspeed.Cli.Services.FileService
             {
                 _logger.LogInformation("Creating schema");
 
-                var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(content);
+                var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(content, SerializerOptions);
                 fs.Write(jsonBytes, 0, jsonBytes.Length);
             }
         }
@@ -63,16 +68,21 @@ namespace Enterspeed.Cli.Services.FileService
         public SchemaBaseProperties GetSchema(string alias, string filePath = null)
         {
             var schemaFile = GetSchemaContent(alias, filePath);
-            return JsonSerializer.Deserialize<SchemaBaseProperties>(schemaFile);
+            return JsonSerializer.Deserialize<SchemaBaseProperties>(schemaFile, SerializerOptions);
         }
 
-        public bool ValidateSchema(string externalSchema, string schemaAlias)
+        public bool SchemaValid(string externalSchema, string schemaAlias)
         {
-            var local = GetSchemaContent(schemaAlias);
+            if (SchemaExists(schemaAlias))
+            {
+                var local = GetSchemaContent(schemaAlias);
 
-            // TODO : Can we do this in a better way?
-            local = local.Replace("\n", "").Replace("\r", "").Replace(" ", "");
-            return local == externalSchema;
+                // TODO : Can we do this in a better way?
+                local = local.Replace("\n", "").Replace("\r", "").Replace(" ", "");
+                return local == externalSchema;
+            }
+
+            return false;
         }
 
         private void EnsureSchemaFolder()
@@ -83,7 +93,7 @@ namespace Enterspeed.Cli.Services.FileService
             }
         }
 
-        private bool SchemaExists(string alias)
+        public bool SchemaExists(string alias)
         {
             var schemaFilePath = GetFilePath(alias);
             return File.Exists(Path.Combine(Directory.GetCurrentDirectory(), schemaFilePath));
