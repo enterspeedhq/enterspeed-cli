@@ -8,11 +8,15 @@ namespace Enterspeed.Cli.Services.StateService;
 public class StateService : IStateService
 {
     private readonly ILogger<StateService> _logger;
-    private const string Filename = ".escli-state.json";
+    private readonly string _stateFilePath;
 
     public StateService(ILogger<StateService> logger)
     {
         _logger = logger;
+
+        var userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        _stateFilePath = Path.Combine(userFolderPath, ".enterspeed", "cli.state.json");
+
         LoadState();
     }
 
@@ -38,7 +42,8 @@ public class StateService : IStateService
             User = user,
             ActiveTenantId = ActiveTenantId.IdValue
         });
-        File.WriteAllText(Filename, jsonString);
+        Directory.CreateDirectory(Path.GetDirectoryName(_stateFilePath)!);
+        File.WriteAllText(_stateFilePath, jsonString);
         _logger.LogInformation("State saved");
     }
 
@@ -62,7 +67,7 @@ public class StateService : IStateService
     {
         try
         {
-            var jsonString = File.ReadAllText(Filename);
+            var jsonString = File.ReadAllText(_stateFilePath);
             var state = JsonSerializer.Deserialize<State>(jsonString);
             if (state != null)
             {
