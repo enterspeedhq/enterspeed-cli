@@ -6,9 +6,12 @@ public static class SourceGroupCommands
 {
     public static Command BuildCommands()
     {
-        var command = new Command("source-groups", "Source groups")
+        var command = new Command("source-group", "Source group")
         {
-            new ListSourceGroupsCommand()
+            new ListSourceGroupCommand(),
+            new CreateSourceGroupCommand(),
+            new UpdateSourceGroupCommand(),
+            new DeleteSourceGroupCommand()
         };
         return command;
     }

@@ -63,9 +63,9 @@ public sealed class RouteUrlId : Id
             throw new InvalidIdFormatException("Missing url");
         }
 
-        return new RouteUrlId(From(environment.EnvironmentGuid, domainGuid, urlPath))
+        return new RouteUrlId(From(environment.EnvironmentGuid.ToString(), domainGuid, urlPath))
         {
-            EnvironmentGuid = environment.EnvironmentGuid,
+            EnvironmentGuid = environment.EnvironmentGuid.ToString(),
             UrlPath = urlPath,
             DomainGuid = domainGuid
         };

@@ -1,19 +1,19 @@
-﻿using Enterspeed.Cli.Api.Domain;
+﻿using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using MediatR;
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using Enterspeed.Cli.Domain.Models;
+using Enterspeed.Cli.Api.SourceGroup;
 
-namespace Enterspeed.Cli.Commands.Domain;
+namespace Enterspeed.Cli.Commands.SourceGroup;
 
-internal class UpdateDomainCommand : Command
+public class UpdateSourceGroupCommand : Command
 {
-    public UpdateDomainCommand() : base(name: "update", "Update domain")
+    public UpdateSourceGroupCommand() : base(name: "update", "Update source group")
     {
-        AddArgument(new Argument<Guid>("id", "Id of the domain") { Arity = ArgumentArity.ExactlyOne });
-        AddOption(new Option<string>(new[] { "--name", "-n" }, "Name of domain"));
-        AddOption(new Option<string>(new[] { "--hostnames", "-h" }, "List of hostnames, separated by semicolon."));
+        AddArgument(new Argument<Guid>("id", "Id of the source group") { Arity = ArgumentArity.ExactlyOne });
+        AddOption(new Option<string>(new[] { "--name", "-n" }, "Name of source group"));
+        AddOption(new Option<string>(new[] { "--type", "-t" }, "Source group type"));
     }
 
     public new class Handler : BaseCommandHandler, ICommandHandler
@@ -23,7 +23,7 @@ internal class UpdateDomainCommand : Command
 
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public string Hostnames { get; set; }
+        public string Type { get; set; }
 
 
         public Handler(IMediator mediator, IOutputService outputService)
@@ -34,16 +34,15 @@ internal class UpdateDomainCommand : Command
 
         public async Task<int> InvokeAsync(InvocationContext context)
         {
-            var request = new UpdateDomainRequest(DomainId.Parse(DomainId.From(Id.ToString())));
+            var request = new UpdateSourceGroupRequest(SourceGroupId.Parse(SourceGroupId.From(Id.ToString())));
             if (!string.IsNullOrEmpty(Name))
             {
                 request.Name = Name;
             }
 
-            if (!string.IsNullOrEmpty(Hostnames))
+            if (!string.IsNullOrEmpty(Type))
             {
-                var hostnames = Hostnames.Split(';');
-                request.Hostnames = hostnames.Select(host => host.Trim()).ToArray();
+                request.Type = Type;
             }
 
             var response = await _mediator.Send(request);
