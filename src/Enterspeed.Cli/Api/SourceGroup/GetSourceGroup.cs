@@ -8,7 +8,6 @@ namespace Enterspeed.Cli.Api.SourceGroup;
 
 public class GetSourceGroupsRequest : IRequest<GetSourceGroupResponse[]>
 {
-    public string[] TenantIds { get; set; }
 }
 
 public class GetSourceGroupResponse

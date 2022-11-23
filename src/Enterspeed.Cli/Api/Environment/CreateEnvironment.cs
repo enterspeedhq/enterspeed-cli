@@ -1,4 +1,5 @@
-﻿using Enterspeed.Cli.Services.EnterspeedClient;
+﻿using Enterspeed.Cli.Domain.Models;
+using Enterspeed.Cli.Services.EnterspeedClient;
 using MediatR;
 using RestSharp;
 
@@ -11,6 +12,7 @@ namespace Enterspeed.Cli.Api.Environment
 
     public class CreateEnvironmentResponse
     {
+        public EnvironmentId EnvironmentId { get; set; }
     }
 
     public class CreateEnvironmentRequestRequestHandler : IRequestHandler<CreateEnvironmentRequest, CreateEnvironmentResponse>
@@ -22,10 +24,10 @@ namespace Enterspeed.Cli.Api.Environment
             _enterspeedClient = enterspeedClient;
         }
 
-        public async Task<CreateEnvironmentResponse> Handle(CreateEnvironmentRequest createEnvironmentsRequest, CancellationToken cancellationToken)
+        public async Task<CreateEnvironmentResponse> Handle(CreateEnvironmentRequest createEnvironmentRequest, CancellationToken cancellationToken)
         {
             var request = new RestRequest("tenant/environments", Method.Post)
-                .AddJsonBody(createEnvironmentsRequest);
+                .AddJsonBody(createEnvironmentRequest);
 
             var response = await _enterspeedClient.ExecuteAsync<CreateEnvironmentResponse>(request, cancellationToken);
             return response;

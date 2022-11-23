@@ -30,7 +30,11 @@ public static class ServiceCollectionExtensions
         var logEventLevel = verbose ? LogEventLevel.Verbose : LogEventLevel.Warning;
 
         loggerConfiguration.MinimumLevel.Override("Microsoft", logEventLevel);
-        loggerConfiguration.WriteTo.File(new CompactJsonFormatter(), "log.json", logEventLevel);
+
+        var userFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var logFilePath = Path.Combine(userFolderPath, ".enterspeed", "cli.log.json");
+
+        loggerConfiguration.WriteTo.File(new CompactJsonFormatter(), logFilePath, logEventLevel);
         loggerConfiguration.WriteTo.Console(logEventLevel);
         loggerConfiguration.Enrich.WithExceptionDetails();
 

@@ -1,17 +1,17 @@
-﻿using Enterspeed.Cli.Api.Domain;
+﻿using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using MediatR;
-using System.CommandLine;
 using System.CommandLine.Invocation;
-using Enterspeed.Cli.Domain.Models;
+using System.CommandLine;
+using Enterspeed.Cli.Api.SourceGroup;
 
-namespace Enterspeed.Cli.Commands.Domain;
+namespace Enterspeed.Cli.Commands.SourceGroup;
 
-public class DeleteDomainCommand : ConfirmCommand
+public class DeleteSourceGroupCommand : ConfirmCommand
 {
-    public DeleteDomainCommand() : base(name: "delete", "Delete domain")
+    public DeleteSourceGroupCommand() : base(name: "delete", "Delete source group")
     {
-        AddArgument(new Argument<Guid>("id", "Id of the domain") { Arity = ArgumentArity.ExactlyOne });
+        AddArgument(new Argument<Guid>("id", "Id of the source group") { Arity = ArgumentArity.ExactlyOne });
     }
 
     public new class Handler : BaseCommandHandler, ICommandHandler
@@ -20,7 +20,7 @@ public class DeleteDomainCommand : ConfirmCommand
         private readonly IOutputService _outputService;
 
         public Guid Id { get; set; }
-        
+
 
         public Handler(IMediator mediator, IOutputService outputService)
         {
@@ -35,7 +35,7 @@ public class DeleteDomainCommand : ConfirmCommand
                 return 0;
             }
 
-            var response = await _mediator.Send(new DeleteDomainRequest(DomainId.Parse(DomainId.From(Id.ToString()))));
+            var response = await _mediator.Send(new DeleteSourceGroupRequest(SourceGroupId.Parse(SourceGroupId.From(Id.ToString()))));
             _outputService.Write(response);
 
             return 0;

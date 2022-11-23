@@ -9,7 +9,7 @@ public sealed class EnvironmentId : Id
     {
     }
 
-    public string EnvironmentGuid { get; set; }
+    public Guid EnvironmentGuid { get; set; }
 
     public static EnvironmentId Default() => Parse(From(Guid.Empty.ToString()));
 
@@ -50,7 +50,7 @@ public sealed class EnvironmentId : Id
 
         return new EnvironmentId(From(guid.ToString()))
         {
-            EnvironmentGuid = guid.ToString()
+            EnvironmentGuid = guid
         };
     }
 }

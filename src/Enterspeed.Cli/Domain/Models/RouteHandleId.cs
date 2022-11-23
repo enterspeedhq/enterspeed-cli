@@ -55,9 +55,9 @@ public sealed class RouteHandleId : Id
             throw new InvalidIdFormatException("Missing handle");
         }
 
-        return new RouteHandleId(From(environment.EnvironmentGuid, handle))
+        return new RouteHandleId(From(environment.EnvironmentGuid.ToString(), handle))
         {
-            EnvironmentGuid = environment.EnvironmentGuid,
+            EnvironmentGuid = environment.EnvironmentGuid.ToString(),
             Handle = handle
         };
     }

@@ -48,9 +48,9 @@ public sealed class EnvironmentClientId : Id
 
         var guid = GetValidatedGuid(guidAsString);
 
-        return new EnvironmentClientId(From(environment.EnvironmentGuid, guid.ToString()))
+        return new EnvironmentClientId(From(environment.EnvironmentGuid.ToString(), guid.ToString()))
         {
-            EnvironmentGuid = environment.EnvironmentGuid,
+            EnvironmentGuid = environment.EnvironmentGuid.ToString(),
             ClientGuid = guid.ToString()
         };
     }

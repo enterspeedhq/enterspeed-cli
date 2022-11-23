@@ -1,5 +1,4 @@
-﻿using System.Buffers;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
 using System.CommandLine.Parsing;
@@ -9,6 +8,7 @@ using Enterspeed.Cli.Commands.Environment;
 using Enterspeed.Cli.Commands.EnvironmentClient;
 using Enterspeed.Cli.Commands.Login;
 using Enterspeed.Cli.Commands.Schema;
+using Enterspeed.Cli.Commands.Source;
 using Enterspeed.Cli.Commands.SourceEntity;
 using Enterspeed.Cli.Commands.SourceGroup;
 using Enterspeed.Cli.Commands.Tenant;
@@ -65,6 +65,7 @@ namespace Enterspeed.Cli
             root.AddCommand(EnvironmentClientCommands.BuildCommands());
             root.AddCommand(DomainCommands.BuildCommands());
             root.AddCommand(SourceGroupCommands.BuildCommands());
+            root.AddCommand(SourceCommands.BuildCommands());
             root.AddCommand(ViewCommands.BuildCommands());
             root.AddCommand(SourceEntityCommands.BuildCommands());
             root.AddCommand(SchemaCommands.BuildCommands());

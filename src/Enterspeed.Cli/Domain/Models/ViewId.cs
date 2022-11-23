@@ -58,9 +58,9 @@ public sealed class ViewId : Id
 
         ValidateOrder(gidValues, "Environment", "Source", "Entity", "View");
 
-        return new ViewId(From(environment.EnvironmentGuid, sourceEntity.SourceGuid, sourceEntity.OriginId, viewHandle))
+        return new ViewId(From(environment.EnvironmentGuid.ToString(), sourceEntity.SourceGuid, sourceEntity.OriginId, viewHandle))
         {
-            EnvironmentGuid = environment.EnvironmentGuid,
+            EnvironmentGuid = environment.EnvironmentGuid.ToString(),
             SourceGuid = sourceEntity.SourceGuid,
             OriginId = sourceEntity.OriginId,
             ViewHandle = viewHandle
