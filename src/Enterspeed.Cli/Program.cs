@@ -40,7 +40,7 @@ namespace Enterspeed.Cli
                 .UseHost(_ => CreateHostBuilder(args), (builder) => builder
                     .ConfigureAppConfiguration((context, configuration) =>
                     {
-                        configuration.AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true);
+                        configuration.AddJsonFile($"appsettings.local.json", optional: true);
                     })
                     .ConfigureServices((_, services) =>
                     {

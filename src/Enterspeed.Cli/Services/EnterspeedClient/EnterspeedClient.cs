@@ -22,7 +22,7 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
         _stateService = stateService;
         _apiKeyValue = globalOptions?.ApiKeyValue;
 
-        var settings = configuration.GetRequiredSection("Settings").Get<Settings>();
+        var settings = configuration.GetSection("Settings").Get<Settings>() ?? new Settings();
         var options = new RestClientOptions(settings.EnterspeedApiUri);
 
         _client = new RestClient(options);
