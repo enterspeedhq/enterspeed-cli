@@ -90,14 +90,15 @@ namespace Enterspeed.Cli.Commands.Deploy
 
             private void ExtractSchema(GetMappingSchemaResponse schemaResponse)
             {
+                _deploymentPlanFileService.UpdateDeploymentPlan(schemaResponse.ViewHandle, schemaResponse.Version.Id.Version);
+
                 if (_schemaFileService.SchemaValid(schemaResponse.Version.Data, schemaResponse.ViewHandle))
                 {
-                    _deploymentPlanFileService.UpdateDeploymentPlan(schemaResponse.ViewHandle, schemaResponse.Version.Id.Version);
                     _logger.LogInformation($"Successfully extracted {schemaResponse.ViewHandle} and added it to the deployment plan");
                 }
                 else
                 {
-                    _logger.LogWarning($"Use schema deploy for {schemaResponse.ViewHandle}, to update deploymentplan with versions on disk");
+                    _logger.LogWarning($"Schema on disk did not match deployed version. Use schema deploy for {schemaResponse.ViewHandle}, to update deploymentplan with versions on disk");
                 }
             }
 

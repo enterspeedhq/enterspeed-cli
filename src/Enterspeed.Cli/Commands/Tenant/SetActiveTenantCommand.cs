@@ -10,7 +10,7 @@ public class SetActiveTenantCommand : Command
 {
     public SetActiveTenantCommand() : base(name: "set", "Set the active tenant")
     {
-        AddArgument(new Argument<string>("id", "Id of the tenant") { });
+        AddArgument(new Argument<string>("id", "Id of the tenant") { Arity = ArgumentArity.ExactlyOne });
     }
 
     public new class Handler : BaseCommandHandler, ICommandHandler
@@ -37,7 +37,7 @@ public class SetActiveTenantCommand : Command
             }
             var tenants = tenantIds.Select(TenantId.Parse);
 
-            var activeTenant = tenants.FirstOrDefault(x => x.TenantGuid == Id);
+            var activeTenant = tenants.FirstOrDefault(x => x.IdValue == Id);
             if (activeTenant == null)
             {
                 _logger.LogError("Could not find tenant");
