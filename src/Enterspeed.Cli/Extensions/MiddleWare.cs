@@ -17,9 +17,9 @@ namespace Enterspeed.Cli.Extensions
                 var outPutStyleValue = context.ParseResult.GetValueForOption(outPutStyle);
 
                 var host = context.BindingContext.GetService<IHost>();
-                var apiKey = host?.Services.GetService<GlobalOptions>();
+                var globalOptions = host?.Services.GetService<GlobalOptions>();
 
-                apiKey?.Set(apiKeyValue, outPutStyleValue);
+                globalOptions?.Set(apiKeyValue, outPutStyleValue);
             };
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using Enterspeed.Cli.Domain;
 using Enterspeed.Cli.Services.FileService.Models;
 using Microsoft.Extensions.Logging;
 
@@ -73,16 +74,13 @@ namespace Enterspeed.Cli.Services.FileService
 
         public bool SchemaValid(string externalSchema, string schemaAlias)
         {
-            if (SchemaExists(schemaAlias))
+            if (!SchemaExists(schemaAlias))
             {
-                var local = GetSchemaContent(schemaAlias);
-
-                // TODO : Can we do this in a better way?
-                local = local.Replace("\n", "").Replace("\r", "").Replace(" ", "");
-                return local == externalSchema;
+                return false;
             }
-
-            return false;
+         
+            var localSchema = GetSchemaContent(schemaAlias);
+            return CompareSchemaContent(externalSchema, localSchema);
         }
 
         private void EnsureSchemaFolder()
@@ -114,6 +112,23 @@ namespace Enterspeed.Cli.Services.FileService
         private string GetFilePath(string alias)
         {
             return $"{SchemaDirectory}/{alias}.json";
+        }
+
+        private bool CompareSchemaContent(string schema1, string schema2)
+        {
+            var comparer = new JsonElementComparer();
+            try
+            {
+                using var doc1 = JsonDocument.Parse(schema1);
+                using var doc2 = JsonDocument.Parse(schema2);
+                return comparer.Equals(doc1.RootElement, doc2.RootElement);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Could not deserialize schema! {ex.Message}");
+            }
+
+            return false;
         }
     }
 }
