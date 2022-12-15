@@ -8,5 +8,5 @@ Lists and sets working tenant
 ## Commands
 |Command| |
 |---|---|
-|[es-cli tenant list]()  |List all tenants.   |
-|[es-cli tenant set]()   |Sets the current tenant by id.   |
+|[es-cli tenant list](#)  |List all tenants.   |
+|[es-cli tenant set](#)   |Sets the current tenant by id.   |

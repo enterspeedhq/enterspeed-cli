@@ -6,11 +6,11 @@ Manage domains for tenant.
 ## Commands
 |Command| |
 |---|---|
-|[es-cli domain list]()  |List all domains.   |
-|[es-cli domain get]()   |Get domain by id.   |
-|[es-cli domain create]()   |Create a new domain.   |
-|[es-cli domain update]()   |Update existing domain.  |
-|[es-cli domain delete]()   |Delete domain.  |
+|[es-cli domain list](#es-cli-domain-list)  |List all domains.   |
+|[es-cli domain get](#)   |Get domain by id.   |
+|[es-cli domain create](#)   |Create a new domain.   |
+|[es-cli domain update](#)   |Update existing domain.  |
+|[es-cli domain delete](#)   |Delete domain.  |
 
 
 ### es-cli domain list

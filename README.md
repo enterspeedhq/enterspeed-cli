@@ -23,6 +23,9 @@ $ es-cli login
 
 This will open a webbrowser, with a login page, where you can signin using your Enterspeed credentials. Once signed in you can close the browser window.
 
+If you have access to more than one tenant, use `es-cli tenant set` to switch active tenant. You can use `es-cli tenant list` to get a list of avalible tenants.
+
+
 #### API key  authentication:
 
 First you must generate a Management Client in the [Enterspeed dashboard](https://app.enterspeed.com/). Go to the _Settings_ tab and select _Management clients_, here you can create a new Management client, which will provide you with an API key. The API Key is only valid for the tenant on which it is created.
@@ -40,7 +43,8 @@ $ es-cli [ group ] [ command ] --apiKey <APIKey>
 
 ### CLI commands
 
->TODO: Global parameters
+
+[Global commands](docs/global-commands.md)
 
 [Tenants](docs/tenant-commands.md)
 
@@ -67,7 +71,7 @@ $ es-cli [ group ] [ command ] --apiKey <APIKey>
 
 The CLI logs everything to the file `<UserHome>\.enterspeed\cli.log.json`.
 
-To enable verbose logging in the console, use the ´--verbose´ global parameter.
+To enable verbose logging in the console, use the `--verbose` global parameter.
 
 
 #### Exit codes

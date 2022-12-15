@@ -6,4 +6,4 @@ Query sourceentities.
 ## Commands
 |Command| |
 |---|---|
-|[es-cli source-entity list]()  |Queries sourceentities.   |
+|[es-cli source-entity list](#)  |Queries sourceentities.   |
