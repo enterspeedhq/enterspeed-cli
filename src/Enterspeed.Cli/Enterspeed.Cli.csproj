@@ -8,7 +8,7 @@
     <Company>Enterspeed</Company>
     <Version>1.0.0-preview3</Version>
 	  
-	  <PublishSingleFile>true</PublishSingleFile>
+	  <!--<PublishSingleFile>true</PublishSingleFile>-->
 	  
 	  <AssemblyName>es-cli</AssemblyName>
   </PropertyGroup>

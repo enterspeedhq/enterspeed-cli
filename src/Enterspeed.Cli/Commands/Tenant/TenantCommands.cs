@@ -9,7 +9,9 @@ public static class TenantCommands
         var command = new Command("tenant", "Tenant")
         {
             new ListTenantsCommand(),
+            new CurrentTenantCommand(),
             new SetActiveTenantCommand()
+            
         };
         return command;
     }
