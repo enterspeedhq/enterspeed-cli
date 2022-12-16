@@ -2,7 +2,20 @@
 
 ## Installation
 
-Download binaries from the releases page, and include location of es-cli in your PATH.
+Download binaries from [releases](https://github.com/enterspeedhq/enterspeed-cli/releases), and include location of es-cli in your PATH.
+
+## Run on macOS
+To run the preview of the Enterspeed CLI on macOS you have to do the following:
+- Sign the binary: 
+```bash
+sudo codesign -f -s - --deep ~/bin/es-cli
+```
+- Try to run the binary. You will then prompted that the binary can't be opened
+- Go to System Settings > Privacy and Security
+- Click "Allow Anyway" under the Security section
+
+![macOS installation guide](docs/images/macOS-installation-guide1.png)
+![macOS installation guide](docs/images/macOS-installation-guide2.png)
 
 ## Usage
 
