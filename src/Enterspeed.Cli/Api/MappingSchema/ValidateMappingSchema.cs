@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Services.EnterspeedClient;
 using MediatR;

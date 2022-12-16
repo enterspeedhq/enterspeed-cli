@@ -15,8 +15,8 @@ namespace Enterspeed.Cli.Commands.Schema
     {
         public DeploySchemaCommand() : base("deploy", "Adds schema to deployment plan")
         {
-            AddArgument(new Argument<string>("schemaAlias", "Alias of the schema") { });
-            AddOption(new Option<string>(new[] { "--environment", "-e" }, "Alias of environment")
+            AddArgument(new Argument<string>("alias", "Alias of the schema") { });
+            AddOption(new Option<string>(new[] { "--environment", "-e" }, "Environment name")
             {
                 IsRequired = true
             });
@@ -44,7 +44,7 @@ namespace Enterspeed.Cli.Commands.Schema
                 _deploymentPlanFileService = deploymentPlanFileService;
             }
 
-            public string SchemaAlias { get; set; }
+            public string Alias { get; set; }
             public string Environment { get; set; }
 
             public async Task<int> InvokeAsync(InvocationContext context)
@@ -66,7 +66,7 @@ namespace Enterspeed.Cli.Commands.Schema
                 }
 
                 // Validate that schema on disk matches schema saved in Enterspeed.
-                var valid = _schemaFileService.SchemaValid(existingSchema.Version.Data, SchemaAlias);
+                var valid = _schemaFileService.SchemaValid(existingSchema.Version.Data, Alias);
                 if (!valid)
                 {
                     _logger.LogError("Schema on disk does not match schema in Enterspeed. Save your schema before deploying it.");
@@ -110,9 +110,9 @@ namespace Enterspeed.Cli.Commands.Schema
                     return 1;
                 }
 
-                _deploymentPlanFileService.UpdateDeploymentPlan(SchemaAlias, existingSchema.LatestVersion);
+                _deploymentPlanFileService.UpdateDeploymentPlan(Alias, existingSchema.LatestVersion);
 
-                _outputService.Write("Successfully deployed schema: " + SchemaAlias);
+                _outputService.Write("Successfully deployed schema: " + Alias);
 
                 return 0;
             }
@@ -150,7 +150,7 @@ namespace Enterspeed.Cli.Commands.Schema
             private async Task<MappingSchemaId> GetMappingSchemaGuid()
             {
                 var schemas = await _mediator.Send(new QueryMappingSchemasRequest());
-                var mappingSchemaGuid = schemas.FirstOrDefault(sc => sc.ViewHandle == SchemaAlias)?.Id;
+                var mappingSchemaGuid = schemas.FirstOrDefault(sc => sc.ViewHandle == Alias)?.Id;
                 return mappingSchemaGuid;
             }
         }
