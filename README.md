@@ -1,5 +1,9 @@
 # Enterspeed Management CLI
 
+Check out the [Enterspeed documention](https://docs.enterspeed.com/tooling/cli/overview) for help and guides on how to use the CLI. 
+
+Make sure to [contact](https://www.enterspeed.com/contact) us if you need any help. We're happy assist!
+
 ## Installation
 
 Download binaries from [releases](https://github.com/enterspeedhq/enterspeed-cli/releases), and include location of es-cli in your PATH.
