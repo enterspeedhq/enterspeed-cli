@@ -6,6 +6,7 @@ public interface ISchemaFileService
 {
     void CreateSchema(string alias, string content = null);
     SchemaBaseProperties GetSchema(string alias, string filePath = null);
+    IList<SchemaFile> GetAllSchemas();
     bool SchemaExists(string alias);
     bool SchemaValid(string externalSchema, string schemaAlias);
 }
