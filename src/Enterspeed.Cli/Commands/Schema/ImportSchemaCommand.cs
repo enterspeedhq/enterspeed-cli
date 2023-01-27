@@ -70,6 +70,7 @@ internal class ImportSchemaCommand : Command
             if (failedImports > 0)
             {
                 _outputService.Write($"Failed to imported {failedImports} schema(s).");
+                return 1;
             }
 
             return 0;
