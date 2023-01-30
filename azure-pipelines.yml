@@ -78,11 +78,11 @@ pr:
 stages:
   - stage: Build
     displayName: Build
+    pool:
+      vmImage: $(vmPool)
     jobs:
       - job: BuildPlatform
         displayName: Build Platform
-        pool:
-          vmImage: $(vmPool)
 
         steps:
           - task: DotNetCoreCLI@2
@@ -190,15 +190,6 @@ stages:
               targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-arm64.gz"
               artifact: 'es-cli_$(semVersion)_osx-arm64'
 
-          # - task: DotNetCoreCLI@2
-          #   displayName: 'dotnet publish'
-          #   inputs:
-          #     command: 'publish'
-          #     publishWebProjects: false
-          #     projects: '**/*.csproj'
-          #     arguments: '-o $(Build.ArtifactStagingDirectory)/Output'
-          #     modifyOutputPath: true
-
   - stage: ReleaseOnGithub
     displayName: Release on Github
     condition: and(succeeded(), eq(variables.releaseOnGithub, 'true'))
@@ -215,12 +206,6 @@ stages:
               downloadType: 'specific'
               downloadPath: '$(System.ArtifactsDirectory)'
               cleanDestinationFolder: true
-
-          - task: PowerShell@2
-            displayName: List file - $(System.ArtifactsDirectory)
-            inputs:
-              targetType: 'inline'
-              script: 'Get-ChildItem -Path $(System.ArtifactsDirectory) –Recurse'
 
           - task: GitHubRelease@1
             inputs:
