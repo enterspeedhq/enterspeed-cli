@@ -61,47 +61,47 @@ stages:
               targetPath: "$(Pipeline.Workspace)/Output/win-x64"
               artifact: 'es-cli_$(semVersion)_win-x64.zip'
 
-          - task: DotNetCoreCLI@2
-            displayName: Dotnet publish linux-x64
-            inputs:
-              command: 'publish'
-              publishWebProjects: false
-              projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
-              arguments: '-c Release -r linux-x64 -p:PublishReadyToRun=true --self-contained -o $(Pipeline.Workspace)/Output/linux-x64'
+          # - task: DotNetCoreCLI@2
+          #   displayName: Dotnet publish linux-x64
+          #   inputs:
+          #     command: 'publish'
+          #     publishWebProjects: false
+          #     projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
+          #     arguments: '-c Release -r linux-x64 -p:PublishReadyToRun=true --self-contained -o $(Pipeline.Workspace)/Output/linux-x64'
 
-          - task: PublishPipelineArtifact@1
-            displayName: Publish artifact - linux-x64
-            inputs:
-              targetPath: "$(Pipeline.Workspace)/Output/linux-x64"
-              artifact: 'es-cli_$(semVersion)-linux-x64.gz'
+          # - task: PublishPipelineArtifact@1
+          #   displayName: Publish artifact - linux-x64
+          #   inputs:
+          #     targetPath: "$(Pipeline.Workspace)/Output/linux-x64"
+          #     artifact: 'es-cli_$(semVersion)-linux-x64.gz'
 
-          - task: DotNetCoreCLI@2
-            displayName: Dotnet publish osx-x64
-            inputs:
-              command: 'publish'
-              publishWebProjects: false
-              projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
-              arguments: '-c Release -r osx-x64 -p:PublishReadyToRun=true --self-contained -o $(Pipeline.Workspace)/Output/osx-x64'
+          # - task: DotNetCoreCLI@2
+          #   displayName: Dotnet publish osx-x64
+          #   inputs:
+          #     command: 'publish'
+          #     publishWebProjects: false
+          #     projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
+          #     arguments: '-c Release -r osx-x64 -p:PublishReadyToRun=true --self-contained -o $(Pipeline.Workspace)/Output/osx-x64'
 
-          - task: PublishPipelineArtifact@1
-            displayName: Publish artifact - osx-x64
-            inputs:
-              targetPath: "$(Pipeline.Workspace)/Output/osx-x64"
-              artifact: 'es-cli_$(semVersion)osx-x64.gz'
+          # - task: PublishPipelineArtifact@1
+          #   displayName: Publish artifact - osx-x64
+          #   inputs:
+          #     targetPath: "$(Pipeline.Workspace)/Output/osx-x64"
+          #     artifact: 'es-cli_$(semVersion)osx-x64.gz'
 
-          - task: DotNetCoreCLI@2
-            displayName: Dotnet publish osx-arm64
-            inputs:
-              command: 'publish'
-              publishWebProjects: false
-              projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
-              arguments: '-c Release -r osx-arm64 -p:PublishReadyToRun=true --self-contained -o $(Pipeline.Workspace)/Output/osx-arm64'
+          # - task: DotNetCoreCLI@2
+          #   displayName: Dotnet publish osx-arm64
+          #   inputs:
+          #     command: 'publish'
+          #     publishWebProjects: false
+          #     projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
+          #     arguments: '-c Release -r osx-arm64 -p:PublishReadyToRun=true --self-contained -o $(Pipeline.Workspace)/Output/osx-arm64'
 
-          - task: PublishPipelineArtifact@1
-            displayName: Publish artifact - osx-arm64
-            inputs:
-              targetPath: "$(Pipeline.Workspace)/Output/osx-arm64"
-              artifact: 'es-cli_$(semVersion)osx-arm64.gz'
+          # - task: PublishPipelineArtifact@1
+          #   displayName: Publish artifact - osx-arm64
+          #   inputs:
+          #     targetPath: "$(Pipeline.Workspace)/Output/osx-arm64"
+          #     artifact: 'es-cli_$(semVersion)osx-arm64.gz'
 
           - task: DotNetCoreCLI@2
             displayName: 'dotnet publish'
@@ -136,7 +136,9 @@ stages:
               #releaseNotesInline: # string. Optional. Use when releaseNotesSource = inline. Release notes. 
               assets: |
                 $(Pipeline.Workspace)/*
-                $(Pipeline.Workspace)/Output/win-x64/*
+                $(Pipeline.Workspace)\Output\win-x64\*
+                $(Pipeline.Workspace)\Output\win-x64\
+                $(Pipeline.Workspace)\Output\win-x64
                 $(Pipeline.Workspace)/Output/linux-x64/*
                 $(Pipeline.Workspace)/Output/osx-x64/*
                 $(Pipeline.Workspace)/Output/osx-arm64/*
