@@ -47,7 +47,7 @@ stages:
               arguments: '-o $(Build.ArtifactStagingDirectory)/Output'
               modifyOutputPath: true
 
-  - stage: Release on Github
+  - stage: ReleaseOnGithub
     displayName: Release on Github
     jobs:
       - job:
