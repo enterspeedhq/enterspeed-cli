@@ -10,7 +10,7 @@ namespace Enterspeed.Cli.Services.FileService
     {
         private readonly ILogger<SchemaFileService> _logger;
         private const string SchemaDirectory = "schemas";
-        public static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
+        public static readonly JsonSerializerOptions SerializerOptions = new()
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
@@ -42,8 +42,7 @@ namespace Enterspeed.Cli.Services.FileService
 
         private void CreateEmptySchema(string alias)
         {
-            // Create empty schema
-            CreateSchema(alias, new SchemaBaseProperties()
+            CreateSchema(alias, new SchemaBaseProperties
             {
                 Properties = new(),
                 Triggers = new()
@@ -72,6 +71,22 @@ namespace Enterspeed.Cli.Services.FileService
             return JsonSerializer.Deserialize<SchemaBaseProperties>(schemaFile, SerializerOptions);
         }
 
+        public IList<SchemaFile> GetAllSchemas()
+        {
+            EnsureSchemaFolder();
+            
+            var filePaths = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), SchemaDirectory));
+            
+            return filePaths.Select(filePath =>
+            {
+                var alias = GetAliasFromFilePath(filePath);
+                var schemaBaseProperties = GetSchema(alias, filePath);
+
+                return new SchemaFile(alias, schemaBaseProperties);
+            })
+            .ToList();
+        }
+
         public bool SchemaValid(string externalSchema, string schemaAlias)
         {
             if (!SchemaExists(schemaAlias))
@@ -83,7 +98,13 @@ namespace Enterspeed.Cli.Services.FileService
             return CompareSchemaContent(externalSchema, localSchema);
         }
 
-        private void EnsureSchemaFolder()
+        public bool SchemaExists(string alias)
+        {
+            var schemaFilePath = GetFilePath(alias);
+            return File.Exists(Path.Combine(Directory.GetCurrentDirectory(), schemaFilePath));
+        }
+
+        private static void EnsureSchemaFolder()
         {
             if (!Directory.Exists(SchemaDirectory))
             {
@@ -91,27 +112,26 @@ namespace Enterspeed.Cli.Services.FileService
             }
         }
 
-        public bool SchemaExists(string alias)
-        {
-            var schemaFilePath = GetFilePath(alias);
-            return File.Exists(Path.Combine(Directory.GetCurrentDirectory(), schemaFilePath));
-        }
-
-        private void DeleteSchema(string alias)
+        private static void DeleteSchema(string alias)
         {
             var schemaFilePath = GetFilePath(alias);
             File.Delete(schemaFilePath);
         }
 
-        private string GetSchemaContent(string alias, string filePath = null)
+        private static string GetSchemaContent(string alias, string filePath = null)
         {
             var schemaFilePath = filePath ?? GetFilePath(alias);
             return File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), schemaFilePath));
         }
 
-        private string GetFilePath(string alias)
+        private static string GetFilePath(string alias)
         {
             return $"{SchemaDirectory}/{alias}.json";
+        }
+
+        private static string GetAliasFromFilePath(string filePath)
+        {
+            return Path.GetFileNameWithoutExtension(filePath);
         }
 
         private bool CompareSchemaContent(string schema1, string schema2)
