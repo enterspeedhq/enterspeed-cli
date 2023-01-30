@@ -53,21 +53,21 @@ stages:
               command: 'publish'
               publishWebProjects: false
               projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
-              arguments: '-c Release -r win-x64 -p:PublishReadyToRun=true --self-contained -o $(Pipeline.Workspace)/Output/win-x64'
+              arguments: '-c Release -r win-x64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output/win-x64'
               zipAfterPublish: false
               modifyOutputPath: false
 
           - task: PublishPipelineArtifact@1
             displayName: Publish artifact - win-x64
             inputs:
-              targetPath: "$(Pipeline.Workspace)/Output/win-x64"
+              targetPath: "$(Build.ArtifactStagingDirectory)/Output/win-x64"
               artifact: 'es-cli_$(semVersion)_win-x64.zip'
 
           - task: PowerShell@2
-            displayName: List file - $(Pipeline.Workspace)
+            displayName: List file - $(Build.ArtifactStagingDirectory)
             inputs:
               targetType: 'inline'
-              script: 'Get-ChildItem -Path $(Pipeline.Workspace) –Recurse'
+              script: 'Get-ChildItem -Path $(Build.ArtifactStagingDirectory) –Recurse'
 
           - task: PowerShell@2
             displayName: List file - $(Build.ArtifactStagingDirectory)
