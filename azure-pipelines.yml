@@ -49,7 +49,7 @@ stages:
 
           # Publish win-x64
           - task: DotNetCoreCLI@2
-            displayName: Dotnet publish win-x64
+            displayName: Dotnet publish - win-x64
             inputs:
               command: 'publish'
               publishWebProjects: false
@@ -66,24 +66,29 @@ stages:
 
           # Publish linux-x64
           - task: DotNetCoreCLI@2
-            displayName: Dotnet publish linux-x64
+            displayName: Dotnet publish - linux-x64
             inputs:
               command: 'publish'
               publishWebProjects: false
               projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
               arguments: '-c Release -r linux-x64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64'
-              zipAfterPublish: true
+              zipAfterPublish: false
               modifyOutputPath: false
+            
+          - task: PowerShell@2
+            inputs:
+              targetType: 'inline'
+              script: '& 7z.exe a -tgzip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64 $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64/es-cli'
 
           - task: PublishPipelineArtifact@1
             displayName: Publish artifact - linux-x64
             inputs:
-              targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64"
+              targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64/es-cli_$(semVersion)_linux-x64.gz"
               artifact: 'es-cli_$(semVersion)-linux-x64'
 
           # Publish osx-x64
           - task: DotNetCoreCLI@2
-            displayName: Dotnet publish osx-x64
+            displayName: Dotnet publish - osx-x64
             inputs:
               command: 'publish'
               publishWebProjects: false
@@ -100,7 +105,7 @@ stages:
 
           # Publish osx-arm64
           - task: DotNetCoreCLI@2
-            displayName: Dotnet publish osx-arm64
+            displayName: Dotnet publish - osx-arm64
             inputs:
               command: 'publish'
               publishWebProjects: false
