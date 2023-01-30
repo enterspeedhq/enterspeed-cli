@@ -67,7 +67,7 @@ stages:
         steps:
           - task: GitHubRelease@1
             inputs:
-              gitHubConnection: # string. Required. GitHub connection (OAuth or PAT). 
+              gitHubConnection: GithubReleaseCli 
               repositoryName: '$(Build.Repository.Name)'
               action: 'create'
               #target: '$(Build.SourceVersion)' # string. Required when action = create || action = edit. Target. Default: $(Build.SourceVersion).
