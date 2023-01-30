@@ -135,10 +135,14 @@ stages:
               #releaseNotesFilePath: # string. Optional. Use when releaseNotesSource = filePath. Release notes file path. 
               #releaseNotesInline: # string. Optional. Use when releaseNotesSource = inline. Release notes. 
               assets: |
-                $(Pipeline.Workspace)/*
-                $(Pipeline.Workspace)\Output\win-x64\*
-                $(Pipeline.Workspace)\Output\win-x64\
-                $(Pipeline.Workspace)\Output\win-x64
+                $(Build.ArtifactStagingDirectory)/*
+                $(Build.ArtifactStagingDirectory)/Output/win-x64/*
+                $(Build.ArtifactStagingDirectory)/Output/win-x64/
+                $(Build.ArtifactStagingDirectory)/Output/win-x64
+                $(Build.ArtifactStagingDirectory)\*
+                $(Build.ArtifactStagingDirectory)\Output\win-x64\*
+                $(Build.ArtifactStagingDirectory)\Output\win-x64\
+                $(Build.ArtifactStagingDirectory)\Output\win-x64
                 $(Pipeline.Workspace)/Output/linux-x64/*
                 $(Pipeline.Workspace)/Output/osx-x64/*
                 $(Pipeline.Workspace)/Output/osx-arm64/*
