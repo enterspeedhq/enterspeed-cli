@@ -97,7 +97,7 @@ stages:
               command: test
               arguments: '--no-build --configuration Release'
 
-      - job: PublishWin-x64Artifact
+      - job: PublishWinx64Artifact
         displayName: Publish win-x64 artifact
         steps:
         
@@ -123,7 +123,7 @@ stages:
               targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64.zip"
               artifact: 'es-cli_$(semVersion)_win-x64'
 
-      - job: PublishLinux-x64Artifact
+      - job: PublishLinuxx64Artifact
         displayName: Publish linux-x64 artifact
         steps:
           - task: DotNetCoreCLI@2
@@ -148,7 +148,7 @@ stages:
               targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64.gz"
               artifact: 'es-cli_$(semVersion)_linux-x64'
 
-      - job: PublishOsx-x64Artifact
+      - job: PublishOsxx64Artifact
         displayName: Publish osx-x64 artifact
         steps:
           - task: DotNetCoreCLI@2
@@ -173,7 +173,7 @@ stages:
               targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-x64.gz"
               artifact: 'es-cli_$(semVersion)_osx-x64'
 
-      - job: PublishOsx-arm64Artifact
+      - job: PublishOsxarm64Artifact
         displayName: Publish osx-arm64 artifact
         steps:
           - task: DotNetCoreCLI@2
