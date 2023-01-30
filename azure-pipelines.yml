@@ -64,10 +64,10 @@ stages:
               artifact: 'es-cli_$(semVersion)_win-x64.zip'
 
           - task: PowerShell@2
-            displayName: List file - $(Build.ArtifactStagingDirectory)
+            displayName: List file - $(Pipeline.Workspace)
             inputs:
               targetType: 'inline'
-              script: 'Get-ChildItem -Path $(Build.ArtifactStagingDirectory) –Recurse'
+              script: 'Get-ChildItem -Path $(Pipeline.Workspace) –Recurse'
 
           - task: PowerShell@2
             displayName: List file - $(Build.ArtifactStagingDirectory)
@@ -134,6 +134,12 @@ stages:
           vmImage: $(vmPool)
         
         steps:
+          - task: DownloadBuildArtifacts@1
+            inputs:
+              buildType: 'current'
+              downloadType: 'specific'
+              downloadPath: '$(System.ArtifactsDirectory)'
+              cleanDestinationFolder: true
           - task: PowerShell@2
             displayName: List file - $(Pipeline.Workspace)
             inputs:
@@ -145,6 +151,12 @@ stages:
             inputs:
               targetType: 'inline'
               script: 'Get-ChildItem -Path $(Build.ArtifactStagingDirectory) –Recurse'
+
+          - task: PowerShell@2
+            displayName: List file - $(System.ArtifactsDirectory)
+            inputs:
+              targetType: 'inline'
+              script: 'Get-ChildItem -Path $(System.ArtifactsDirectory) –Recurse'
 
           - task: GitHubRelease@1
             inputs:
