@@ -55,13 +55,19 @@ stages:
               publishWebProjects: false
               projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
               arguments: '-c Release -r win-x64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64'
-              zipAfterPublish: true
+              zipAfterPublish: false
               modifyOutputPath: false
+            
+          - task: PowerShell@2
+            displayName: zip - win-x64
+            inputs:
+              targetType: 'inline'
+              script: '& 7z.exe a -tzip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64.zip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64/es-cli.exe'
 
           - task: PublishPipelineArtifact@1
             displayName: Publish artifact - win-x64
             inputs:
-              targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64"
+              targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64.zip"
               artifact: 'es-cli_$(semVersion)_win-x64'
 
           # Publish linux-x64
@@ -76,15 +82,16 @@ stages:
               modifyOutputPath: false
             
           - task: PowerShell@2
+            displayName: gzip - linux-x64
             inputs:
               targetType: 'inline'
-              script: '& 7z.exe a -tgzip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64/es-cli_$(semVersion)_linux-x64.gz $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64/es-cli'
+              script: '& 7z.exe a -tgzip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64.gz $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64/es-cli'
 
           - task: PublishPipelineArtifact@1
             displayName: Publish artifact - linux-x64
             inputs:
-              targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64/es-cli_$(semVersion)_linux-x64.gz"
-              artifact: 'es-cli_$(semVersion)-linux-x64'
+              targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64.gz"
+              artifact: 'es-cli_$(semVersion)_linux-x64'
 
           # Publish osx-x64
           - task: DotNetCoreCLI@2
@@ -94,14 +101,20 @@ stages:
               publishWebProjects: false
               projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
               arguments: '-c Release -r osx-x64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-x64'
-              zipAfterPublish: true
+              zipAfterPublish: false
               modifyOutputPath: false
+            
+          - task: PowerShell@2
+            displayName: gzip - osx-x64
+            inputs:
+              targetType: 'inline'
+              script: '& 7z.exe a -tgzip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-x64.gz $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-x64/es-cli'
 
           - task: PublishPipelineArtifact@1
             displayName: Publish artifact - osx-x64
             inputs:
-              targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-x64"
-              artifact: 'es-cli_$(semVersion)osx-x64'
+              targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-x64.gz"
+              artifact: 'es-cli_$(semVersion)_osx-x64'
 
           # Publish osx-arm64
           - task: DotNetCoreCLI@2
@@ -111,14 +124,20 @@ stages:
               publishWebProjects: false
               projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
               arguments: '-c Release -r osx-arm64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-arm64'
-              zipAfterPublish: true
+              zipAfterPublish: false
               modifyOutputPath: false
+            
+          - task: PowerShell@2
+            displayName: gzip - osx-arm64
+            inputs:
+              targetType: 'inline'
+              script: '& 7z.exe a -tgzip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-arm64.gz $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-arm64/es-cli'
 
           - task: PublishPipelineArtifact@1
             displayName: Publish artifact - osx-arm64
             inputs:
-              targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-arm64"
-              artifact: 'es-cli_$(semVersion)osx-arm64'
+              targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-arm64.gz"
+              artifact: 'es-cli_$(semVersion)_osx-arm64'
 
           - task: PowerShell@2
             displayName: List file - $(Build.ArtifactStagingDirectory)
