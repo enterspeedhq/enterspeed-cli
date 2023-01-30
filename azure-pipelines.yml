@@ -48,6 +48,38 @@ stages:
               arguments: '--no-build --configuration Release'
 
           - task: DotNetCoreCLI@2
+            displayName: Dotnet publish win-x64
+            inputs:
+              command: 'publish'
+              publishWebProjects: false
+              projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
+              arguments: '-c Release -r win-x64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output'
+
+          - task: DotNetCoreCLI@2
+            displayName: Dotnet publish linux-x64
+            inputs:
+              command: 'publish'
+              publishWebProjects: false
+              projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
+              arguments: '-c Release -r linux-x64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output'
+
+          - task: DotNetCoreCLI@2
+            displayName: Dotnet publish osx-x64
+            inputs:
+              command: 'publish'
+              publishWebProjects: false
+              projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
+              arguments: '-c Release -r osx-x64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output'
+
+          - task: DotNetCoreCLI@2
+            displayName: Dotnet publish osx-arm64
+            inputs:
+              command: 'publish'
+              publishWebProjects: false
+              projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
+              arguments: '-c Release -r osx-arm64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output'
+
+          - task: DotNetCoreCLI@2
             displayName: 'dotnet publish'
             inputs:
               command: 'publish'
