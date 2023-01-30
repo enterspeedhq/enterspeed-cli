@@ -53,14 +53,14 @@ stages:
               command: 'publish'
               publishWebProjects: false
               projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
-              arguments: '-c Release -r win-x64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output/win-x64'
+              arguments: '-c Release -r win-x64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64'
               zipAfterPublish: true
               modifyOutputPath: false
 
           - task: PublishPipelineArtifact@1
             displayName: Publish artifact - win-x64
             inputs:
-              targetPath: "$(Build.ArtifactStagingDirectory)/Output/win-x64"
+              targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64"
               artifact: 'es-cli_$(semVersion)_win-x64'
 
           - task: PowerShell@2
