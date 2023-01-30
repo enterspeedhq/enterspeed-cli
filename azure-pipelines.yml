@@ -83,7 +83,6 @@ stages:
     jobs:
       - job: BuildPlatform
         displayName: Build Platform
-
         steps:
           - task: DotNetCoreCLI@2
             displayName: Dotnet build
@@ -98,7 +97,10 @@ stages:
               command: test
               arguments: '--no-build --configuration Release'
 
-          # Publish win-x64
+      - job: PublishWin-x64Artifact
+        displayName: Publish win-x64 artifact
+        steps:
+        
           - task: DotNetCoreCLI@2
             displayName: win-x64 - Dotnet publish
             inputs:
@@ -121,7 +123,9 @@ stages:
               targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64.zip"
               artifact: 'es-cli_$(semVersion)_win-x64'
 
-          # Publish linux-x64
+      - job: PublishLinux-x64Artifact
+        displayName: Publish linux-x64 artifact
+        steps:
           - task: DotNetCoreCLI@2
             displayName: linux-x64 - Dotnet publish
             inputs:
@@ -144,7 +148,9 @@ stages:
               targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64.gz"
               artifact: 'es-cli_$(semVersion)_linux-x64'
 
-          # Publish osx-x64
+      - job: PublishOsx-x64Artifact
+        displayName: Publish osx-x64 artifact
+        steps:
           - task: DotNetCoreCLI@2
             displayName: osx-x64 - Dotnet publish
             inputs:
@@ -167,7 +173,9 @@ stages:
               targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-x64.gz"
               artifact: 'es-cli_$(semVersion)_osx-x64'
 
-          # Publish osx-arm64
+      - job: PublishOsx-arm64Artifact
+        displayName: Publish osx-arm64 artifact
+        steps:
           - task: DotNetCoreCLI@2
             displayName: osx-arm64 - Dotnet publish
             inputs:
@@ -192,12 +200,12 @@ stages:
 
   - stage: ReleaseOnGithub
     displayName: Release on Github
+    pool:
+      vmImage: $(vmPool)
     condition: and(succeeded(), eq(variables.releaseOnGithub, 'true'))
     jobs:
       - job:
         displayName: Create release on Github
-        pool:
-          vmImage: $(vmPool)
         
         steps:
           - task: DownloadBuildArtifacts@1
