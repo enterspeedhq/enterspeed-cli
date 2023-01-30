@@ -48,10 +48,10 @@ stages:
               modifyOutputPath: true
 
   - stage: Release on Github
-    displayname: 
+    displayName: Release on Github
     jobs:
       - job:
-        displayname: 
+        displayName: Create release on Github
         pool:
           vmImage: $(vmPool)
         
