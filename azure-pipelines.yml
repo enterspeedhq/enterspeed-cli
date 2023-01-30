@@ -89,7 +89,7 @@ stages:
           - task: PublishPipelineArtifact@1
             displayName: Publish artifact - win-x64
             inputs:
-              targetPath: "$(Pipeline.Workspace)/Output/win-x64/*"
+              targetPath: "$(Pipeline.Workspace)/Output/win-x64"
               artifact: 'es-cli_$(semVersion)-preview4_win-x64.zip'
 
           - task: DotNetCoreCLI@2
