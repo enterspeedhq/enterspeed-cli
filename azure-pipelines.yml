@@ -7,9 +7,44 @@ variables:
   version: $[format('{0}.{1}.{2}', variables.majorVersion, variables.minorVersion, variables.patchVersion)]
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
     # Versioning: 1.0.0
-    releaseOnNuget: true
+    releaseOnGithub: true
     semVersion: $[format('{0}', variables.version)]
     buildName: $[format('{0}', variables.semVersion)]
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/develop') }}:
+    # Versioning: 1.0.0-develop.123
+    releaseOnGithub: false
+    semVersionBase: $[format('{0}-develop', variables.version)]
+    semVersionRev: $[counter(variables.semVersionBase, 0)]
+    semVersion: $[format('{0}.{1}', variables.semVersionBase, variables.semVersionRev)]
+    buildName: $[format('Develop - {0}', variables.semVersion)]
+  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/release/') }}:
+    # Versioning: 1.0.0-alpha.branch.123
+    releaseOnGithub: false
+    semVersionBase: $[format('{0}-alpha.{1}', variables.version, variables['Build.SourceBranchName'])]
+    semVersionRev: $[counter(variables.semVersionBase, 0)]
+    semVersion: $[format('{0}.{1}', variables.semVersionBase, variables.semVersionRev)]
+    buildName: $[format('Release - {0}', variables.semVersion)]
+  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/') }}:
+    # Versioning: 1.0.0-feature.branch.123
+    releaseOnGithub: false
+    semVersionBase: $[format('{0}-feature.{1}', variables.version, variables['Build.SourceBranchName'])]
+    semVersionRev: $[counter(variables.semVersionBase, 0)]
+    semVersion: $[format('{0}.{1}', variables.semVersionBase, variables.semVersionRev)]
+    buildName: $[format('Feature - {0}', variables.semVersion)]
+  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/pull/') }}: # Pull requests
+    # Versioning: 1.0.0-pr.1.123
+    releaseOnGithub: false
+    semVersionBase: $[format('{0}-pr.{1}', variables.version, variables['System.PullRequest.PullRequestId'])]
+    semVersionRev: $[counter(variables.semVersionBase, 0)]
+    semVersion: $[format('{0}.{1}', variables.semVersionBase, variables.semVersionRev)]
+    buildName: $[format('Pull Request - {0}', variables.semVersion)]
+  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/bugfix/') }}:
+    # Versioning: 1.0.0-bugfix.branch.123
+    releaseOnGithub: false
+    semVersionBase: $[format('{0}-bugfix.{1}', variables.version, variables['Build.SourceBranchName'])]
+    semVersionRev: $[counter(variables.semVersionBase, 0)]
+    semVersion: $[format('{0}.{1}', variables.semVersionBase, variables.semVersionRev)]
+    buildName: $[format('Bugfix - {0}', variables.semVersion)]
 
 name: $(BuildID) - $(buildName)
 
@@ -17,12 +52,28 @@ trigger:
   branches:
     include:
       - master
+      - develop
+      - release/*
+      - feature/*
+      - bugfix/*
+      - hotfix/*
   paths:
     exclude:
       - README.md
       - CHANGELOG.md
       - docs/*
 
+pr:
+  branches:
+    include:
+      - master
+      - develop
+      - release/*
+  paths:
+    exclude:
+      - README.md
+      - CHANGELOG.md
+      - docs/*
       
 stages:
   - stage: Build
@@ -49,7 +100,7 @@ stages:
 
           # Publish win-x64
           - task: DotNetCoreCLI@2
-            displayName: Dotnet publish - win-x64
+            displayName: win-x64 - Dotnet publish
             inputs:
               command: 'publish'
               publishWebProjects: false
@@ -59,20 +110,20 @@ stages:
               modifyOutputPath: false
             
           - task: PowerShell@2
-            displayName: zip - win-x64
+            displayName: win-x64 - zip
             inputs:
               targetType: 'inline'
               script: '& 7z.exe a -tzip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64.zip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64/es-cli.exe'
 
           - task: PublishPipelineArtifact@1
-            displayName: Publish artifact - win-x64
+            displayName: win-x64 - Publish artifact
             inputs:
               targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64.zip"
               artifact: 'es-cli_$(semVersion)_win-x64'
 
           # Publish linux-x64
           - task: DotNetCoreCLI@2
-            displayName: Dotnet publish - linux-x64
+            displayName: linux-x64 - Dotnet publish
             inputs:
               command: 'publish'
               publishWebProjects: false
@@ -82,20 +133,20 @@ stages:
               modifyOutputPath: false
             
           - task: PowerShell@2
-            displayName: gzip - linux-x64
+            displayName: linux-x64 - gzip
             inputs:
               targetType: 'inline'
               script: '& 7z.exe a -tgzip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64.gz $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64/es-cli'
 
           - task: PublishPipelineArtifact@1
-            displayName: Publish artifact - linux-x64
+            displayName: linux-x64 - Publish artifact
             inputs:
               targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64.gz"
               artifact: 'es-cli_$(semVersion)_linux-x64'
 
           # Publish osx-x64
           - task: DotNetCoreCLI@2
-            displayName: Dotnet publish - osx-x64
+            displayName: osx-x64 - Dotnet publish
             inputs:
               command: 'publish'
               publishWebProjects: false
@@ -105,20 +156,20 @@ stages:
               modifyOutputPath: false
             
           - task: PowerShell@2
-            displayName: gzip - osx-x64
+            displayName: osx-x64 - gzip
             inputs:
               targetType: 'inline'
               script: '& 7z.exe a -tgzip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-x64.gz $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-x64/es-cli'
 
           - task: PublishPipelineArtifact@1
-            displayName: Publish artifact - osx-x64
+            displayName: osx-x64 - Publish artifact
             inputs:
               targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-x64.gz"
               artifact: 'es-cli_$(semVersion)_osx-x64'
 
           # Publish osx-arm64
           - task: DotNetCoreCLI@2
-            displayName: Dotnet publish - osx-arm64
+            displayName: osx-arm64 - Dotnet publish
             inputs:
               command: 'publish'
               publishWebProjects: false
@@ -128,34 +179,29 @@ stages:
               modifyOutputPath: false
             
           - task: PowerShell@2
-            displayName: gzip - osx-arm64
+            displayName: osx-arm64 - gzip
             inputs:
               targetType: 'inline'
               script: '& 7z.exe a -tgzip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-arm64.gz $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-arm64/es-cli'
 
           - task: PublishPipelineArtifact@1
-            displayName: Publish artifact - osx-arm64
+            displayName: osx-arm64 - Publish artifact
             inputs:
               targetPath: "$(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-arm64.gz"
               artifact: 'es-cli_$(semVersion)_osx-arm64'
 
-          - task: PowerShell@2
-            displayName: List file - $(Build.ArtifactStagingDirectory)
-            inputs:
-              targetType: 'inline'
-              script: 'Get-ChildItem -Path $(Build.ArtifactStagingDirectory) –Recurse'
-
-          - task: DotNetCoreCLI@2
-            displayName: 'dotnet publish'
-            inputs:
-              command: 'publish'
-              publishWebProjects: false
-              projects: '**/*.csproj'
-              arguments: '-o $(Build.ArtifactStagingDirectory)/Output'
-              modifyOutputPath: true
+          # - task: DotNetCoreCLI@2
+          #   displayName: 'dotnet publish'
+          #   inputs:
+          #     command: 'publish'
+          #     publishWebProjects: false
+          #     projects: '**/*.csproj'
+          #     arguments: '-o $(Build.ArtifactStagingDirectory)/Output'
+          #     modifyOutputPath: true
 
   - stage: ReleaseOnGithub
     displayName: Release on Github
+    condition: and(succeeded(), eq(variables.releaseOnGithub, 'true'))
     jobs:
       - job:
         displayName: Create release on Github
@@ -189,12 +235,7 @@ stages:
               #releaseNotesSource: 'filePath' # 'filePath' | 'inline'. Optional. Use when action = create || action = edit. Release notes source. Default: filePath.
               #releaseNotesFilePath: # string. Optional. Use when releaseNotesSource = filePath. Release notes file path. 
               #releaseNotesInline: # string. Optional. Use when releaseNotesSource = inline. Release notes. 
-              assets: |
-                $(System.ArtifactsDirectory)/**
-                $(System.ArtifactsDirectory)/es-cli_$(semVersion)_win-x64/*
-                $(System.ArtifactsDirectory)/es-cli_$(semVersion)_linux-x64/*
-                $(System.ArtifactsDirectory)/es-cli_$(semVersion)_osx-x64/*
-                $(System.ArtifactsDirectory)/es-cli_$(semVersion)_osx-arm64/*
+              assets: '$(System.ArtifactsDirectory)/**'
               #assetUploadMode: 'delete' # 'delete' | 'replace'. Optional. Use when action = edit. Asset upload mode. Default: delete.
               #isDraft: false # boolean. Optional. Use when action = create || action = edit. Draft release. Default: false.
               #isPreRelease: false # boolean. Optional. Use when action = create || action = edit. Pre-release. Default: false.
