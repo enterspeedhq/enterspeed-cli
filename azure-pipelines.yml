@@ -25,7 +25,7 @@ stages:
           vmImage: $(vmPool)
 
         steps:
-           - task: DotNetCoreCLI@2
+          - task: DotNetCoreCLI@2
             displayName: Dotnet build
             inputs:
               command: build
