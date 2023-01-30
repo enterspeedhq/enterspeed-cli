@@ -41,12 +41,6 @@ stages:
               projects: 'Enterspeed.Cli.sln'
               arguments: '--configuration Release /p:Version=$(semVersion)'
 
-          - task: PublishBuildArtifacts@1
-            inputs:
-              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-              ArtifactName: 'es-cli_$(semVersion)-preview4_win-x64.zip'
-              publishLocation: 'Container'
-
           - task: DotNetCoreCLI@2
             displayName: Dotnet test
             inputs:
@@ -85,7 +79,11 @@ stages:
               projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
               arguments: '-c Release -r osx-arm64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output/osx-arm64'
 
-          
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)/Output/win-x64/*'
+              ArtifactName: 'es-cli_$(semVersion)-preview4_win-x64.zip'
+              publishLocation: 'Container'
 
           - task: DotNetCoreCLI@2
             displayName: 'dotnet publish'
@@ -119,6 +117,7 @@ stages:
               #releaseNotesFilePath: # string. Optional. Use when releaseNotesSource = filePath. Release notes file path. 
               #releaseNotesInline: # string. Optional. Use when releaseNotesSource = inline. Release notes. 
               assets: |
+                $(Build.ArtifactStagingDirectory)/*
                 $(Build.ArtifactStagingDirectory)/Output/win-x64/*
                 $(Build.ArtifactStagingDirectory)/Output/linux-x64/*
                 $(Build.ArtifactStagingDirectory)/Output/osx-x64/*
