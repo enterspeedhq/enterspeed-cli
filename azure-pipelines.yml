@@ -99,6 +99,7 @@ stages:
 
       - job: PublishWinx64Artifact
         displayName: Publish win-x64 artifact
+        dependsOn: BuildPlatform
         steps:
         
           - task: DotNetCoreCLI@2
@@ -125,6 +126,7 @@ stages:
 
       - job: PublishLinuxx64Artifact
         displayName: Publish linux-x64 artifact
+        dependsOn: BuildPlatform
         steps:
           - task: DotNetCoreCLI@2
             displayName: linux-x64 - Dotnet publish
@@ -150,6 +152,7 @@ stages:
 
       - job: PublishOsxx64Artifact
         displayName: Publish osx-x64 artifact
+        dependsOn: BuildPlatform
         steps:
           - task: DotNetCoreCLI@2
             displayName: osx-x64 - Dotnet publish
@@ -175,6 +178,7 @@ stages:
 
       - job: PublishOsxarm64Artifact
         displayName: Publish osx-arm64 artifact
+        dependsOn: BuildPlatform
         steps:
           - task: DotNetCoreCLI@2
             displayName: osx-arm64 - Dotnet publish
