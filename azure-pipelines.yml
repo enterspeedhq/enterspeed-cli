@@ -78,7 +78,7 @@ stages:
           - task: PowerShell@2
             inputs:
               targetType: 'inline'
-              script: '& 7z.exe a -tgzip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64.gz $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64/es-cli'
+              script: '& 7z.exe a -tgzip $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64/es-cli_$(semVersion)_linux-x64.gz $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64/es-cli'
 
           - task: PublishPipelineArtifact@1
             displayName: Publish artifact - linux-x64
