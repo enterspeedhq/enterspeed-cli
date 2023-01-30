@@ -123,6 +123,18 @@ stages:
           vmImage: $(vmPool)
         
         steps:
+          - task: PowerShell@2
+            displayName: List file - $(Pipeline.Workspace)
+            inputs:
+              targetType: 'inline'
+              script: 'Get-ChildItem -Path $(Pipeline.Workspace) –Recurse'
+
+          - task: PowerShell@2
+            displayName: List file - $(Build.ArtifactStagingDirectory)
+            inputs:
+              targetType: 'inline'
+              script: 'Get-ChildItem -Path $(Build.ArtifactStagingDirectory) –Recurse'
+
           - task: GitHubRelease@1
             inputs:
               gitHubConnection: GithubReleaseCli 
