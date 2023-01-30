@@ -63,6 +63,17 @@ stages:
               targetPath: "$(Pipeline.Workspace)/Output/win-x64"
               artifact: 'es-cli_$(semVersion)_win-x64.zip'
 
+          - task: PowerShell@2
+            displayName: List file - $(Pipeline.Workspace)
+            inputs:
+              targetType: 'inline'
+              script: 'Get-ChildItem -Path $(Pipeline.Workspace) –Recurse'
+
+          - task: PowerShell@2
+            displayName: List file - $(Build.ArtifactStagingDirectory)
+            inputs:
+              targetType: 'inline'
+              script: 'Get-ChildItem -Path $(Build.ArtifactStagingDirectory) –Recurse'
           # - task: DotNetCoreCLI@2
           #   displayName: Dotnet publish linux-x64
           #   inputs:
