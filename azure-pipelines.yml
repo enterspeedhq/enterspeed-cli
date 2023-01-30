@@ -70,10 +70,10 @@ stages:
               gitHubConnection: GithubReleaseCli 
               repositoryName: '$(Build.Repository.Name)'
               action: 'create'
-              #target: '$(Build.SourceVersion)' # string. Required when action = create || action = edit. Target. Default: $(Build.SourceVersion).
-              tagSource: 'gitTag'
+              target: '$(Build.SourceVersion)'
+              tagSource: 'userSpecifiedTag'
               #tagPattern: # string. Optional. Use when tagSource = gitTag. Tag Pattern. 
-              #tag: # string. Required when action = edit || action = delete || tagSource = userSpecifiedTag. Tag. 
+              tag: '$(semVersion)' 
               #title: # string. Optional. Use when action = create || action = edit. Release title. 
               #releaseNotesSource: 'filePath' # 'filePath' | 'inline'. Optional. Use when action = create || action = edit. Release notes source. Default: filePath.
               #releaseNotesFilePath: # string. Optional. Use when releaseNotesSource = filePath. Release notes file path. 
