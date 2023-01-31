@@ -212,6 +212,11 @@ stages:
         displayName: Create release on Github
         
         steps:
+          - checkout: self
+            persistCredentials: true
+            clean: true
+            fetchDepth: 1
+            
           - task: DownloadBuildArtifacts@1
             inputs:
               buildType: 'current'
@@ -230,8 +235,8 @@ stages:
               tag: '$(semVersion)' 
               #title: # string. Optional. Use when action = create || action = edit. Release title. 
 
-              #releaseNotesSource: 'filePath' # 'filePath' | 'inline'. Optional. Use when action = create || action = edit. Release notes source. Default: filePath.
-              #releaseNotesFilePath: # string. Optional. Use when releaseNotesSource = filePath. Release notes file path. 
+              releaseNotesSource: 'filePath' # 'filePath' | 'inline'. Optional. Use when action = create || action = edit. Release notes source. Default: filePath.
+              releaseNotesFilePath: '$(Build.SourcesDirectory)/releaseNotes/$(semVersion).md' # string. Optional. Use when releaseNotesSource = filePath. Release notes file path. 
               #releaseNotesInline: # string. Optional. Use when releaseNotesSource = inline. Release notes. 
 
               assets: '$(System.ArtifactsDirectory)/**'
