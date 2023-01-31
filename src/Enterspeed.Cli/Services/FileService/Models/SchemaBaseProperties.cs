@@ -8,6 +8,9 @@ namespace Enterspeed.Cli.Services.FileService.Models
         [JsonPropertyName("triggers")]
         public object Triggers { get; set; }
 
+        [JsonPropertyName("sourceEntityTypes")]
+        public object SourceEntityTypes { get; set; }
+
         [JsonPropertyName("environments")]
         public object[] Environments { get; set; }
 
