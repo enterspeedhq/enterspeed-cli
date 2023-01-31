@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <Company>Enterspeed</Company>
-    <Version>1.0.0</Version>
+    <Version></Version>
 	  
 	  <PublishSingleFile>true</PublishSingleFile>
 	  
