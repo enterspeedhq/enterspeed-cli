@@ -57,8 +57,8 @@ public class AuthenticationRequestHandler : IRequestHandler<IdentityRequest, Aut
 
     private AuthenticationCallback StartBrowserProcessAndListenForCallback(string redirectUrl)
     {
-        string? state = null;
-        string? code = null;
+        string state = null;
+        string code = null;
 
         var task = Task.Run(
             () =>

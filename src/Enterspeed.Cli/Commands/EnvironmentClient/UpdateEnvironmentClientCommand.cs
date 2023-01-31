@@ -29,10 +29,11 @@ internal class UpdateEnvironmentClientCommand : Command
         public string Domains { get; set; }
         public bool RegenerateAccessKey { get; set; }
 
-        public Handler(IMediator mediator, IOutputService outputService)
+        public Handler(IMediator mediator, IOutputService outputService, ILogger<UpdateEnvironmentClientCommand> logger)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _outputService = outputService;
+            _logger = logger;
         }
 
         public async Task<int> InvokeAsync(InvocationContext context)
