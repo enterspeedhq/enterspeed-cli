@@ -232,7 +232,7 @@ stages:
           - task: PowerShell@2
             inputs:
               targetType: 'inline'
-              script: 'Get-ChildItem -Path $(System.ArtifactsDirectory) -Recurse'
+              script: 'Get-ChildItem -Path $(Build.SourcesDirectory) -Recurse'
 
           - task: PowerShell@2
             inputs:
@@ -251,7 +251,7 @@ stages:
               #title: # string. Optional. Use when action = create || action = edit. Release title. 
 
               releaseNotesSource: 'filePath' # 'filePath' | 'inline'. Optional. Use when action = create || action = edit. Release notes source. Default: filePath.
-              releaseNotesFilePath: '$(Build.ArtifactStagingDirectory)/releaseNotes/$(semVersion).md' # string. Optional. Use when releaseNotesSource = filePath. Release notes file path. 
+              releaseNotesFilePath: '$(Build.SourcesDirectory)/releaseNotes/$(semVersion).md' # string. Optional. Use when releaseNotesSource = filePath. Release notes file path. 
               #releaseNotesInline: # string. Optional. Use when releaseNotesSource = inline. Release notes. 
 
               assets: '$(System.ArtifactsDirectory)/**'
