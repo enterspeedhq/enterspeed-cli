@@ -14,7 +14,7 @@ namespace Enterspeed.Cli.Commands.Schema
     {
         public SaveSchemaCommand() : base(name: "save", "Saves schema")
         {
-            AddArgument(new Argument<string>("alias", "Alias of the schema") { });
+            AddArgument(new Argument<string>("alias", "Alias of the schema"));
             AddOption(new Option<string>(new[] { "--file", "-f" }, "E.g. mySchemaAlias.json"));
         }
 
@@ -28,12 +28,12 @@ namespace Enterspeed.Cli.Commands.Schema
             public Handler(
                 IMediator mediator,
                 IOutputService outputService,
-                ISchemaFileService schmeaFileService,
+                ISchemaFileService schemaFileService,
                 ILogger<SaveSchemaCommand> logger)
             {
                 _mediator = mediator;
                 _outputService = outputService;
-                _schemaFileService = schmeaFileService;
+                _schemaFileService = schemaFileService;
                 _logger = logger;
             }
 
@@ -47,7 +47,7 @@ namespace Enterspeed.Cli.Commands.Schema
                     throw new ConsoleArgumentException("Please specify an alias for your schema");
                 }
 
-                var schema = _schemaFileService.GetSchema(Alias, File);
+                var schema = _schemaFileService.GetSchema(Alias, File)?.SchemaBaseProperties;
                 if (schema == null)
                 {
                     _logger.LogError("Schema file not found!");
@@ -77,7 +77,7 @@ namespace Enterspeed.Cli.Commands.Schema
                 }
 
                 // Create update schema request
-                var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest()
+                var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest
                 {
                     Format = "json",
                     MappingSchemaId = existingSchema.Version.Id.MappingSchemaGuid,

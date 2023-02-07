@@ -14,6 +14,7 @@ internal class ImportSchemaCommand : Command
 {
     public ImportSchemaCommand() : base(name: "import", "Imports all schemas from the /schemas folder on the disk. Will create new schemas and update existing schemas if --override is enabled.")
     {
+        AddOption(new Option<string>(new[] { "--schemaAlias", "-a" }, "Provide a schema alias to only import a single schema"));
         AddOption(new Option<bool>(new[] { "--override", "-o" }, "Override existing schemas"));
     }
 
@@ -36,11 +37,15 @@ internal class ImportSchemaCommand : Command
         }
 
         public bool Override { get; set; }
+        public string SchemaAlias { get; set; }
 
         public async Task<int> InvokeAsync(InvocationContext context)
         {
             var existingSchemas = await _mediator.Send(new QueryMappingSchemasRequest());
-            var schemaFiles = _schemaFileService.GetAllSchemas();
+            
+            var schemaFiles = string.IsNullOrWhiteSpace(SchemaAlias) 
+                ? _schemaFileService.GetAllSchemas() 
+                : new List<SchemaFile> { _schemaFileService.GetSchema(SchemaAlias) };
 
             var successfulImports = 0;
             var failedImports = 0;
