@@ -47,12 +47,10 @@ internal class UpdateEnvironmentClientCommand : Command
                 return 1;
             }
 
-            var updateRequest = new UpdateEnvironmentClientRequest(client.Id);
-
-            if (!string.IsNullOrEmpty(NewName))
+            var updateRequest = new UpdateEnvironmentClientRequest(client.Id)
             {
-                updateRequest.Name = NewName;
-            }
+                Name = !string.IsNullOrEmpty(NewName) ? NewName : Name
+            };
 
             if (!string.IsNullOrEmpty(Domains))
             {
