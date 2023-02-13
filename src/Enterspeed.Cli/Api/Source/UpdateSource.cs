@@ -25,7 +25,8 @@ public class UpdateSourceRequest : IRequest<UpdateSourceResponse>
 
 public class UpdateSourceResponse
 {
-    public SourceId SourceId { get; set; }
+    public string IdValue { get; set; }
+    public string SourceGuid { get; set; }
 }
 
 public class UpdateSourceRequestHandler : IRequestHandler<UpdateSourceRequest, UpdateSourceResponse>

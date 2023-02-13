@@ -1,5 +1,4 @@
-﻿using Enterspeed.Cli.Domain.Models;
-using Enterspeed.Cli.Services.EnterspeedClient;
+﻿using Enterspeed.Cli.Services.EnterspeedClient;
 using MediatR;
 using RestSharp;
 
@@ -13,7 +12,8 @@ public class CreateDomainRequest : IRequest<CreateDomainResponse>
 
 public class CreateDomainResponse
 {
-    public DomainId DomainId { get; set; }
+    public string IdValue { get; set; }
+    public string DomainGuid { get; set; }
 }
 
 public class CreateDomainRequestRequestHandler : IRequestHandler<CreateDomainRequest, CreateDomainResponse>

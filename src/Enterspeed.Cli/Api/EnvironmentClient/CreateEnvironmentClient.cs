@@ -24,7 +24,9 @@ namespace Enterspeed.Cli.Api.EnvironmentClient
 
     public class CreateEnvironmentClientResponse
     {
-        public EnvironmentClientId EnvironmentClientId { get; set; }
+        public string IdValue { get; set; }
+        public string ClientGuid { get; set; }
+        public string EnvironmentGuid { get; set; }
     }
 
     public class CreateEnvironmentClientRequestRequestHandler : IRequestHandler<CreateEnvironmentClientRequest, CreateEnvironmentClientResponse>
@@ -38,7 +40,7 @@ namespace Enterspeed.Cli.Api.EnvironmentClient
 
         public async Task<CreateEnvironmentClientResponse> Handle(CreateEnvironmentClientRequest createEnvironmentClientRequest, CancellationToken cancellationToken)
         {
-            var request = new RestRequest($"tenant/environment-clients/{createEnvironmentClientRequest.EnvironmentId.EnvironmentGuid}", Method.Post)
+            var request = new RestRequest($"tenant/environments/{createEnvironmentClientRequest.EnvironmentId.EnvironmentGuid}/clients", Method.Post)
                 .AddJsonBody(createEnvironmentClientRequest);
 
             var response = await _enterspeedClient.ExecuteAsync<CreateEnvironmentClientResponse>(request, cancellationToken);
