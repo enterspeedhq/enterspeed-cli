@@ -8,7 +8,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{7C6DC0AF-9D52-4612-ADBB-1587538AAD16}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		releaseNotes\1.0.0.md = releaseNotes\1.0.0.md
 		azure-pipelines.yml = azure-pipelines.yml
 		README.md = README.md
 	EndProjectSection
@@ -17,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "releaseNotes", "releaseNote
 	ProjectSection(SolutionItems) = preProject
 		releaseNotes\1.0.0.md = releaseNotes\1.0.0.md
 		releaseNotes\1.1.0.md = releaseNotes\1.1.0.md
+		releaseNotes\1.1.1.md = releaseNotes\1.1.1.md
 	EndProjectSection
 EndProject
 Global
