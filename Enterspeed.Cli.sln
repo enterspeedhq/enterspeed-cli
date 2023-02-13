@@ -16,6 +16,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "releaseNotes", "releaseNotes", "{66A24EA2-62B6-464D-815D-C5BC3F8C8D95}"
 	ProjectSection(SolutionItems) = preProject
 		releaseNotes\1.0.0.md = releaseNotes\1.0.0.md
+		releaseNotes\1.1.0.md = releaseNotes\1.1.0.md
 	EndProjectSection
 EndProject
 Global
