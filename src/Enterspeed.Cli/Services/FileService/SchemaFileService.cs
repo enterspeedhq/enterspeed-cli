@@ -65,10 +65,12 @@ namespace Enterspeed.Cli.Services.FileService
             }
         }
 
-        public SchemaBaseProperties GetSchema(string alias, string filePath = null)
+        public SchemaFile GetSchema(string alias, string filePath = null)
         {
             var schemaFile = GetSchemaContent(alias, filePath);
-            return JsonSerializer.Deserialize<SchemaBaseProperties>(schemaFile, SerializerOptions);
+            var schemaBaseProperties = JsonSerializer.Deserialize<SchemaBaseProperties>(schemaFile, SerializerOptions);
+
+            return new SchemaFile(alias, schemaBaseProperties);
         }
 
         public IList<SchemaFile> GetAllSchemas()
@@ -80,9 +82,8 @@ namespace Enterspeed.Cli.Services.FileService
             return filePaths.Select(filePath =>
             {
                 var alias = GetAliasFromFilePath(filePath);
-                var schemaBaseProperties = GetSchema(alias, filePath);
 
-                return new SchemaFile(alias, schemaBaseProperties);
+                return GetSchema(alias, filePath);
             })
             .ToList();
         }
