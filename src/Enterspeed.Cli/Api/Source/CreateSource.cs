@@ -9,10 +9,11 @@ public class CreateSourceRequest : IRequest<CreateSourceResponse>
     public string SourceGroupId { get; }
     public string Name { get; set; }
     public string Type { get; set; }
+    public string[] EnvironmentIds { get; set; }
 
     public CreateSourceRequest(SourceGroupId sourceGroupId)
     {
-        SourceGroupId = sourceGroupId.SourceGroupGuid;
+        SourceGroupId = sourceGroupId.IdValue;
     }
 }
 
