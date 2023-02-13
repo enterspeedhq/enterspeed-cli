@@ -12,7 +12,8 @@ public class CreateSourceCommand : Command
     {
         AddArgument(new Argument<Guid>("id", "Id of the source group") { Arity = ArgumentArity.ExactlyOne });
         AddOption(new Option<string>(new[] { "--name", "-n" }, "Name of source group") { IsRequired = true });
-        AddOption(new Option<string>(new[] { "--type", "-t" }, "Source group type"));
+        AddOption(new Option<string[]>(new[] { "--environment", "-e" }, "Target environment for deploy") { IsRequired = true });
+        AddOption(new Option<string>(new[] { "--type", "-t" }, "Source group type") { IsRequired = true });
     }
 
     public new class Handler : BaseCommandHandler, ICommandHandler
@@ -22,6 +23,7 @@ public class CreateSourceCommand : Command
 
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public string[] Environment { get; set; }
         public string Type { get; set; }
 
         public Handler(IMediator mediator, IOutputService outputService)
@@ -35,7 +37,8 @@ public class CreateSourceCommand : Command
             var request = new CreateSourceRequest(SourceGroupId.Parse(SourceGroupId.From(Id.ToString())))
             {
                 Name = Name,
-                Type = Type
+                Type = Type,
+                EnvironmentIds = Environment
             };
 
             var domain = await _mediator.Send(request);
