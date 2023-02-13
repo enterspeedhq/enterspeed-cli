@@ -34,7 +34,7 @@ namespace Enterspeed.Cli.Api.EnvironmentClient
         {
             var request =
                 new RestRequest(
-                    $"tenant/environment-clients/{deleteEnvironmentClientRequest.EnvironmentClientId.EnvironmentGuid}/{deleteEnvironmentClientRequest.EnvironmentClientId.ClientGuid}/",
+                    $"tenant/environments/{deleteEnvironmentClientRequest.EnvironmentClientId.EnvironmentGuid}/clients/{deleteEnvironmentClientRequest.EnvironmentClientId.ClientGuid}",
                     Method.Delete);
 
             var response = await _enterspeedClient.ExecuteAsync<DeleteEnvironmentClientResponse>(request, cancellationToken);

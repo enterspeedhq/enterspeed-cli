@@ -40,7 +40,7 @@ namespace Enterspeed.Cli.Api.EnvironmentClient
 
         public async Task<UpdateEnvironmentClientResponse> Handle(UpdateEnvironmentClientRequest updateEnvironmentClientRequest, CancellationToken cancellationToken)
         {
-            var request = new RestRequest($"tenant/environment-clients/{updateEnvironmentClientRequest.EnvironmentClientId.EnvironmentGuid}/{updateEnvironmentClientRequest.EnvironmentClientId.ClientGuid}/", Method.Put)
+            var request = new RestRequest($"tenant/environments/{updateEnvironmentClientRequest.EnvironmentClientId.EnvironmentGuid}/clients/{updateEnvironmentClientRequest.EnvironmentClientId.ClientGuid}", Method.Put)
                 .AddJsonBody(updateEnvironmentClientRequest);
 
             var response = await _enterspeedClient.ExecuteAsync<UpdateEnvironmentClientResponse>(request, cancellationToken);
