@@ -19,7 +19,8 @@ public class CreateSourceRequest : IRequest<CreateSourceResponse>
 
 public class CreateSourceResponse
 {
-    public SourceId SourceId { get; set; }
+    public string IdValue { get; set; }
+    public string SourceGuid { get; set; }
 }
 
 public class CreateSourceGroupRequestHandler : IRequestHandler<CreateSourceRequest, CreateSourceResponse>

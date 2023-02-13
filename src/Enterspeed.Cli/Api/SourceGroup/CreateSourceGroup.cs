@@ -1,5 +1,4 @@
-﻿using Enterspeed.Cli.Domain.Models;
-using Enterspeed.Cli.Services.EnterspeedClient;
+﻿using Enterspeed.Cli.Services.EnterspeedClient;
 using MediatR;
 using RestSharp;
 
@@ -14,7 +13,8 @@ public class CreateSourceGroupRequest : IRequest<CreateSourceGroupResponse>
 
 public class CreateSourceGroupResponse
 {
-    public SourceGroupId SourceGroupId { get; set; }
+    public string IdValue { get; set; }
+    public string SourceGroupGuid { get; set; }
 }
 
 public class CreateSourceGroupRequestHandler : IRequestHandler<CreateSourceGroupRequest, CreateSourceGroupResponse>

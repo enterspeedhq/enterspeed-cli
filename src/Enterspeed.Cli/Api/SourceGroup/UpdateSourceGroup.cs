@@ -24,7 +24,8 @@ public class UpdateSourceGroupRequest : IRequest<UpdateSourceGroupResponse>
 
 public class UpdateSourceGroupResponse
 {
-    public SourceGroupId SourceGroupId { get; set; }
+    public string IdValue { get; set; }
+    public string SourceGroupGuid { get; set; }
 }
 
 public class UpdateSourceGroupRequestHandler : IRequestHandler<UpdateSourceGroupRequest, UpdateSourceGroupResponse>

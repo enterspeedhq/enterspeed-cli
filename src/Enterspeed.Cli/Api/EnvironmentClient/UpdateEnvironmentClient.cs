@@ -24,7 +24,9 @@ namespace Enterspeed.Cli.Api.EnvironmentClient
 
     public class UpdateEnvironmentClientResponse
     {
-        public EnvironmentClientId EnvironmentClientId { get; set; }
+        public string ClientGuid { get; set; }
+        public string EnvironmentGuid { get; set; }
+        public string IdValue { get; set; }
     }
 
     public class UpdateEnvironmentClientRequestRequestHandler : IRequestHandler<UpdateEnvironmentClientRequest, UpdateEnvironmentClientResponse>
