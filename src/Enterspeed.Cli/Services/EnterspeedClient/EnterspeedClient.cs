@@ -22,10 +22,20 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
         _stateService = stateService;
         _apiKeyValue = globalOptions?.ApiKeyValue;
 
-        var settings = configuration.GetSection("Settings").Get<Settings>() ?? new Settings();
-        var options = new RestClientOptions(settings.EnterspeedApiUri);
+        var customEndpointUri = globalOptions?.CustomEndpoint;
 
-        _client = new RestClient(options);
+        RestClientOptions restOptions;
+        if (customEndpointUri != null)
+        {
+            restOptions = new RestClientOptions(customEndpointUri);
+        }
+        else
+        {
+            var settings = configuration.GetSection("Settings").Get<Settings>() ?? new Settings();
+            restOptions = new RestClientOptions(settings.EnterspeedApiUri);
+        }
+
+        _client = new RestClient(restOptions);
     }
 
     public async Task<T> ExecuteAsync<T>(RestRequest request, CancellationToken cancellationToken = default)

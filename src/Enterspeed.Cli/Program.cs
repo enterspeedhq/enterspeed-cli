@@ -30,6 +30,11 @@ namespace Enterspeed.Cli
             IsHidden = true
         };
 
+        private static readonly Option<string> CustomEndpointOption = new("--customEndpoint")
+        {
+            IsHidden = true
+        };
+
         private static readonly Option<bool> VerboseLogging = new(new[] { "--verbose", "-v" }, "verbose");
 
         internal static IHostBuilder CreateHostBuilder(string[] args) => Host.CreateDefaultBuilder(args);
@@ -49,7 +54,7 @@ namespace Enterspeed.Cli
                     })
                     .UseSerilog((context, loggerConfiguration) => loggerConfiguration.ConfigureSerilog(context, VerboseLogging))
                     .UseCommands())
-                .AddMiddleware(MiddleWare.ApiKeyAuth(ApiKeyOption, OutPutStyle))
+                .AddMiddleware(MiddleWare.SetGlobalOptions(ApiKeyOption, OutPutStyle, CustomEndpointOption))
                 .UseDefaults()
                 .Build();
 
@@ -74,6 +79,7 @@ namespace Enterspeed.Cli
             root.AddGlobalOption(OutPutStyle);
             root.AddGlobalOption(VerboseLogging);
             root.AddGlobalOption(ApiKeyOption);
+            root.AddGlobalOption(CustomEndpointOption);
 
             return new CommandLineBuilder(root);
         }
