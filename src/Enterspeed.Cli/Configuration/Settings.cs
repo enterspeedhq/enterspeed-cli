@@ -3,5 +3,6 @@
     public sealed class Settings
     {
         public string EnterspeedApiUri { get; set; } = "https://management.enterspeed.com/api/v1/";
+        public string IngestApiUri { get; set; } = "https://api.enterspeed.com/ingest/v2/";
     }
 }

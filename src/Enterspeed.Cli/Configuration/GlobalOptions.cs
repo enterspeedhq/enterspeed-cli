@@ -1,4 +1,3 @@
-using Enterspeed.Cli.Domain.Exceptions;
 using Enterspeed.Cli.Services.ConsoleOutput;
 
 namespace Enterspeed.Cli.Configuration

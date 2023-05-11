@@ -6,16 +6,17 @@ namespace Enterspeed.Cli.Services.IngestService;
 
 public class IngestService : IIngestService
 {
-    private const string IngestUrl = "https://api.enterspeed.com/ingest/v2/";
-    private readonly HttpClient _httpClient = new()
-    {
-        BaseAddress = new Uri(IngestUrl),
-    };
+    private readonly HttpClient _httpClient;
 
     private readonly ILogger<IngestService> _logger;
-    public IngestService(ILogger<IngestService> logger)
+    public IngestService(ILogger<IngestService> logger, ISettingsService settingsService)
     {
         _logger = logger;
+
+        _httpClient = new HttpClient
+        {
+            BaseAddress = new Uri(settingsService.GetSettings().IngestApiUri),
+        };
     }
 
     public async Task<bool> Ingest(string filePath, string apiKey, bool useFilenameAsId)
@@ -26,6 +27,7 @@ public class IngestService : IIngestService
         if (attr.HasFlag(FileAttributes.Directory))
         {
             _logger.LogInformation($"Ingesting files from: {filePath}");
+            Console.WriteLine($"Ingesting files from: {filePath}");
             foreach (var file in Directory.EnumerateFiles(filePath, "*.json"))
             {
                 await IngestFile(file, useFilenameAsId);
@@ -34,6 +36,7 @@ public class IngestService : IIngestService
         else
         {
             _logger.LogInformation($"Ingesting file: {filePath}");
+            Console.WriteLine($"Ingesting file: {filePath}");
             await IngestFile(filePath, useFilenameAsId);
         }
 
@@ -51,7 +54,12 @@ public class IngestService : IIngestService
         }
         else
         {
-            var fileData = JsonSerializer.Deserialize<SourceEntityInput>(json)!;
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            var fileData = JsonSerializer.Deserialize<SourceEntityInput>(json, jsonOptions)!;
             id = fileData.Id;
         }
 
@@ -68,6 +76,7 @@ public class IngestService : IIngestService
         {
             var rr = await new IngestResponse<IngestOkResponse>().GetMessage(responseMessage);
             _logger.LogInformation($"Ingest: {id} Ok, {rr.Message}");
+            Console.WriteLine($"Ingest: {id} Ok, {rr.Message}");
         }
         else
         {
@@ -92,9 +101,7 @@ public class IngestService : IIngestService
         return response;
     }
 
-   
-
-    class IngestResponse<T> where T : class
+    public class IngestResponse<T> where T : class
     {
         public async Task<T> GetMessage(HttpResponseMessage responseMessage) 
         {
@@ -112,19 +119,5 @@ public class IngestService : IIngestService
                 return null;
             }
         }
-    }
-
-    class IngestOkResponse
-    {
-        public int Status { get; set; }
-        public string Message { get; set; }
-    }
-
-    class IngestErrorResponse
-    {
-        public int Status { get; set; }
-        public string Message { get; set; }
-        public int ErrorCode { get; set; }
-        public Dictionary<string, string> Errors { get; set; }
     }
 }

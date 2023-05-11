@@ -12,6 +12,7 @@ using Serilog.Exceptions;
 using System.CommandLine;
 using Microsoft.Extensions.Hosting;
 using System.CommandLine.Hosting;
+using Enterspeed.Cli.Services;
 using Enterspeed.Cli.Services.IngestService;
 using Serilog.Events;
 
@@ -45,6 +46,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddMediatR(Assembly.GetExecutingAssembly());
+        services.AddSingleton<ISettingsService, SettingsService>();
         services.AddTransient<IEnterspeedClient, EnterspeedClient>();
         services.AddTransient<IOutputService, OutputService>();
         services.AddTransient<ISchemaFileService, SchemaFileService>();

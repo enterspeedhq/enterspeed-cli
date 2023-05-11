@@ -24,11 +24,12 @@ namespace Enterspeed.Cli.Commands.SourceEntity
             private readonly IIngestService _ingestService;
             private readonly ILogger<IngestSourceEntitiesCommand> _logger;
 
-            public Handler(IMediator mediator, IOutputService outputService, IIngestService ingestService)
+            public Handler(IMediator mediator, IOutputService outputService, IIngestService ingestService, ILogger<IngestSourceEntitiesCommand> logger)
             {
                 _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
                 _outputService = outputService;
                 _ingestService = ingestService;
+                _logger = logger;
             }
 
             public string SourceId { get; set; }
@@ -46,7 +47,7 @@ namespace Enterspeed.Cli.Commands.SourceEntity
                     return 1;
                 }
 
-                var result = await _ingestService.Ingest(FilePath, source.AccessKey, FilenameAsId);
+                await _ingestService.Ingest(FilePath, source.AccessKey, FilenameAsId);
 
                 return 0;
             }
