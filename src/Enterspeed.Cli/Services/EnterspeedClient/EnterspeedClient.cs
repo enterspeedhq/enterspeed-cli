@@ -31,7 +31,7 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
         else
         {
             var settings = settingsService.GetSettings();
-            restOptions = new RestClientOptions(settings.EnterspeedApiUri);
+            restOptions = new RestClientOptions(settings.ManagementApiUri);
         }
 
         _client = new RestClient(restOptions);
