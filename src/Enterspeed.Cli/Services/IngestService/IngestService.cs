@@ -43,6 +43,21 @@ public class IngestService : IIngestService
         return true;
     }
 
+    public async Task<bool> Delete(string id, string apiKey)
+    {
+        _httpClient.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
+        var responseMessage = await Delete(id);
+
+        if (responseMessage.IsSuccessStatusCode)
+        {
+            return true;
+        }
+
+        var err = await new IngestResponse<IngestErrorResponse>().GetMessage(responseMessage);
+        _logger.LogError($"Failed to delete: {id}. {err.Message}");
+        return false;
+    }
+
     private async Task IngestFile(string filename, bool useFilenameAsId)
     {
         var json = await File.ReadAllTextAsync(filename);
@@ -99,6 +114,11 @@ public class IngestService : IIngestService
 
         var response = await _httpClient.PostAsync(id, data);
         return response;
+    }
+
+    private async Task<HttpResponseMessage> Delete(string id)
+    {
+        return await _httpClient.DeleteAsync(id);
     }
 
     public class IngestResponse<T> where T : class
