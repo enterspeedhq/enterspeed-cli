@@ -3,7 +3,6 @@ using System.Text.Json;
 using Enterspeed.Cli.Api.Identity.Models;
 using Enterspeed.Cli.Configuration;
 using Enterspeed.Cli.Services.StateService;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RestSharp;
 
@@ -16,7 +15,7 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
     private readonly RestClient _client;
     private readonly string _apiKeyValue;
 
-    public EnterspeedClient(ILogger<EnterspeedClient> logger, IConfiguration configuration, IStateService stateService, GlobalOptions globalOptions)
+    public EnterspeedClient(ILogger<EnterspeedClient> logger, ISettingsService settingsService, IStateService stateService, GlobalOptions globalOptions)
     {
         _logger = logger;
         _stateService = stateService;
@@ -31,8 +30,8 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
         }
         else
         {
-            var settings = configuration.GetSection("Settings").Get<Settings>() ?? new Settings();
-            restOptions = new RestClientOptions(settings.EnterspeedApiUri);
+            var settings = settingsService.GetSettings();
+            restOptions = new RestClientOptions(settings.ManagementApiUri);
         }
 
         _client = new RestClient(restOptions);
