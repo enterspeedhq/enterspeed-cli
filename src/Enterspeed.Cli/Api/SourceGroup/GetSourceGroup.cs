@@ -33,6 +33,7 @@ public class Source
     public string Name { get; set; }
     public string Type { get; set; }
     public SourceId Id { get; set; }
+    public string AccessKey { get; set; }
 }
 
 public class GetTenantsRequestHandler : IRequestHandler<GetSourceGroupsRequest, GetSourceGroupResponse[]>
