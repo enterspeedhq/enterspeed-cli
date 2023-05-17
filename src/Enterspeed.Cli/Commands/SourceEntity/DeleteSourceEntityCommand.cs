@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System.CommandLine.Invocation;
 using System.CommandLine;
+using Enterspeed.Cli.Domain.Models;
 
 namespace Enterspeed.Cli.Commands.SourceEntity;
 
@@ -13,7 +14,7 @@ public class DeleteSourceEntitiesCommand : Command
     public DeleteSourceEntitiesCommand() : base(name: "delete", "Delete source entity")
     {
         AddArgument(new Argument<string>("id", "Id of the source entity to delete") { Arity = ArgumentArity.ExactlyOne });
-        AddOption(new Option<string>(new[] { "--sourceId", "-s" }, "Id of the source") { Arity = ArgumentArity.ExactlyOne });
+        AddOption(new Option<string>(new[] { "--sourceId", "-s" }, "Id of the source, if not using full source entity id") { Arity = ArgumentArity.ZeroOrOne });
     }
 
     public new class Handler : BaseCommandHandler, ICommandHandler
@@ -36,9 +37,20 @@ public class DeleteSourceEntitiesCommand : Command
 
         public async Task<int> InvokeAsync(InvocationContext context)
         {
-            // Find source
-            var sourceGroups = await _mediator.Send(new GetSourceGroupsRequest());
-            var source = sourceGroups.SelectMany(sg => sg.Sources).FirstOrDefault(s => s.Source.Id.SourceGuid == SourceId)?.Source;
+            // Check if Id is a full source entity Id
+            if (SourceEntityId.TryParse(Id, out SourceEntityId fullId))
+            {
+                SourceId = fullId.SourceGuid;
+                Id = fullId.OriginId;
+            }
+
+            if (string.IsNullOrEmpty(SourceId))
+            {
+                _logger.LogError("--sourceId is required if not specified in source entity id");
+                return 1;
+            }
+            
+            var source = await GetSource(SourceId);
             if (source == null)
             {
                 _logger.LogError($"Source: {SourceId} not found");
@@ -47,6 +59,12 @@ public class DeleteSourceEntitiesCommand : Command
 
             var deleteResult = await _ingestService.Delete(Id, source.AccessKey);
             return deleteResult ? 0 : 1;
+        }
+
+        private async Task<Api.SourceGroup.Source> GetSource(string sourceGuid)
+        {
+            var sourceGroups = await _mediator.Send(new GetSourceGroupsRequest());
+            return sourceGroups.SelectMany(sg => sg.Sources).FirstOrDefault(s => s.Source.Id.SourceGuid == sourceGuid)?.Source;
         }
     }
 }
