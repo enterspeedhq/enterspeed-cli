@@ -130,7 +130,6 @@ public class IngestService : IIngestService
             {
                 return await JsonSerializer.DeserializeAsync<T>(contentStream, new JsonSerializerOptions
                 {
-                    IgnoreNullValues = true,
                     PropertyNameCaseInsensitive = true
                 });
             }
