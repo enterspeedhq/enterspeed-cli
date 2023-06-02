@@ -3,155 +3,152 @@ using System.CommandLine.Invocation;
 using System.Text.Json;
 using Enterspeed.Cli.Api.Environment;
 using Enterspeed.Cli.Api.MappingSchema;
+using Enterspeed.Cli.Api.Release;
 using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace Enterspeed.Cli.Commands.Schema
+namespace Enterspeed.Cli.Commands.Schema;
+
+internal class DeploySchemaCommand : Command
 {
-    internal class DeploySchemaCommand : Command
+    public DeploySchemaCommand() : base("deploy", "Adds schema to deployment plan")
     {
-        public DeploySchemaCommand() : base("deploy", "Adds schema to deployment plan")
+        AddArgument(new Argument<string>("alias", "Alias of the schema"));
+        AddOption(new Option<string>(new[] { "--environment", "-e" }, "Environment name")
         {
-            AddArgument(new Argument<string>("alias", "Alias of the schema") { });
-            AddOption(new Option<string>(new[] { "--environment", "-e" }, "Environment name")
-            {
-                IsRequired = true
-            });
+            IsRequired = true
+        });
+    }
+
+    public new class Handler : BaseCommandHandler, ICommandHandler
+    {
+        private readonly IMediator _mediator;
+        private readonly IOutputService _outputService;
+        private readonly ISchemaFileService _schemaFileService;
+        private readonly ILogger<DeploySchemaCommand> _logger;
+        private readonly IDeploymentPlanFileService _deploymentPlanFileService;
+
+        public Handler(
+            IMediator mediator,
+            IOutputService outputService,
+            ISchemaFileService schemaFileService,
+            ILogger<DeploySchemaCommand> logger,
+            IDeploymentPlanFileService deploymentPlanFileService)
+        {
+            _outputService = outputService;
+            _mediator = mediator;
+            _schemaFileService = schemaFileService;
+            _logger = logger;
+            _deploymentPlanFileService = deploymentPlanFileService;
         }
 
-        public new class Handler : BaseCommandHandler, ICommandHandler
+        public string Alias { get; set; }
+        public string Environment { get; set; }
+
+        public async Task<int> InvokeAsync(InvocationContext context)
         {
-            private readonly IMediator _mediator;
-            private readonly IOutputService _outputService;
-            private readonly ISchemaFileService _schemaFileService;
-            private readonly ILogger<DeploySchemaCommand> _logger;
-            private readonly IDeploymentPlanFileService _deploymentPlanFileService;
-
-            public Handler(
-                IMediator mediator,
-                IOutputService outputService,
-                ISchemaFileService schemaFileService,
-                ILogger<DeploySchemaCommand> logger,
-                IDeploymentPlanFileService deploymentPlanFileService)
+            // Get mapping schema guid
+            var mappingSchemaId = await GetMappingSchemaGuid();
+            if (mappingSchemaId == null)
             {
-                _outputService = outputService;
-                _mediator = mediator;
-                _schemaFileService = schemaFileService;
-                _logger = logger;
-                _deploymentPlanFileService = deploymentPlanFileService;
+                _logger.LogError("Mapping schema id not found!");
+                return 1;
             }
 
-            public string Alias { get; set; }
-            public string Environment { get; set; }
-
-            public async Task<int> InvokeAsync(InvocationContext context)
+            // Get version from existing schema
+            var existingSchema = await GetExistingSchema(mappingSchemaId.MappingSchemaGuid);
+            if (existingSchema == null)
             {
-                // Get mapping schema guid
-                var mappingSchemaId = await GetMappingSchemaGuid();
-                if (mappingSchemaId == null)
-                {
-                    _logger.LogError("Mapping schema id not found!");
-                    return 1;
-                }
+                _logger.LogError("Schema not found!");
+                return 1;
+            }
 
-                // Get version from existing schema
-                var existingSchema = await GetExistingSchema(mappingSchemaId.MappingSchemaGuid);
-                if (existingSchema == null)
-                {
-                    _logger.LogError("Schema not found!");
-                    return 1;
-                }
+            // Validate that schema on disk matches schema saved in Enterspeed.
+            var valid = _schemaFileService.SchemaValid(existingSchema.Version.Data, Alias);
+            if (!valid)
+            {
+                _logger.LogError("Schema on disk does not match schema in Enterspeed. Save your schema before deploying it.");
+                return 1;
+            }
 
-                // Validate that schema on disk matches schema saved in Enterspeed.
-                var valid = _schemaFileService.SchemaValid(existingSchema.Version.Data, Alias);
-                if (!valid)
-                {
-                    _logger.LogError("Schema on disk does not match schema in Enterspeed. Save your schema before deploying it.");
-                    return 1;
-                }
+            // Deploy schema
+            var environmentToDeployTo = await GetEnvironmentToDeployTo();
+            if (environmentToDeployTo == null)
+            {
+                _logger.LogError("Environment to deploy to was not found");
+                return 1;
+            }
 
-                // Ensure that content of schema is valid
-                var validationResponse = await ValidateMappingSchema(existingSchema, mappingSchemaId.MappingSchemaGuid);
-                if (!validationResponse.Success)
+            var createReleaseResponse = await _mediator.Send(new CreateReleaseRequest
+            {
+                EnvironmentId = environmentToDeployTo.Id.IdValue,
+                Schemas = new[]
                 {
-                    var error = JsonSerializer.Serialize(validationResponse.Error);
-                    _logger.LogError("Schema not valid: " + error);
-                    return 1;
-                }
-
-                // Deploy schema
-                var environmentToDeployTo = await GetEnvironmentToDeployTo();
-                if (environmentToDeployTo == null)
-                {
-                    _logger.LogError("Environment to deploy to was not found");
-                    return 1;
-                }
-
-                var deployMappingSchemaResponse = await _mediator.Send(new DeployMappingSchemaRequest()
-                {
-                    SchemaId = mappingSchemaId.IdValue,
-                    Deployments = new List<DeployMappingSchemaRequest.EnvironmentSchemaDeployment>()
+                    new SchemaVersionId
                     {
-                        new DeployMappingSchemaRequest.EnvironmentSchemaDeployment()
-                        {
-                            Version = existingSchema.Version.Id.Version,
-                            EnvironmentId = environmentToDeployTo.Id.IdValue
-                        }
+                        SchemaId = mappingSchemaId.IdValue,
+                        Version = existingSchema.Version.Id.Version
                     }
-                });
-
-                if (!deployMappingSchemaResponse.Success)
-                {
-                    var error = JsonSerializer.Serialize(deployMappingSchemaResponse.Error);
-                    _logger.LogError("Something went wrong when deploying schema: " + error);
-                    return 1;
                 }
+            });
 
-                _deploymentPlanFileService.UpdateDeploymentPlan(Alias, existingSchema.LatestVersion);
+            if (!createReleaseResponse.Success)
+            {
+                LogError(createReleaseResponse.Error);
 
-                _outputService.Write("Successfully deployed schema: " + Alias);
-
-                return 0;
+                return 1;
             }
 
-            private async Task<GetEnvironmentsResponse> GetEnvironmentToDeployTo()
-            {
-                var environments = await _mediator.Send(new GetEnvironmentsRequest());
-                var environmentToDeployTo = environments.FirstOrDefault(e => e.Name == Environment);
-                return environmentToDeployTo;
-            }
+            _deploymentPlanFileService.UpdateDeploymentPlan(Alias, existingSchema.LatestVersion);
 
-            private async Task<ValidateMappingSchemaResponse> ValidateMappingSchema(GetMappingSchemaResponse existingSchema, string mappingSchemaGuid)
-            {
-                var validationResponse = await _mediator.Send(new ValidateMappingSchemaRequest()
+            _outputService.Write("Successfully deployed schema: " + Alias);
+
+            return 0;
+        }
+
+        private async Task<GetEnvironmentsResponse> GetEnvironmentToDeployTo()
+        {
+            var environments = await _mediator.Send(new GetEnvironmentsRequest());
+            var environmentToDeployTo = environments.FirstOrDefault(e => e.Name == Environment);
+            return environmentToDeployTo;
+        }
+
+        private async Task<GetMappingSchemaResponse> GetExistingSchema(string mappingSchemaGuid)
+        {
+            var existingSchema = await _mediator.Send(
+                new GetMappingSchemaRequest
                 {
-                    Version = existingSchema.LatestVersion,
-                    MappingSchemaId = mappingSchemaGuid,
-                });
+                    MappingSchemaId = mappingSchemaGuid
+                }
+            );
 
-                return validationResponse;
-            }
+            return existingSchema;
+        }
 
-            private async Task<GetMappingSchemaResponse> GetExistingSchema(string mappingSchemaGuid)
+        private async Task<MappingSchemaId> GetMappingSchemaGuid()
+        {
+            var schemas = await _mediator.Send(new QueryMappingSchemasRequest());
+            var mappingSchemaGuid = schemas.FirstOrDefault(sc => sc.ViewHandle == Alias)?.Id;
+            return mappingSchemaGuid;
+        }
+
+        private void LogError(ApiErrorBaseResponse apiErrorBaseResponse)
+        {
+            if (apiErrorBaseResponse is ApiGroupedErrorResponse apiGroupedErrorResponse)
             {
-                var existingSchema = await _mediator.Send(
-                    new GetMappingSchemaRequest
-                    {
-                        MappingSchemaId = mappingSchemaGuid
-                    }
-                );
-
-                return existingSchema;
+                foreach (var groupedError in apiGroupedErrorResponse.Errors)
+                {
+                    var error = JsonSerializer.Serialize(groupedError.Errors);
+                    _logger.LogError("Something went wrong when deploying schema with id '" + groupedError.Name + "': " + error);
+                }
             }
-
-            private async Task<MappingSchemaId> GetMappingSchemaGuid()
+            else
             {
-                var schemas = await _mediator.Send(new QueryMappingSchemasRequest());
-                var mappingSchemaGuid = schemas.FirstOrDefault(sc => sc.ViewHandle == Alias)?.Id;
-                return mappingSchemaGuid;
+                var error = JsonSerializer.Serialize((ApiErrorResponse)apiErrorBaseResponse);
+                _logger.LogError("Something went wrong when deploying schema: " + error);
             }
         }
     }
