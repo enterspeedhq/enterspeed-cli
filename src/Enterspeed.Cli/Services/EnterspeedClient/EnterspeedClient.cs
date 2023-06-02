@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Reflection;
 using System.Text.Json;
 using Enterspeed.Cli.Api.Identity.Models;
 using Enterspeed.Cli.Configuration;
@@ -85,6 +86,8 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
 
     private void AddHeaders(RestRequest request)
     {
+        request.AddHeader("X-Enterspeed-System-Information", $"Enterspeed-cli-{GetVersionNumber()}");
+
         if (!string.IsNullOrEmpty(_apiKeyValue))
         {
             request.AddHeader("X-Api-Key", _apiKeyValue);
@@ -197,6 +200,11 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
                 Type = "refresh_token",
                 Token = refreshToken
             });
+    }
+
+    private static string GetVersionNumber()
+    {
+        return Assembly.GetExecutingAssembly().GetName().Version?.ToString(3);
     }
 
     public void Dispose()
