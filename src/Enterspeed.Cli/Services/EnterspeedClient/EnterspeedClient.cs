@@ -86,7 +86,7 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
 
     private void AddHeaders(RestRequest request)
     {
-        request.AddHeader("X-Enterspeed-System-Information", $"Enterspeed-cli-{GetVersionNumber()}");
+        request.AddHeader("X-Enterspeed-System", $"cli/{GetVersionNumber()}");
 
         if (!string.IsNullOrEmpty(_apiKeyValue))
         {
