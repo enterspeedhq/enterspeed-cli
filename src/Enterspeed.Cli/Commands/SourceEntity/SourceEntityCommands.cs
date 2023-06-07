@@ -8,7 +8,9 @@ public static class SourceEntityCommands
     {
         var command = new Command("source-entity", "Source entities")
         {
-            new ListSourceEntitiesCommand()
+            new ListSourceEntitiesCommand(), 
+            new IngestSourceEntitiesCommand(),
+            new DeleteSourceEntitiesCommand()
         };
         return command;
     }

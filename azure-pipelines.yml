@@ -108,7 +108,7 @@ stages:
               command: 'publish'
               publishWebProjects: false
               projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
-              arguments: '-c Release -r win-x64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64'
+              arguments: '-c Release -r win-x64 -p:PublishReadyToRun=true -p:Version=$(semVersion) --self-contained -o $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_win-x64'
               zipAfterPublish: false
               modifyOutputPath: false
             
@@ -134,7 +134,7 @@ stages:
               command: 'publish'
               publishWebProjects: false
               projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
-              arguments: '-c Release -r linux-x64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64'
+              arguments: '-c Release -r linux-x64 -p:PublishReadyToRun=true -p:Version=$(semVersion) --self-contained -o $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_linux-x64'
               zipAfterPublish: false
               modifyOutputPath: false
             
@@ -160,7 +160,7 @@ stages:
               command: 'publish'
               publishWebProjects: false
               projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
-              arguments: '-c Release -r osx-x64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-x64'
+              arguments: '-c Release -r osx-x64 -p:PublishReadyToRun=true -p:Version=$(semVersion) --self-contained -o $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-x64'
               zipAfterPublish: false
               modifyOutputPath: false
             
@@ -186,7 +186,7 @@ stages:
               command: 'publish'
               publishWebProjects: false
               projects: 'src/Enterspeed.Cli/Enterspeed.Cli.csproj'
-              arguments: '-c Release -r osx-arm64 -p:PublishReadyToRun=true --self-contained -o $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-arm64'
+              arguments: '-c Release -r osx-arm64 -p:PublishReadyToRun=true -p:Version=$(semVersion) --self-contained -o $(Build.ArtifactStagingDirectory)/Output/es-cli_$(semVersion)_osx-arm64'
               zipAfterPublish: false
               modifyOutputPath: false
             
