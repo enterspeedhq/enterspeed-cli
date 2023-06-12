@@ -80,7 +80,7 @@ namespace Enterspeed.Cli.Commands.Schema
             // We are using the terms "full" as public facing term but "normal" inside the code base, so we have to do some manual mapping
             private SchemaType? GetSchemaType()
             {
-                if (Type == "full" || string.IsNullOrWhiteSpace(Type))
+                if (string.IsNullOrWhiteSpace(Type) || Type.Equals("full", StringComparison.InvariantCultureIgnoreCase))
                 {
                     return SchemaType.Normal;
                 }

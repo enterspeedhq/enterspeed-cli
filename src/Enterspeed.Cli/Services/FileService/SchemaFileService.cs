@@ -143,8 +143,8 @@ public class SchemaFileService : ISchemaFileService
     private static string GetRelativeFilePath(string alias, SchemaType schemaType)
     {
         return schemaType == SchemaType.Normal
-            ? $"{SchemaDirectory}/{GetFileName(alias)}"
-            : $"{PartialSchemaDirectory}/{GetFileName(alias)}";
+            ? Path.Combine(SchemaDirectory, GetFileName(alias))
+            : Path.Combine(PartialSchemaDirectory, GetFileName(alias));
     }
 
     private static string GetFileName(string alias)
