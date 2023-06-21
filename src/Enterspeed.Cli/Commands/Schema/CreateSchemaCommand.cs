@@ -1,7 +1,10 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Text.Json;
 using Enterspeed.Cli.Api.MappingSchema;
+using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Exceptions;
+using Enterspeed.Cli.Extensions;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;
 using MediatR;
@@ -13,7 +16,8 @@ namespace Enterspeed.Cli.Commands.Schema
     {
         public CreateSchemaCommand() : base(name: "create", "Creates schema")
         {
-            AddArgument(new Argument<string>("alias", "Alias of the schema") { });
+            AddArgument(new Argument<string>("alias", "Alias of the schema"));
+            AddOption(new Option<string>(new[] { "--type", "-t" }, "Type of the schema (full or partial). Default value is full"));
             AddOption(new Option<string>(new[] { "--name", "-n" }, "Name of the schema"));
         }
 
@@ -37,6 +41,7 @@ namespace Enterspeed.Cli.Commands.Schema
 
             public string Alias { get; set; }
             public string Name { get; set; }
+            public string Type { get; set; }
 
             public async Task<int> InvokeAsync(InvocationContext context)
             {
@@ -45,15 +50,22 @@ namespace Enterspeed.Cli.Commands.Schema
                     throw new ConsoleArgumentException("Please specify an alias for your schema");
                 }
 
-                var createSchemaResponse = await _mediator.Send(new CreateMappingSchemaRequest()
+                var schemaType = GetSchemaType();
+                if (!schemaType.HasValue)
+                {
+                    throw new ConsoleArgumentException("Please specify a valid value for type");
+                }
+
+                var createSchemaResponse = await _mediator.Send(new CreateMappingSchemaRequest
                 {
                     Name = Name ?? Alias,
-                    ViewHandle = Alias
+                    ViewHandle = Alias,
+                    Type = schemaType.Value.ToApiString()
                 });
 
                 if (createSchemaResponse?.IdValue != null && !string.IsNullOrEmpty(createSchemaResponse.MappingSchemaGuid))
                 {
-                    _schemaFileService.CreateSchema(Alias);
+                    _schemaFileService.CreateSchema(Alias, schemaType.Value);
                 }
                 else
                 {
@@ -61,9 +73,44 @@ namespace Enterspeed.Cli.Commands.Schema
                     return 1;
                 }
 
+                if (schemaType == SchemaType.Partial)
+                {
+                    await UpdateSchemaToPartialTemplate(createSchemaResponse.MappingSchemaGuid);
+                }
+                
                 _outputService.Write("Successfully created new schema : " + Alias);
 
                 return 0;
+            }
+
+            // Maybe this should be handled in the management API see shortcut story: 3226
+            private async Task UpdateSchemaToPartialTemplate(string mappingSchemaGuid)
+            {
+                var schema = _schemaFileService.GetSchema(Alias)?.SchemaBaseProperties;
+                
+                var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest
+                {
+                    Format = "json",
+                    MappingSchemaId = mappingSchemaGuid,
+                    Version = 1,
+                    Schema = JsonSerializer.SerializeToDocument(schema, SchemaFileService.SerializerOptions)
+                });
+            }
+
+            // We are using the terms "full" as public facing term but "normal" inside the code base, so we have to do some manual mapping
+            private SchemaType? GetSchemaType()
+            {
+                if (string.IsNullOrWhiteSpace(Type) || Type.Equals("full", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return SchemaType.Normal;
+                }
+                
+                if (Enum.TryParse(Type, true, out SchemaType schemaType))
+                {
+                    return schemaType;
+                }
+
+                return null;
             }
         }
     }
