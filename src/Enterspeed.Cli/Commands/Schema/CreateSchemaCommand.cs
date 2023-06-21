@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Text.Json;
 using Enterspeed.Cli.Api.MappingSchema;
 using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Exceptions;
@@ -72,9 +73,28 @@ namespace Enterspeed.Cli.Commands.Schema
                     return 1;
                 }
 
+                if (schemaType == SchemaType.Partial)
+                {
+                    await UpdateSchemaToPartialTemplate(createSchemaResponse.MappingSchemaGuid);
+                }
+                
                 _outputService.Write("Successfully created new schema : " + Alias);
 
                 return 0;
+            }
+
+            // Maybe this should be handled in the management API 
+            private async Task UpdateSchemaToPartialTemplate(string mappingSchemaGuid)
+            {
+                var schema = _schemaFileService.GetSchema(Alias)?.SchemaBaseProperties;
+                
+                var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest
+                {
+                    Format = "json",
+                    MappingSchemaId = mappingSchemaGuid,
+                    Version = 1,
+                    Schema = JsonSerializer.SerializeToDocument(schema, SchemaFileService.SerializerOptions)
+                });
             }
 
             // We are using the terms "full" as public facing term but "normal" inside the code base, so we have to do some manual mapping
