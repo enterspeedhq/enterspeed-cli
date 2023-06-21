@@ -1,4 +1,5 @@
 ﻿using Enterspeed.Cli.Api.MappingSchema.Models;
+using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Services.EnterspeedClient;
 using MediatR;
 using RestSharp;
@@ -16,6 +17,7 @@ namespace Enterspeed.Cli.Api.MappingSchema
         public string Name { get; set; }
         public string ViewHandle { get; set; }
         public int LatestVersion { get; set; }
+        public SchemaType Type { get; set; }
         public MappingSchemaVersion Version { get; set; }
         public List<DeploymentResponse> Deployments { get; set; }
     }

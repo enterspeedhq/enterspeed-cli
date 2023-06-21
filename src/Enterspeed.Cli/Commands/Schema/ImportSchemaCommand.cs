@@ -2,6 +2,7 @@
 using System.CommandLine.Invocation;
 using System.Text.Json;
 using Enterspeed.Cli.Api.MappingSchema;
+using Enterspeed.Cli.Extensions;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;
 using Enterspeed.Cli.Services.FileService.Models;
@@ -117,7 +118,8 @@ internal class ImportSchemaCommand : Command
             var createSchemaResponse = await _mediator.Send(new CreateMappingSchemaRequest
             {
                 Name = schemaFile.Alias,
-                ViewHandle = schemaFile.Alias
+                ViewHandle = schemaFile.Alias,
+                Type = schemaFile.SchemaType.ToApiString()
             });
 
             if (createSchemaResponse?.IdValue is null || string.IsNullOrEmpty(createSchemaResponse.MappingSchemaGuid))
