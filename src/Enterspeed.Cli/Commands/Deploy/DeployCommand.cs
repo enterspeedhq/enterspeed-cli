@@ -16,7 +16,8 @@ public class DeployCommand : Command
 {
     public DeployCommand() : base(name: "deploy", "Deploy schemas using deploymentplan")
     {
-        AddOption(new Option<string>(new[] { "--environment", "-e" }, "Target environment for deploy") { IsRequired = true });
+        AddOption(new Option<string>(new[] { "--environment", "-e" }, "Target environment for deploy")
+            { IsRequired = true });
         AddOption(new Option<string>(new[] { "--deploymentplan", "-dp" }, "Deploymentplan to use"));
     }
 
@@ -72,11 +73,6 @@ public class DeployCommand : Command
                 return 1;
             }
 
-            foreach (var schema in schemasToDeploy)
-            {
-                var currentVersion = 
-            }
-
             // Check if schemas are locked
             if (!EnsureSchemasLocked(schemasToDeploy))
             {
@@ -112,7 +108,8 @@ public class DeployCommand : Command
             return targetEnvironment?.Id;
         }
 
-        private async Task<IReadOnlyList<GetMappingSchemaResponse>> FetchSchemas(List<DeploymentPlanSchema> planSchemas, EnvironmentId targetEnvironment)
+        private async Task<IReadOnlyList<GetMappingSchemaResponse>> FetchSchemas(List<DeploymentPlanSchema> planSchemas,
+            EnvironmentId targetEnvironment)
         {
             var schemas = new List<GetMappingSchemaResponse>();
 
@@ -136,10 +133,19 @@ public class DeployCommand : Command
                     }
                 );
 
-                var newestDeployedSchemaForEnvironment = schema.Deployments.OrderByDescending(d => d.Version)
-                    .FirstOrDefault(d => d.EnvironmentId == targetEnvironment.IdValue);
+                var exstingDeployedSchemaForEnvironment =
+                    schema.Deployments.FirstOrDefault(d => d.EnvironmentId == targetEnvironment.IdValue);
 
-                if (newestDeployedSchemaForEnvironment != null && newestDeployedSchemaForEnvironment.Version < schema.LatestVersion)
+                // Check if deployed schema for environment is the same version as the one we are deploying
+                // If not, then add to list of schemas to deploy
+                if (exstingDeployedSchemaForEnvironment != null &&
+                    exstingDeployedSchemaForEnvironment.Version != schema.Version.Id.Version)
+                {
+                    schemas.Add(schema);
+                }
+                // If existing deployed schema for environment is null, then there are no deployed schema of this type
+                // on the environment. In this case we add the schema to list of schemas to deploy.
+                else if (exstingDeployedSchemaForEnvironment == null)
                 {
                     schemas.Add(schema);
                 }
