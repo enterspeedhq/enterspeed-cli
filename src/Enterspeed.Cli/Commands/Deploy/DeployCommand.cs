@@ -66,10 +66,15 @@ public class DeployCommand : Command
             }
 
             // Fetch schemas to deploy
-            var schemasToDeploy = await FetchSchemas(plan.Schemas);
+            var schemasToDeploy = await FetchSchemas(plan.Schemas, targetEnvironment);
             if (schemasToDeploy == null)
             {
                 return 1;
+            }
+
+            foreach (var schema in schemasToDeploy)
+            {
+                var currentVersion = 
             }
 
             // Check if schemas are locked
@@ -107,7 +112,7 @@ public class DeployCommand : Command
             return targetEnvironment?.Id;
         }
 
-        private async Task<IReadOnlyList<GetMappingSchemaResponse>> FetchSchemas(List<DeploymentPlanSchema> planSchemas)
+        private async Task<IReadOnlyList<GetMappingSchemaResponse>> FetchSchemas(List<DeploymentPlanSchema> planSchemas, EnvironmentId targetEnvironment)
         {
             var schemas = new List<GetMappingSchemaResponse>();
 
@@ -130,7 +135,14 @@ public class DeployCommand : Command
                         Version = planSchema.Version
                     }
                 );
-                schemas.Add(schema);
+
+                var newestDeployedSchemaForEnvironment = schema.Deployments.OrderByDescending(d => d.Version)
+                    .FirstOrDefault(d => d.EnvironmentId == targetEnvironment.IdValue);
+
+                if (newestDeployedSchemaForEnvironment != null && newestDeployedSchemaForEnvironment.Version < schema.LatestVersion)
+                {
+                    schemas.Add(schema);
+                }
             }
 
             return schemas;
