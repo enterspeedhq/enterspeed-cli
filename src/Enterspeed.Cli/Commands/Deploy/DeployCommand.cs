@@ -16,8 +16,7 @@ public class DeployCommand : Command
 {
     public DeployCommand() : base(name: "deploy", "Deploy schemas using deploymentplan")
     {
-        AddOption(new Option<string>(new[] { "--environment", "-e" }, "Target environment for deploy")
-            { IsRequired = true });
+        AddOption(new Option<string>(new[] { "--environment", "-e" }, "Target environment for deploy") { IsRequired = true });
         AddOption(new Option<string>(new[] { "--deploymentplan", "-dp" }, "Deploymentplan to use"));
     }
 
