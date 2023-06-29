@@ -75,7 +75,7 @@ internal class DeploySchemaCommand : Command
             }
 
             // Deploy schema
-            var environmentToDeployTo = await GetEnvironmentToDeployTo();
+            var environmentToDeployTo = await GetEnvironmentToDeployTo(Environment, _mediator);
             if (environmentToDeployTo == null)
             {
                 _logger.LogError("Environment to deploy to was not found");
@@ -107,13 +107,6 @@ internal class DeploySchemaCommand : Command
             _outputService.Write("Successfully deployed schema: " + Alias);
 
             return 0;
-        }
-
-        private async Task<GetEnvironmentsResponse> GetEnvironmentToDeployTo()
-        {
-            var environments = await _mediator.Send(new GetEnvironmentsRequest());
-            var environmentToDeployTo = environments.FirstOrDefault(e => e.Name == Environment);
-            return environmentToDeployTo;
         }
 
         private async Task<GetMappingSchemaResponse> GetExistingSchema(string mappingSchemaGuid)
