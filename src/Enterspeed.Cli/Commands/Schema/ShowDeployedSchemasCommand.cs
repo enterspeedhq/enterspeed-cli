@@ -9,7 +9,7 @@ namespace Enterspeed.Cli.Commands.Schema;
 
 public class ShowDeployedSchemasCommand : Command
 {
-    public ShowDeployedSchemasCommand() : base("showDeployed", "Shows all deployed schemas for the environment")
+    public ShowDeployedSchemasCommand() : base("show-deployed", "Shows all deployed schemas for the environment")
     {
         AddOption(new Option<string>(new[] { "--environment", "-e" }, "Environment name"));
     }
