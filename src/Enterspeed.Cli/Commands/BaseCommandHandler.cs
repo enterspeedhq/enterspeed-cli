@@ -1,7 +1,5 @@
 ﻿using System.CommandLine.Invocation;
-using Enterspeed.Cli.Api.Environment;
 using Enterspeed.Cli.Services.ConsoleOutput;
-using MediatR;
 
 namespace Enterspeed.Cli.Commands;
 
@@ -25,12 +23,5 @@ public class BaseCommandHandler
         if (confirm != null && (confirm.ToLower() == "y" || confirm.ToLower() == "yes"))
             return true;
         return false;
-    }
-
-    protected async Task<GetEnvironmentsResponse> GetEnvironmentToDeployTo(string environmentName, IMediator mediator)
-    {
-        var environments = await mediator.Send(new GetEnvironmentsRequest());
-        var environmentToDeployTo = environments.FirstOrDefault(e => e.Name == environmentName);
-        return environmentToDeployTo;
     }
 }
