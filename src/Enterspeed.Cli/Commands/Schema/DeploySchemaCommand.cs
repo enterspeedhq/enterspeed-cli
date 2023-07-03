@@ -17,6 +17,7 @@ internal class DeploySchemaCommand : Command
     public DeploySchemaCommand() : base("deploy", "Adds schema to deployment plan")
     {
         AddArgument(new Argument<string>("alias", "Alias of the schema"));
+        AddOption(new Option<bool>(new[] { "--force", "-f" }, "Force redeploy"));
         AddOption(new Option<string>(new[] { "--environment", "-e" }, "Environment name")
         {
             IsRequired = true
@@ -47,6 +48,7 @@ internal class DeploySchemaCommand : Command
 
         public string Alias { get; set; }
         public string Environment { get; set; }
+        public bool Force { get; set; }
 
         public async Task<int> InvokeAsync(InvocationContext context)
         {
@@ -66,6 +68,27 @@ internal class DeploySchemaCommand : Command
                 return 1;
             }
 
+            // Get environment
+            var environmentToDeployTo = await GetEnvironmentToDeployTo();
+            if (environmentToDeployTo == null)
+            {
+                _logger.LogError("Environment to deploy to was not found");
+                return 1;
+            }
+
+            // Check if version we are deploying is already deployed 
+            var currentlyDeployedSchema =
+                existingSchema.Deployments.FirstOrDefault(p => p.EnvironmentId == environmentToDeployTo.Id.IdValue);
+
+            if (currentlyDeployedSchema?.Version == existingSchema.Version.Id.Version && !Force)
+            {
+                var message = "This version of the schema has already been deployed";
+                _logger.LogInformation(message);
+                _outputService.Write(message);
+
+                return 1;
+            }
+
             // Validate that schema on disk matches schema saved in Enterspeed.
             var valid = _schemaFileService.SchemaValid(existingSchema.Version.Data, Alias);
             if (!valid)
@@ -75,13 +98,6 @@ internal class DeploySchemaCommand : Command
             }
 
             // Deploy schema
-            var environmentToDeployTo = await GetEnvironmentToDeployTo();
-            if (environmentToDeployTo == null)
-            {
-                _logger.LogError("Environment to deploy to was not found");
-                return 1;
-            }
-
             var createReleaseResponse = await _mediator.Send(new CreateReleaseRequest
             {
                 EnvironmentId = environmentToDeployTo.Id.IdValue,

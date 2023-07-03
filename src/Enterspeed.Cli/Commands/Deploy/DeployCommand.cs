@@ -132,19 +132,20 @@ public class DeployCommand : Command
                     }
                 );
 
-                var exstingDeployedSchemaForEnvironment =
+                var existingDeployedSchemaForEnvironment =
                     schema.Deployments.FirstOrDefault(d => d.EnvironmentId == targetEnvironment.IdValue);
 
                 // Check if deployed schema for environment is the same version as the one we are deploying
                 // If not, then add to list of schemas to deploy
-                if (exstingDeployedSchemaForEnvironment != null &&
-                    exstingDeployedSchemaForEnvironment.Version != schema.Version.Id.Version)
+                if (existingDeployedSchemaForEnvironment != null &&
+                    existingDeployedSchemaForEnvironment.Version != schema.Version.Id.Version)
                 {
                     schemas.Add(schema);
                 }
+
                 // If existing deployed schema for environment is null, then there are no deployed schema of this type
                 // on the environment. In this case we add the schema to list of schemas to deploy.
-                else if (exstingDeployedSchemaForEnvironment == null)
+                else if (existingDeployedSchemaForEnvironment == null)
                 {
                     schemas.Add(schema);
                 }
