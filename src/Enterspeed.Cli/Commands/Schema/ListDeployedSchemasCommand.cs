@@ -8,9 +8,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Enterspeed.Cli.Commands.Schema
 {
-    public class ShowDeployedSchemasCommand : Command
+    public class ListDeployedSchemasCommand : Command
     {
-        public ShowDeployedSchemasCommand() : base("show-deployed", "Shows all deployed schemas for the environment")
+        public ListDeployedSchemasCommand() : base("list-deployed", "Lists all deployed schemas for the environment")
         {
             AddOption(new Option<string>(new[] { "--environment", "-e" }, "Environment name"));
         }
@@ -19,11 +19,11 @@ namespace Enterspeed.Cli.Commands.Schema
         {
             private readonly IMediator _mediator;
             private readonly IOutputService _outputService;
-            private readonly ILogger<ShowDeployedSchemasCommand> _logger;
+            private readonly ILogger<ListDeployedSchemasCommand> _logger;
 
             public Handler(IMediator mediator,
                 IOutputService outputService,
-                ILogger<ShowDeployedSchemasCommand> logger)
+                ILogger<ListDeployedSchemasCommand> logger)
             {
                 _mediator = mediator;
                 _outputService = outputService;
@@ -46,7 +46,7 @@ namespace Enterspeed.Cli.Commands.Schema
                     EnvironmentId = environmentToDeployTo.Id.EnvironmentGuid.ToString()
                 });
 
-                _outputService.Write(schemas);
+                _outputService.Write(schemas.Current.Schemas);
                 return 0;
             }
 
