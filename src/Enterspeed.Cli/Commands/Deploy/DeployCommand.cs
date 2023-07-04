@@ -117,7 +117,7 @@ public class DeployCommand : Command
                 if (mappingSchemaId == null)
                 {
                     _logger.LogError($"Schema with alias {planSchema.Schema} not found");
-                    continue;
+                    return null;
                 }
 
                 var schema = await _mediator.Send(new GetMappingSchemaRequest
