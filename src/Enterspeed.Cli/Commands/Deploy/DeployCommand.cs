@@ -17,7 +17,7 @@ public class DeployCommand : Command
     public DeployCommand() : base(name: "deploy", "Deploy schemas using deploymentplan")
     {
         AddOption(new Option<string>(new[] { "--environment", "-e" }, "Target environment for deploy") { IsRequired = true });
-        AddOption(new Option<string>(new[] { "--deploymentplan", "-dp" }, "Deploymentplan to use"));
+        AddOption(new Option<string>(new[] { "--deploymentplan", "-dp" }, "Deployment plan to use"));
     }
 
     public new class Handler : BaseCommandHandler, ICommandHandler
@@ -43,30 +43,16 @@ public class DeployCommand : Command
         {
             _logger.LogInformation($"Deploy {DeploymentPlan} to {Environment}");
 
-            // Read deployment plan file
-            var plan = _deploymentPlanFileService.GetDeploymentPlan(DeploymentPlan);
-            if (plan == null)
-            {
-                _logger.LogError($"Deployment plan {DeploymentPlan} not found!");
-                return 1;
-            }
-
-            if (!plan.Schemas.Any())
-            {
-                _logger.LogError($"Deployment plan contains no schemas!");
-                return 1;
-            }
-
             // Resolve environment alias
-            var targetEnvironment = await GetTargetEnvironmentId(Environment);
-            if (targetEnvironment == null)
+            var targetEnvironmentId = await GetTargetEnvironmentId(Environment);
+            if (targetEnvironmentId == null)
             {
                 _logger.LogError($"Environment {Environment} not found!");
                 return 1;
             }
 
             // Fetch schemas to deploy
-            var schemasToDeploy = await FetchSchemas(plan.Schemas, targetEnvironment);
+            var schemasToDeploy = await FetchSchemas(targetEnvironmentId);
             if (schemasToDeploy == null)
             {
                 return 1;
@@ -81,7 +67,7 @@ public class DeployCommand : Command
             // Execute deployment
             var createReleaseRequest = new CreateReleaseRequest
             {
-                EnvironmentId = targetEnvironment.IdValue,
+                EnvironmentId = targetEnvironmentId.IdValue,
                 Schemas = schemasToDeploy.Select(x => new SchemaVersionId
                 {
                     SchemaId = x.Version.Id.IdValue,
@@ -90,7 +76,6 @@ public class DeployCommand : Command
             };
 
             var createReleaseResponse = await _mediator.Send(createReleaseRequest);
-
             if (!createReleaseResponse.Success)
             {
                 LogError(createReleaseResponse.Error);
@@ -100,20 +85,31 @@ public class DeployCommand : Command
             return 0;
         }
 
-        private async Task<EnvironmentId> GetTargetEnvironmentId(string environmentName)
+        private async Task<IReadOnlyList<GetMappingSchemaResponse>> FetchSchemas(EnvironmentId targetEnvironmentId)
         {
-            var environments = await _mediator.Send(new GetEnvironmentsRequest());
-            var targetEnvironment = environments.FirstOrDefault(env => env.Name == environmentName);
-            return targetEnvironment?.Id;
+            // Read deployment plan file
+            var plan = _deploymentPlanFileService.GetDeploymentPlan(DeploymentPlan);
+            if (plan == null)
+            {
+                _logger.LogError($"Deployment plan {DeploymentPlan} not found!");
+                return null;
+            }
+
+            if (!plan.Schemas.Any())
+            {
+                _logger.LogError($"Deployment plan contains no schemas!");
+                return null;
+            }
+
+            return await FetchSchemas(plan.Schemas, targetEnvironmentId);
         }
 
-        private async Task<IReadOnlyList<GetMappingSchemaResponse>> FetchSchemas(List<DeploymentPlanSchema> planSchemas,
-            EnvironmentId targetEnvironment)
+        private async Task<List<GetMappingSchemaResponse>> FetchSchemas(List<DeploymentPlanSchema> planSchemas, EnvironmentId targetEnvironmentId)
         {
-            var schemas = new List<GetMappingSchemaResponse>();
-
             // Resolve schema aliases
             var schemaQueryResponse = await _mediator.Send(new QueryMappingSchemasRequest());
+
+            var schemas = new List<GetMappingSchemaResponse>();
 
             foreach (var planSchema in planSchemas)
             {
@@ -121,37 +117,45 @@ public class DeployCommand : Command
                 if (mappingSchemaId == null)
                 {
                     _logger.LogError($"Schema with alias {planSchema.Schema} not found");
-                    return null;
+                    continue;
                 }
 
-                var schema = await _mediator.Send(
-                    new GetMappingSchemaRequest
-                    {
-                        MappingSchemaId = mappingSchemaId.MappingSchemaGuid,
-                        Version = planSchema.Version
-                    }
-                );
-
-                var existingDeployedSchemaForEnvironment =
-                    schema.Deployments.FirstOrDefault(d => d.EnvironmentId == targetEnvironment.IdValue);
-
-                // Check if deployed schema for environment is the same version as the one we are deploying
-                // If not, then add to list of schemas to deploy
-                if (existingDeployedSchemaForEnvironment != null &&
-                    existingDeployedSchemaForEnvironment.Version != schema.Version.Id.Version)
+                var schema = await _mediator.Send(new GetMappingSchemaRequest
                 {
-                    schemas.Add(schema);
-                }
+                    MappingSchemaId = mappingSchemaId.MappingSchemaGuid,
+                    Version = planSchema.Version
+                });
 
-                // If existing deployed schema for environment is null, then there are no deployed schema of this type
-                // on the environment. In this case we add the schema to list of schemas to deploy.
-                else if (existingDeployedSchemaForEnvironment == null)
-                {
-                    schemas.Add(schema);
-                }
+                AddSchemaToList(schema, schemas, targetEnvironmentId);
             }
 
             return schemas;
+        }
+
+        private static void AddSchemaToList(GetMappingSchemaResponse schema, ICollection<GetMappingSchemaResponse> schemas, EnvironmentId targetEnvironment)
+        {
+            var existingDeployedSchemaForEnvironment = schema.Deployments.FirstOrDefault(d => d.EnvironmentId == targetEnvironment.IdValue);
+
+            // Check if deployed schema for environment is the same version as the one we are deploying
+            // If not, then add to list of schemas to deploy
+            if (existingDeployedSchemaForEnvironment != null &&
+                existingDeployedSchemaForEnvironment.Version != schema.Version.Id.Version)
+            {
+                schemas.Add(schema);
+            }
+            // If existing deployed schema for environment is null, then there are no deployed schema of this type
+            // on the environment. In this case we add the schema to list of schemas to deploy.
+            else if (existingDeployedSchemaForEnvironment == null)
+            {
+                schemas.Add(schema);
+            }
+        }
+
+        private async Task<EnvironmentId> GetTargetEnvironmentId(string environmentName)
+        {
+            var environments = await _mediator.Send(new GetEnvironmentsRequest());
+            var targetEnvironment = environments.FirstOrDefault(env => env.Name == environmentName);
+            return targetEnvironment?.Id;
         }
 
         private bool EnsureSchemasLocked(IEnumerable<GetMappingSchemaResponse> schemasToDeploy)
