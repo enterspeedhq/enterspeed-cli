@@ -24,4 +24,4 @@ public class BaseCommandHandler
             return true;
         return false;
     }
-}   
+}

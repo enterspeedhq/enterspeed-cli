@@ -12,7 +12,8 @@ namespace Enterspeed.Cli.Commands.Schema
                 new SaveSchemaCommand(),
                 new DeploySchemaCommand(),
                 new CloneSchemaCommand(),
-                new ImportSchemaCommand()
+                new ImportSchemaCommand(),
+                new ListDeployedSchemasCommand()
             };
 
             return command;
