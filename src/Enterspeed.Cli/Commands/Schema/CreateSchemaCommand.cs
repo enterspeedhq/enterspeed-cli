@@ -86,7 +86,7 @@ namespace Enterspeed.Cli.Commands.Schema
             // Maybe this should be handled in the management API see shortcut story: 3226
             private async Task UpdateSchemaToPartialTemplate(string mappingSchemaGuid)
             {
-                var schema = _schemaFileService.GetSchema(Alias)?.SchemaBaseProperties;
+                var schema = _schemaFileService.GetSchema(Alias)?.Content;
                 
                 var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest
                 {

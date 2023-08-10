@@ -1,6 +1,8 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Text;
 using System.Text.Json;
+using System.Text.Unicode;
 using Enterspeed.Cli.Api.MappingSchema;
 using Enterspeed.Cli.Extensions;
 using Enterspeed.Cli.Services.ConsoleOutput;
@@ -26,9 +28,9 @@ internal class ImportSchemaCommand : Command
         private readonly ISchemaFileService _schemaFileService;
         private readonly ILogger<CreateSchemaCommand> _logger;
 
-        public Handler(IMediator mediator, 
-            IOutputService outputService, 
-            ISchemaFileService schemaFileService, 
+        public Handler(IMediator mediator,
+            IOutputService outputService,
+            ISchemaFileService schemaFileService,
             ILogger<CreateSchemaCommand> logger)
         {
             _mediator = mediator;
@@ -43,9 +45,9 @@ internal class ImportSchemaCommand : Command
         public async Task<int> InvokeAsync(InvocationContext context)
         {
             var existingSchemas = await _mediator.Send(new QueryMappingSchemasRequest());
-            
-            var schemaFiles = string.IsNullOrWhiteSpace(SchemaAlias) 
-                ? _schemaFileService.GetAllSchemas() 
+
+            var schemaFiles = string.IsNullOrWhiteSpace(SchemaAlias)
+                ? _schemaFileService.GetAllSchemas()
                 : new List<SchemaFile> { _schemaFileService.GetSchema(SchemaAlias) };
 
             var successfulImports = 0;
@@ -72,7 +74,7 @@ internal class ImportSchemaCommand : Command
             }
 
             _outputService.Write($"Successfully imported {successfulImports} schema(s).");
-                
+
             if (failedImports > 0)
             {
                 _outputService.Write($"Failed to imported {failedImports} schema(s).");
@@ -96,15 +98,15 @@ internal class ImportSchemaCommand : Command
                 _logger.LogError("Schema not found!");
                 return false;
             }
-            
+
             var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest
             {
-                Format = "json",
+                Format = schemaFile.Format,
                 MappingSchemaId = queryMappingSchemaResponse.Id.MappingSchemaGuid,
                 Version = existingSchema.LatestVersion,
-                Schema = JsonSerializer.SerializeToDocument(schemaFile.SchemaBaseProperties, SchemaFileService.SerializerOptions)
+                Schema = JsonSerializer.SerializeToDocument(schemaFile.Content, SchemaFileService.SerializerOptions)
             });
-            
+
             _outputService.Write($"Successfully updated schema: {schemaFile.Alias} Version: {updateSchemaResponse.Version}");
 
             return true;
@@ -119,7 +121,8 @@ internal class ImportSchemaCommand : Command
             {
                 Name = schemaFile.Alias,
                 ViewHandle = schemaFile.Alias,
-                Type = schemaFile.SchemaType.ToApiString()
+                Type = schemaFile.SchemaType.ToApiString(),
+                Format = schemaFile.Format
             });
 
             if (createSchemaResponse?.IdValue is null || string.IsNullOrEmpty(createSchemaResponse.MappingSchemaGuid))
@@ -129,13 +132,23 @@ internal class ImportSchemaCommand : Command
             }
 
             _outputService.Write("Successfully created new schema: " + schemaFile.Alias);
-            
+
+            object schemaContent;
+            if (schemaFile.Format.Equals("javascript"))
+            {
+                schemaContent = Convert.ToBase64String(Encoding.UTF8.GetBytes(schemaFile.Content?.ToString() ?? string.Empty));
+            }
+            else
+            {
+                schemaContent = JsonSerializer.SerializeToDocument(schemaFile.Content, SchemaFileService.SerializerOptions);
+            }
+
             var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest
             {
-                Format = "json",
+                Format = schemaFile.Format,
                 MappingSchemaId = createSchemaResponse.MappingSchemaGuid,
                 Version = createSchemaResponse.Version,
-                Schema = JsonSerializer.SerializeToDocument(schemaFile.SchemaBaseProperties, SchemaFileService.SerializerOptions)
+                Schema = schemaContent
             });
 
             _outputService.Write($"Successfully updated schema: {schemaFile.Alias} Version: {updateSchemaResponse.Version}");

@@ -47,7 +47,7 @@ namespace Enterspeed.Cli.Commands.Schema
                     throw new ConsoleArgumentException("Please specify an alias for your schema");
                 }
 
-                var schema = _schemaFileService.GetSchema(Alias, File)?.SchemaBaseProperties;
+                var schema = _schemaFileService.GetSchema(Alias, File)?.Content;
                 if (schema == null)
                 {
                     _logger.LogError("Schema file not found!");
