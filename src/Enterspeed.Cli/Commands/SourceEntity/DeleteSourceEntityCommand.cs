@@ -14,7 +14,7 @@ public class DeleteSourceEntitiesCommand : Command
     public DeleteSourceEntitiesCommand() : base(name: "delete", "Delete source entity")
     {
         AddArgument(new Argument<string>("id", "Id of the source entity to delete") { Arity = ArgumentArity.ExactlyOne });
-        AddOption(new Option<string>(new[] { "--sourceId", "-s" }, "Id of the source, if not using full source entity id") { Arity = ArgumentArity.ZeroOrOne });
+        AddOption(new Option<string>(new[] { "--source-id", "-s" }, "Id of the source, if not using full source entity id") { Arity = ArgumentArity.ZeroOrOne });
     }
 
     public new class Handler : BaseCommandHandler, ICommandHandler

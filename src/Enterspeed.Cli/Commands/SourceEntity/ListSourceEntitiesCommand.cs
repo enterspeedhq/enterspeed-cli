@@ -11,8 +11,8 @@ public class ListSourceEntitiesCommand : Command
     public ListSourceEntitiesCommand() : base(name: "list", "List source entities")
     {
         AddArgument(new Argument<string>("sourceId", "Id of the source") { Arity = ArgumentArity.ExactlyOne });
-        AddOption(new Option<string>("--Filter", "Filter on ID or Url"));
-        AddOption(new Option<string>("--Type", "Source Entity type"));
+        AddOption(new Option<string>("--filter", "Filter on ID or Url"));
+        AddOption(new Option<string>("--type", "Source Entity type"));
     }
 
     public new class Handler : BaseCommandHandler, ICommandHandler
