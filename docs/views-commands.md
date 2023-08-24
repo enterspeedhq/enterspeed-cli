@@ -13,21 +13,21 @@ Query views.
 Query generated views.
 
 ```bash
-es-cli view list <EnvironmentId> [--SourceId] 
-                                 [--SchemaAlias]
-                                 [--OriginId] 
+es-cli view list <environmentId> [--source-id] 
+                                 [--schema-alias]
+                                 [--origin-id] 
 ```
 
 #### Required Parameters
-`EnvironmentId`
+`environmentId`
 
 Id of environment to query.
 
 
 #### Optional Parameters
 
-`--SourceId`
+`--source-id`
 
-`--SchemaAlias`
+`--schema-alias`
 
-`--OriginId`
+`--origin-id`
