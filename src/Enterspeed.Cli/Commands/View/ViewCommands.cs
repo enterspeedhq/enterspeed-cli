@@ -6,7 +6,7 @@ public static class ViewCommands
 {
     public static Command BuildCommands()
     {
-        var command = new Command("views", "Generated views")
+        var command = new Command("view", "Generated views")
         {
             new ListViewsCommand()
         };

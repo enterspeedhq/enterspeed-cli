@@ -8,7 +8,7 @@ public static class SourceGroupCommands
     {
         var command = new Command("source-group", "Source group")
         {
-            new ListSourceGroupCommand(),
+            new ListSourceGroupsCommand(),
             new CreateSourceGroupCommand(),
             new UpdateSourceGroupCommand(),
             new DeleteSourceGroupCommand()
