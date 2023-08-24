@@ -12,7 +12,7 @@ namespace Enterspeed.Cli.Commands.SourceEntity
     {
         public IngestSourceEntitiesCommand() : base(name: "ingest", "Ingest source entities")
         {
-            AddArgument(new Argument<string>("FilePath", "File or path to ingest") {Arity = ArgumentArity.ExactlyOne});
+            AddArgument(new Argument<string>("filePath", "File or path to ingest") {Arity = ArgumentArity.ExactlyOne});
             AddOption(new Option<string>(new [] { "--sourceId", "-s" }, "Id of the source") { Arity = ArgumentArity.ExactlyOne });
             AddOption(new Option<bool>( new [] { "--filenameAsId", "-fid" }, "Use filename as id"));
         }
