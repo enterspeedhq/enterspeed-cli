@@ -1,6 +1,8 @@
 # es-cli view
 Reference
 
+Shortcut: `es-cli v`
+
 Query views.
 
 ## Commands

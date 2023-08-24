@@ -4,15 +4,14 @@ namespace Enterspeed.Cli.Commands.SourceGroup;
 
 public static class SourceGroupCommands
 {
-    public static Command BuildCommands()
+    public static Command[] BuildCommands()
     {
-        var command = new Command("source-group", "Source group")
+        return new[] { "source-group", "sg" }.Select(commandName => new Command(commandName, "Source group")
         {
             new ListSourceGroupCommand(),
             new CreateSourceGroupCommand(),
             new UpdateSourceGroupCommand(),
             new DeleteSourceGroupCommand()
-        };
-        return command;
+        }).ToArray();
     }
 }

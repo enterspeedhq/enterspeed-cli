@@ -65,16 +65,16 @@ namespace Enterspeed.Cli
         {
             var root = new RootCommand();
             root.AddCommand(new LoginCommand());
-            root.AddCommand(TenantCommands.BuildCommands());
-            root.AddCommand(EnvironmentCommands.BuildCommands());
-            root.AddCommand(EnvironmentClientCommands.BuildCommands());
-            root.AddCommand(DomainCommands.BuildCommands());
-            root.AddCommand(SourceGroupCommands.BuildCommands());
-            root.AddCommand(SourceCommands.BuildCommands());
-            root.AddCommand(ViewCommands.BuildCommands());
-            root.AddCommand(SourceEntityCommands.BuildCommands());
-            root.AddCommand(SchemaCommands.BuildCommands());
-            root.AddCommand(DeployCommands.BuildCommands());
+            root.AddCommands(TenantCommands.BuildCommands());
+            root.AddCommands(EnvironmentCommands.BuildCommands());
+            root.AddCommands(EnvironmentClientCommands.BuildCommands());
+            root.AddCommands(DomainCommands.BuildCommands());
+            root.AddCommands(SourceGroupCommands.BuildCommands());
+            root.AddCommands(SourceCommands.BuildCommands());
+            root.AddCommands(ViewCommands.BuildCommands());
+            root.AddCommands(SourceEntityCommands.BuildCommands());
+            root.AddCommands(SchemaCommands.BuildCommands());
+            root.AddCommands(DeployCommands.BuildCommands());
 
             root.AddGlobalOption(OutPutStyle);
             root.AddGlobalOption(VerboseLogging);

@@ -1,6 +1,8 @@
 # es-cli tenant
 Reference
 
+Shortcut: `es-cli t`
+
 Lists and sets working tenant
 
 > NOTE: These commands do not work when using API Keys, as they are bound to a single tenant.

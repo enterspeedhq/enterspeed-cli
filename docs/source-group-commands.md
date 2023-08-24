@@ -1,6 +1,8 @@
 # es-cli source-group
 Reference
 
+Shortcut: `es-cli sg`
+
 Manage source groups for tenant.
 
 ## Commands

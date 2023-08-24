@@ -4,12 +4,11 @@ namespace Enterspeed.Cli.Commands.View;
 
 public static class ViewCommands
 {
-    public static Command BuildCommands()
+    public static Command[] BuildCommands()
     {
-        var command = new Command("views", "Generated views")
+        return new[] { "views", "v" }.Select(commandName => new Command(commandName, "Generated views")
         {
             new ListViewsCommand()
-        };
-        return command;
+        }).ToArray();
     }
 }

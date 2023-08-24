@@ -4,14 +4,13 @@ namespace Enterspeed.Cli.Commands.Source;
 
 public static class SourceCommands
 {
-    public static Command BuildCommands()
+    public static Command[] BuildCommands()
     {
-        var command = new Command("source", "Source")
+        return new[] { "source", "s" }.Select(commandName => new Command(commandName, "Source")
         {
             new CreateSourceCommand(),
             new UpdateSourceCommand(),
             new DeleteSourceCommand()
-        };
-        return command;
+        }).ToArray();
     }
 }

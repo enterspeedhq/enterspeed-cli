@@ -4,15 +4,13 @@ namespace Enterspeed.Cli.Commands.Deploy
 {
     public class DeployCommands
     {
-        public static Command BuildCommands()
+        public static Command[] BuildCommands()
         {
-            var command = new Command("deployment")
+            return new[] { "deployment", "dp" }.Select(commandName => new Command(commandName)
             {
                 new DeployCommand(),
                 new ExtractCommand()
-            };
-
-            return command;
+            }).ToArray();
         }
     }
 }

@@ -4,16 +4,16 @@ namespace Enterspeed.Cli.Commands.Domain;
 
 public static class DomainCommands
 {
-    public static Command BuildCommands()
+    public static Command[] BuildCommands()
     {
-        var domain = new Command("domain", "Domain")
+        return new[] { "domain", "d" }.Select(commandName => new Command(commandName, "Domain")
         {
             new GetDomainCommand(),
             new ListDomainsCommand(),
             new CreateDomainCommand(),
             new UpdateDomainCommand(),
             new DeleteDomainCommand()
-        };
-        return domain;
+        }).ToArray();
+        
     }
 }

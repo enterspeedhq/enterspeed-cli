@@ -4,15 +4,13 @@ namespace Enterspeed.Cli.Commands.Tenant;
 
 public static class TenantCommands
 {
-    public static Command BuildCommands()
+    public static Command[] BuildCommands()
     {
-        var command = new Command("tenant", "Tenant")
+        return new[] { "tenant", "t" }.Select(commandName => new Command(commandName, "Tenant")
         {
             new ListTenantsCommand(),
             new CurrentTenantCommand(),
             new SetActiveTenantCommand()
-            
-        };
-        return command;
+        }).ToArray();
     }
 }
