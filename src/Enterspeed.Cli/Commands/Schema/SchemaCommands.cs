@@ -4,9 +4,9 @@ namespace Enterspeed.Cli.Commands.Schema
 {
     public class SchemaCommands
     {
-        public static Command[] BuildCommands()
+        public static Command BuildCommands()
         {
-            return new[] { "schema", "sc" }.Select(commandName => new Command(commandName, "Schemas")
+            var command = new Command("schema", "Schemas")
             {
                 new CreateSchemaCommand(),
                 new SaveSchemaCommand(),
@@ -14,7 +14,9 @@ namespace Enterspeed.Cli.Commands.Schema
                 new CloneSchemaCommand(),
                 new ImportSchemaCommand(),
                 new ListDeployedSchemasCommand()
-            }).ToArray();
+            };
+            command.AddAlias("sc");
+            return command;
         }
     }
 }

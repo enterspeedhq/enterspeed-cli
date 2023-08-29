@@ -4,13 +4,15 @@ namespace Enterspeed.Cli.Commands.SourceEntity;
 
 public static class SourceEntityCommands
 {
-    public static Command[] BuildCommands()
+    public static Command BuildCommands()
     {
-        return new[] { "source-entity", "se" }.Select(commandName => new Command(commandName, "Source entities")
+        var command = new Command("source-entity", "Source entities")
         {
             new ListSourceEntitiesCommand(), 
             new IngestSourceEntitiesCommand(),
             new DeleteSourceEntitiesCommand()
-        }).ToArray();
+        };
+        command.AddAlias("se");
+        return command;
     }
 }
