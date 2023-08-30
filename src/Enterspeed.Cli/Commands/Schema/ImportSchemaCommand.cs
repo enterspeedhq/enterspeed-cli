@@ -104,7 +104,7 @@ internal class ImportSchemaCommand : Command
                 Format = schemaFile.Format,
                 MappingSchemaId = queryMappingSchemaResponse.Id.MappingSchemaGuid,
                 Version = existingSchema.LatestVersion,
-                Schema = JsonSerializer.SerializeToDocument(schemaFile.Content, SchemaFileService.SerializerOptions)
+                Schema = schemaFile.GetSchemaContent()
             });
 
             _outputService.Write($"Successfully updated schema: {schemaFile.Alias} Version: {updateSchemaResponse.Version}");
@@ -133,22 +133,12 @@ internal class ImportSchemaCommand : Command
 
             _outputService.Write("Successfully created new schema: " + schemaFile.Alias);
 
-            object schemaContent;
-            if (schemaFile.Format.Equals(SchemaConstants.JsFormat))
-            {
-                schemaContent = Convert.ToBase64String(Encoding.UTF8.GetBytes(schemaFile.Content?.ToString() ?? string.Empty));
-            }
-            else
-            {
-                schemaContent = JsonSerializer.SerializeToDocument(schemaFile.Content, SchemaFileService.SerializerOptions);
-            }
-
             var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest
             {
                 Format = schemaFile.Format,
                 MappingSchemaId = createSchemaResponse.MappingSchemaGuid,
                 Version = createSchemaResponse.Version,
-                Schema = schemaContent
+                Schema = schemaFile.GetSchemaContent()
             });
 
             _outputService.Write($"Successfully updated schema: {schemaFile.Alias} Version: {updateSchemaResponse.Version}");

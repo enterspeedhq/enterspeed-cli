@@ -37,7 +37,6 @@ namespace Enterspeed.Cli.Commands.Deploy
 
             public async Task<int> InvokeAsync(InvocationContext context)
             {
-                var schemaResponses = new List<GetMappingSchemaResponse>();
                 var allEnvironments = await _mediator.Send(new GetEnvironmentsRequest());
 
                 var environment = allEnvironments.FirstOrDefault(e => e.Name == Environment);

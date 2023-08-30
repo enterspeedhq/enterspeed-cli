@@ -1,8 +1,8 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Text.Json;
 using Enterspeed.Cli.Api.MappingSchema;
 using Enterspeed.Cli.Exceptions;
+using Enterspeed.Cli.Extensions;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;
 using MediatR;
@@ -47,8 +47,8 @@ namespace Enterspeed.Cli.Commands.Schema
                     throw new ConsoleArgumentException("Please specify an alias for your schema");
                 }
 
-                var schema = _schemaFileService.GetSchema(Alias, File)?.Content;
-                if (schema == null)
+                var schema = _schemaFileService.GetSchema(Alias, File);
+                if (schema.Content == null)
                 {
                     _logger.LogError("Schema file not found!");
                     return 1;
@@ -82,7 +82,7 @@ namespace Enterspeed.Cli.Commands.Schema
                     Format = "json",
                     MappingSchemaId = existingSchema.Version.Id.MappingSchemaGuid,
                     Version = existingSchema.LatestVersion,
-                    Schema = JsonSerializer.SerializeToDocument(schema, SchemaFileService.SerializerOptions)
+                    Schema = schema.GetSchemaContent()
                 });
 
                 var updatedSchema = await _mediator.Send(
