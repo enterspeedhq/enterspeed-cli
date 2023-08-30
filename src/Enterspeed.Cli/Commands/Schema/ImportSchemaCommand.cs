@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Unicode;
 using Enterspeed.Cli.Api.MappingSchema;
+using Enterspeed.Cli.Constants;
 using Enterspeed.Cli.Extensions;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;
@@ -134,7 +135,7 @@ internal class ImportSchemaCommand : Command
             _outputService.Write("Successfully created new schema: " + schemaFile.Alias);
 
             object schemaContent;
-            if (schemaFile.Format.Equals("javascript"))
+            if (schemaFile.Format.Equals(SchemaConstants.JsFormat))
             {
                 schemaContent = Convert.ToBase64String(Encoding.UTF8.GetBytes(schemaFile.Content?.ToString() ?? string.Empty));
             }

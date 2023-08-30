@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Enterspeed.Cli.Api.MappingSchema.Models;
+using Enterspeed.Cli.Constants;
 using Enterspeed.Cli.Domain;
 using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Services.FileService.Models;
@@ -39,7 +40,7 @@ public class SchemaFileService : ISchemaFileService
         {
             using (var fs = File.Create(GetRelativeFilePath(alias, schemaType, version.Format)))
             {
-                if (version.Format.Equals("javascript"))
+                if (version.Format.Equals(SchemaConstants.JsFormat))
                 {
                     CreateSchema(version, fs);
                 }
@@ -85,10 +86,10 @@ public class SchemaFileService : ISchemaFileService
         var schemaContent = GetSchemaContent(alias, schemaFilePath);
 
         var schemaType = schemaFolderName == partialSchemaFolderName ? SchemaType.Partial : SchemaType.Normal;
-        var schemaFormat = schemaFilePath.EndsWith(".js") ? "javascript" : "json";
+        var schemaFormat = schemaFilePath.EndsWith(".js") ? SchemaConstants.JsFormat : SchemaConstants.JsonFormat;
 
         object content;
-        if (schemaFormat.Equals("javascript"))
+        if (schemaFormat.Equals(SchemaConstants.JsFormat))
         {
             content = schemaContent;
         }
@@ -169,7 +170,7 @@ public class SchemaFileService : ISchemaFileService
 
     private static string GetFileName(string alias, string format)
     {
-        if (format.Equals("javascript"))
+        if (format.Equals(SchemaConstants.JsFormat))
         {
             return $"{alias}.js";
         }
