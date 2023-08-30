@@ -13,6 +13,7 @@ public static class SourceGroupCommands
             new UpdateSourceGroupCommand(),
             new DeleteSourceGroupCommand()
         };
+        command.AddAlias("sg");
         return command;
     }
 }

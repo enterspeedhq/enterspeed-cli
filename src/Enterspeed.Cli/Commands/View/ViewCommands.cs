@@ -10,6 +10,7 @@ public static class ViewCommands
         {
             new ListViewsCommand()
         };
+        command.AddAlias("v");
         return command;
     }
 }

@@ -1,6 +1,8 @@
 # es-cli deploy
 Reference
 
+Shortcut: `es-cli dp`
+
 Deploys or extract a deployplan to/from the target environment.
 
 ## Commands

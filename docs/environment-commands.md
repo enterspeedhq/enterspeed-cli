@@ -1,6 +1,8 @@
 # es-cli environment
 Reference
 
+Shortcut: `es-cli e`
+
 Manage environments for tenant.
 
 ## Commands

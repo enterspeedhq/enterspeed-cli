@@ -12,6 +12,7 @@ public static class SourceCommands
             new UpdateSourceCommand(),
             new DeleteSourceCommand()
         };
+        command.AddAlias("s");
         return command;
     }
 }

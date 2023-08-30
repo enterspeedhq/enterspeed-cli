@@ -1,6 +1,8 @@
 # es-cli environment-client
 Reference
 
+Shortcut: `es-cli ec`
+
 Manage environment-clients for tenant.
 
 ## Commands
