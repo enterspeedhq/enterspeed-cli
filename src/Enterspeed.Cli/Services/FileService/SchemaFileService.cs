@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Enterspeed.Cli.Api.MappingSchema.Models;
 using Enterspeed.Cli.Constants;
@@ -117,7 +118,7 @@ public class SchemaFileService : ISchemaFileService
             .ToList();
     }
 
-    public bool SchemaValid(string externalSchema, string schemaAlias)
+    public bool SchemaValid(MappingSchemaVersion externalSchema, string schemaAlias)
     {
         if (!SchemaExists(schemaAlias))
         {
@@ -125,7 +126,7 @@ public class SchemaFileService : ISchemaFileService
         }
 
         var localSchema = GetSchemaContent(schemaAlias);
-        return CompareSchemaContent(externalSchema, localSchema);
+        return CompareSchemaContent(externalSchema.Data, localSchema, externalSchema.Format);
     }
 
     public bool SchemaExists(string alias)
@@ -192,7 +193,22 @@ public class SchemaFileService : ISchemaFileService
         return Path.GetFileNameWithoutExtension(filePath);
     }
 
-    private bool CompareSchemaContent(string schema1, string schema2)
+
+    private bool CompareSchemaContent(string externalSchema, string localSchema, string schemaFormat)
+    {
+        return schemaFormat.Equals(SchemaConstants.JsonFormat) ? CompareJsonSchemas(externalSchema, localSchema)
+            : CompareJavascriptSchemas(externalSchema, localSchema);
+    }
+
+    private static bool CompareJavascriptSchemas(string externalSchema, string localSchema)
+    {
+        var externalSchemaDecoded = Convert.FromBase64String(externalSchema);
+        var externalSchemaDecodedString = Encoding.UTF8.GetString(externalSchemaDecoded);
+
+        return externalSchemaDecodedString.Equals(localSchema);
+    }
+
+    private bool CompareJsonSchemas(string schema1, string schema2)
     {
         var comparer = new JsonElementComparer();
         try

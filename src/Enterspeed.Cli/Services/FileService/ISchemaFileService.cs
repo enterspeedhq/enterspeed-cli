@@ -10,5 +10,5 @@ public interface ISchemaFileService
     SchemaFile GetSchema(string alias, string filePath = null);
     IList<SchemaFile> GetAllSchemas();
     bool SchemaExists(string alias);
-    bool SchemaValid(string externalSchema, string schemaAlias);
+    bool SchemaValid(MappingSchemaVersion version, string schemaAlias);
 }

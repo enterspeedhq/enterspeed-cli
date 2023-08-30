@@ -2,7 +2,6 @@
 using System.CommandLine.Invocation;
 using System.Text;
 using System.Text.Json;
-using System.Text.Unicode;
 using Enterspeed.Cli.Api.MappingSchema;
 using Enterspeed.Cli.Constants;
 using Enterspeed.Cli.Extensions;
