@@ -1,7 +1,7 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Text.Json;
 using Enterspeed.Cli.Api.MappingSchema;
+using Enterspeed.Cli.Constants;
 using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Exceptions;
 using Enterspeed.Cli.Extensions;
@@ -28,9 +28,9 @@ namespace Enterspeed.Cli.Commands.Schema
             private readonly ISchemaFileService _schemaFileService;
             private readonly ILogger<CreateSchemaCommand> _logger;
 
-            public Handler(IMediator mediator, 
-                IOutputService outputService, 
-                ISchemaFileService schemaFileService, 
+            public Handler(IMediator mediator,
+                IOutputService outputService,
+                ISchemaFileService schemaFileService,
                 ILogger<CreateSchemaCommand> logger)
             {
                 _mediator = mediator;
@@ -42,6 +42,7 @@ namespace Enterspeed.Cli.Commands.Schema
             public string Alias { get; set; }
             public string Name { get; set; }
             public string Type { get; set; }
+            public string Format { get; set; }
 
             public async Task<int> InvokeAsync(InvocationContext context)
             {
@@ -56,11 +57,17 @@ namespace Enterspeed.Cli.Commands.Schema
                     throw new ConsoleArgumentException("Please specify a valid value for type");
                 }
 
+                if (string.IsNullOrEmpty(Format))
+                {
+                    Format = SchemaConstants.JsonFormat;
+                }
+
                 var createSchemaResponse = await _mediator.Send(new CreateMappingSchemaRequest
                 {
                     Name = Name ?? Alias,
                     ViewHandle = Alias,
-                    Type = schemaType.Value.ToApiString()
+                    Type = schemaType.Value.ToApiString(),
+                    Format = Format
                 });
 
                 if (createSchemaResponse?.IdValue != null && !string.IsNullOrEmpty(createSchemaResponse.MappingSchemaGuid))
@@ -77,7 +84,7 @@ namespace Enterspeed.Cli.Commands.Schema
                 {
                     await UpdateSchemaToPartialTemplate(createSchemaResponse.MappingSchemaGuid);
                 }
-                
+
                 _outputService.Write("Successfully created new schema : " + Alias);
 
                 return 0;
@@ -86,14 +93,14 @@ namespace Enterspeed.Cli.Commands.Schema
             // Maybe this should be handled in the management API see shortcut story: 3226
             private async Task UpdateSchemaToPartialTemplate(string mappingSchemaGuid)
             {
-                var schema = _schemaFileService.GetSchema(Alias)?.Content;
-                
+                var schema = _schemaFileService.GetSchema(Alias);
+
                 var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest
                 {
-                    Format = "json",
+                    Format = schema.Format,
                     MappingSchemaId = mappingSchemaGuid,
                     Version = 1,
-                    Schema = JsonSerializer.SerializeToDocument(schema, SchemaFileService.SerializerOptions)
+                    Schema = schema.GetSchemaContent()
                 });
             }
 
@@ -104,7 +111,7 @@ namespace Enterspeed.Cli.Commands.Schema
                 {
                     return SchemaType.Normal;
                 }
-                
+
                 if (Enum.TryParse(Type, true, out SchemaType schemaType))
                 {
                     return schemaType;

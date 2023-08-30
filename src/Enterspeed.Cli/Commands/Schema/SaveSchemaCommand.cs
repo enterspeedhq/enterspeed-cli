@@ -76,14 +76,16 @@ namespace Enterspeed.Cli.Commands.Schema
                     return 1;
                 }
 
-                // Create update schema request
-                var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest
+                var updateMappingSchemaRequest = new UpdateMappingSchemaRequest
                 {
-                    Format = "json",
+                    Format = existingSchema.Version.Format,
                     MappingSchemaId = existingSchema.Version.Id.MappingSchemaGuid,
                     Version = existingSchema.LatestVersion,
                     Schema = schema.GetSchemaContent()
-                });
+                };
+
+                // Create update schema request
+                var updateSchemaResponse = await _mediator.Send(updateMappingSchemaRequest);
 
                 var updatedSchema = await _mediator.Send(
                     new GetMappingSchemaRequest

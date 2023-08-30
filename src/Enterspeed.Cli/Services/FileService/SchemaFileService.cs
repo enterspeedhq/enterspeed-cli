@@ -43,17 +43,17 @@ public class SchemaFileService : ISchemaFileService
             {
                 if (version.Format.Equals(SchemaConstants.JsFormat))
                 {
-                    CreateSchema(version, fs);
+                    CreateJavascriptSchemaFile(version, fs);
                 }
                 else
                 {
-                    CreateSchema(schemaType, version, fs);
+                    CreateJsonSchemaFile(schemaType, version, fs);
                 }
             }
         }
-    }
+    }   
 
-    private void CreateSchema(MappingSchemaVersion schemaVersion, FileStream fs)
+    private void CreateJavascriptSchemaFile(MappingSchemaVersion schemaVersion, FileStream fs)
     {
         _logger.LogInformation("Creating javascript schema");
 
@@ -61,7 +61,7 @@ public class SchemaFileService : ISchemaFileService
         fs.Write(decoded, 0, decoded.Length);
     }
 
-    private void CreateSchema(SchemaType schemaType, MappingSchemaVersion schemaVersion, FileStream fs)
+    private void CreateJsonSchemaFile(SchemaType schemaType, MappingSchemaVersion schemaVersion, FileStream fs)
     {
         if (schemaVersion.Data == null)
         {

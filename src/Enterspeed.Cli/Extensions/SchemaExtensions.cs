@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace Enterspeed.Cli.Extensions
 {
-    public static class SchemeExtensions
+    public static class SchemaExtensions
     {
         public static object GetSchemaContent(this SchemaFile schemaFile)
         {
