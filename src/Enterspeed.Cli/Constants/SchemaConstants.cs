@@ -3,6 +3,6 @@
     internal static class SchemaConstants
     {
         internal static string JsonFormat => "json";
-        internal static string JsFormat => "javascript";
+        internal static string JavascriptFormat => "javascript";
     }
 }

@@ -41,7 +41,7 @@ public class SchemaFileService : ISchemaFileService
         {
             using (var fs = File.Create(GetRelativeFilePath(alias, schemaType, version.Format)))
             {
-                if (version.Format.Equals(SchemaConstants.JsFormat))
+                if (version.Format.Equals(SchemaConstants.JavascriptFormat))
                 {
                     CreateJavascriptSchemaFile(version, fs);
                 }
@@ -87,10 +87,10 @@ public class SchemaFileService : ISchemaFileService
         var schemaContent = GetSchemaContent(alias, schemaFilePath);
 
         var schemaType = schemaFolderName == partialSchemaFolderName ? SchemaType.Partial : SchemaType.Normal;
-        var schemaFormat = schemaFilePath.EndsWith(".js") ? SchemaConstants.JsFormat : SchemaConstants.JsonFormat;
+        var schemaFormat = schemaFilePath.EndsWith(".js") ? SchemaConstants.JavascriptFormat : SchemaConstants.JsonFormat;
 
         object content;
-        if (schemaFormat.Equals(SchemaConstants.JsFormat))
+        if (schemaFormat.Equals(SchemaConstants.JavascriptFormat))
         {
             content = schemaContent;
         }
@@ -171,7 +171,7 @@ public class SchemaFileService : ISchemaFileService
 
     private static string GetFileName(string alias, string format)
     {
-        if (format.Equals(SchemaConstants.JsFormat))
+        if (format.Equals(SchemaConstants.JavascriptFormat))
         {
             return $"{alias}.js";
         }

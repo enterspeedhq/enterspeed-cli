@@ -10,7 +10,7 @@ namespace Enterspeed.Cli.Extensions
     {
         public static object GetSchemaContent(this SchemaFile schemaFile)
         {
-            return schemaFile.Format.Equals(SchemaConstants.JsFormat)
+            return schemaFile.Format.Equals(SchemaConstants.JavascriptFormat)
                 ? Convert.ToBase64String(Encoding.UTF8.GetBytes(schemaFile.Content?.ToString() ?? string.Empty))
                 : JsonSerializer.SerializeToDocument(schemaFile.Content, SchemaFileService.SerializerOptions);
         }
