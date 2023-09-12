@@ -37,21 +37,18 @@ public class SchemaFileService : ISchemaFileService
             DeleteSchema(alias);
         }
 
-        if (version != null)
+        using (var fs = File.Create(GetRelativeFilePath(alias, schemaType, version.Format)))
         {
-            using (var fs = File.Create(GetRelativeFilePath(alias, schemaType, version.Format)))
+            if (version.Format.Equals(SchemaConstants.JavascriptFormat))
             {
-                if (version.Format.Equals(SchemaConstants.JavascriptFormat))
-                {
-                    CreateJavascriptSchemaFile(version, fs);
-                }
-                else
-                {
-                    CreateJsonSchemaFile(schemaType, version, fs);
-                }
+                CreateJavascriptSchemaFile(version, fs);
+            }
+            else
+            {
+                CreateJsonSchemaFile(schemaType, version, fs);
             }
         }
-    }   
+    }
 
     private void CreateJavascriptSchemaFile(MappingSchemaVersion schemaVersion, FileStream fs)
     {

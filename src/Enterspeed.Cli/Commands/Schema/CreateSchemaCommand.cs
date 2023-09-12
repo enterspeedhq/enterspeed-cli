@@ -19,6 +19,7 @@ namespace Enterspeed.Cli.Commands.Schema
             AddArgument(new Argument<string>("alias", "Alias of the schema"));
             AddOption(new Option<string>(new[] { "--type", "-t" }, "Type of the schema (full or partial). Default value is full"));
             AddOption(new Option<string>(new[] { "--name", "-n" }, "Name of the schema"));
+            AddOption(new Option<string>(new[] { "--format", "-f" }, "Format of the schema (json or javascript). Default is json"));
         }
 
         public new class Handler : BaseCommandHandler, ICommandHandler
@@ -70,9 +71,15 @@ namespace Enterspeed.Cli.Commands.Schema
                     Format = Format
                 });
 
+
                 if (createSchemaResponse?.IdValue != null && !string.IsNullOrEmpty(createSchemaResponse.MappingSchemaGuid))
                 {
-                    _schemaFileService.CreateSchema(Alias, schemaType.Value);
+                    var schemaResponse = await _mediator.Send(new GetMappingSchemaRequest()
+                    {
+                        MappingSchemaId = createSchemaResponse.MappingSchemaGuid
+                    });
+
+                    _schemaFileService.CreateSchema(Alias, schemaType.Value, schemaResponse.Version);
                 }
                 else
                 {
