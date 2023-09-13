@@ -71,7 +71,6 @@ namespace Enterspeed.Cli.Commands.Schema
                     Format = Format
                 });
 
-
                 if (createSchemaResponse?.IdValue != null && !string.IsNullOrEmpty(createSchemaResponse.MappingSchemaGuid))
                 {
                     var schemaResponse = await _mediator.Send(new GetMappingSchemaRequest()

@@ -13,9 +13,17 @@ namespace Enterspeed.Cli.Services.FileService;
 public class SchemaFileService : ISchemaFileService
 {
     private readonly ILogger<SchemaFileService> _logger;
+
     private const string SchemaDirectory = "schemas";
+
     // logic require partial folder to be a subfolder of normal schema folder
     private const string PartialSchemaDirectory = $"{SchemaDirectory}/partials";
+
+    private const string DefaultJsContent =
+        "/** @type {Enterspeed.FullSchema} */\nexport default {\n  triggers: function(context) {\n    // Example that triggers on 'mySourceEntityType' in 'mySourceGroupAlias', adjust to match your own values\n    // See documentation for triggers here: https://docs.enterspeed.com/reference/js/triggers\n    context.triggers('mySourceGroupAlias', ['mySourceEntityType'])\n  },\n  routes: function(sourceEntity, context) {\n    // Example that generates a handle with the value of 'my-handle' to use when fetching the view from the Delivery API\n    // See documentation for routes here: https://docs.enterspeed.com/reference/js/routes\n    context.handle('my-handle')\n  },\n  properties: function (sourceEntity, context) {\n    // Example that returns all properties from the source entity to the view\n    // See documentation for properties here: https://docs.enterspeed.com/reference/js/properties\n    return sourceEntity.properties\n  }\n}";
+
+    private const string DefaultJsPartialContent =
+        "/** @type {Enterspeed.PartialSchema} */\nexport default {\n  properties: function (input, context) {\n    // Example that returns all properties from the input object to the view\n    // See documentation for properties here: https://docs.enterspeed.com/reference/js/properties\n    return input\n  }\n}";
 
     public static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -27,7 +35,7 @@ public class SchemaFileService : ISchemaFileService
         _logger = logger;
     }
 
-    public void CreateSchema(string alias, SchemaType schemaType, MappingSchemaVersion version = null)
+    public void CreateSchema(string alias, SchemaType schemaType, MappingSchemaVersion version)
     {
         EnsureSchemaFolders();
 
@@ -37,35 +45,42 @@ public class SchemaFileService : ISchemaFileService
             DeleteSchema(alias);
         }
 
-        using (var fs = File.Create(GetRelativeFilePath(alias, schemaType, version.Format)))
+        using var fs = File.Create(GetRelativeFilePath(alias, schemaType, version.Format));
+        if (version.Format.Equals(SchemaConstants.JavascriptFormat))
         {
-            if (version.Format.Equals(SchemaConstants.JavascriptFormat))
-            {
-                CreateJavascriptSchemaFile(version, fs);
-            }
-            else
-            {
-                CreateJsonSchemaFile(schemaType, version, fs);
-            }
+            CreateJavascriptSchemaFile(schemaType, version, fs);
+        }
+        else
+        {
+            CreateJsonSchemaFile(schemaType, version, fs);
         }
     }
 
-    private void CreateJavascriptSchemaFile(MappingSchemaVersion schemaVersion, FileStream fs)
+    private void CreateJavascriptSchemaFile(SchemaType schemaType, MappingSchemaVersion schemaVersion, FileStream fs)
     {
         _logger.LogInformation("Creating javascript schema");
 
-        var decoded = Convert.FromBase64String(schemaVersion.Data);
-        fs.Write(decoded, 0, decoded.Length);
+        // Version does not have any data. Assign default js setup for js schemas instead as a temp fix. 
+        if (schemaVersion.Data == null)
+        {
+            var byteArray = Encoding.UTF8.GetBytes(schemaType == SchemaType.Partial ? DefaultJsPartialContent : DefaultJsContent);
+            fs.Write(byteArray, 0, byteArray.Length);
+        }
+        else
+        {
+            var decoded = Convert.FromBase64String(schemaVersion.Data);
+            fs.Write(decoded, 0, decoded.Length);
+        }
     }
 
-    private void CreateJsonSchemaFile(SchemaType schemaType, MappingSchemaVersion schemaVersion, FileStream fs)
+    private void CreateJsonSchemaFile(SchemaType schemaType, MappingSchemaVersion schemaVersion, Stream fs)
     {
         if (schemaVersion.Data == null)
         {
             var emptyContent = schemaType == SchemaType.Partial
                 ? new SchemaBaseProperties { Properties = new() }
                 : new SchemaBaseProperties { Properties = new(), Triggers = new() };
-
+                
             schemaVersion.Data = JsonSerializer.Serialize(emptyContent);
         }
 
@@ -95,7 +110,6 @@ public class SchemaFileService : ISchemaFileService
         {
             content = JsonSerializer.Deserialize<SchemaBaseProperties>(schemaContent, SerializerOptions);
         }
-
 
         return new SchemaFile(alias, schemaType, content, schemaFormat);
     }
@@ -193,7 +207,8 @@ public class SchemaFileService : ISchemaFileService
 
     private bool CompareSchemaContent(string externalSchema, string localSchema, string schemaFormat)
     {
-        return schemaFormat.Equals(SchemaConstants.JsonFormat) ? CompareJsonSchemas(externalSchema, localSchema)
+        return schemaFormat.Equals(SchemaConstants.JsonFormat)
+            ? CompareJsonSchemas(externalSchema, localSchema)
             : CompareJavascriptSchemas(externalSchema, localSchema);
     }
 
