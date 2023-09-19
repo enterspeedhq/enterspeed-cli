@@ -6,12 +6,13 @@ public class SchemaFile
 {
     public string Alias { get; }
     public SchemaType SchemaType { get; }
-    public SchemaBaseProperties SchemaBaseProperties { get; }
-
-    public SchemaFile(string alias, SchemaType schemaType, SchemaBaseProperties schemaBaseProperties)
+    public object Content { get; }
+    public string Format { get; }
+    public SchemaFile(string alias, SchemaType schemaType, object content, string format)
     {
         Alias = alias;
         SchemaType = schemaType;
-        SchemaBaseProperties = schemaBaseProperties;
+        Content = content;
+        Format = format;
     }
 }

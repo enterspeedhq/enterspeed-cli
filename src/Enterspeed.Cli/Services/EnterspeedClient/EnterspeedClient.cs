@@ -57,7 +57,7 @@ public class EnterspeedClient : IEnterspeedClient, IDisposable
         if (!response.IsSuccessful)
         {
             _logger.LogError($"Unsuccessful: {response.StatusCode}");
-            _logger.LogWarning(JsonSerializer.Serialize(response.Data));
+            _logger.LogWarning(JsonSerializer.Serialize(response));
         }
 
         //_logger.LogInformation(JsonSerializer.Serialize(response.Data));

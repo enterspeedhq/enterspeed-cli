@@ -90,7 +90,7 @@ internal class DeploySchemaCommand : Command
             }
 
             // Validate that schema on disk matches schema saved in Enterspeed.
-            var valid = _schemaFileService.SchemaValid(existingSchema.Version.Data, Alias);
+            var valid = _schemaFileService.SchemaValid(existingSchema.Version, Alias);
             if (!valid)
             {
                 _logger.LogError("Schema on disk does not match schema in Enterspeed. Save your schema before deploying it.");
