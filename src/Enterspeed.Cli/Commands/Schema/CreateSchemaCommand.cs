@@ -60,7 +60,7 @@ namespace Enterspeed.Cli.Commands.Schema
 
                 if (string.IsNullOrEmpty(Format))
                 {
-                    Format = SchemaConstants.JsonFormat;
+                    Format = SchemaConstants.JavascriptFormat;
                 }
 
                 var createSchemaResponse = await _mediator.Send(new CreateMappingSchemaRequest
