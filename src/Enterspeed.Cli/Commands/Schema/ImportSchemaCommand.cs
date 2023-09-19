@@ -15,7 +15,7 @@ internal class ImportSchemaCommand : Command
 {
     public ImportSchemaCommand() : base(name: "import", "Imports all schemas from the /schemas folder on the disk. Will create new schemas and update existing schemas if --override is enabled.")
     {
-        AddOption(new Option<string>(new[] { "--schemaAlias", "-a" }, "Provide a schema alias to only import a single schema"));
+        AddOption(new Option<string>(new[] { "--schema-alias", "-a" }, "Provide a schema alias to only import a single schema"));
         AddOption(new Option<bool>(new[] { "--override", "-o" }, "Override existing schemas"));
     }
 

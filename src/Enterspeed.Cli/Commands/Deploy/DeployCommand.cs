@@ -14,10 +14,10 @@ namespace Enterspeed.Cli.Commands.Deploy;
 
 public class DeployCommand : Command
 {
-    public DeployCommand() : base(name: "deploy", "Deploy schemas using deploymentplan")
+    public DeployCommand() : base(name: "deploy", "Deploy schemas using deployment plan")
     {
         AddOption(new Option<string>(new[] { "--environment", "-e" }, "Target environment for deploy") { IsRequired = true });
-        AddOption(new Option<string>(new[] { "--deploymentplan", "-dp" }, "Deployment plan to use"));
+        AddOption(new Option<string>(new[] { "--deployment-plan", "-dp" }, "Deployment plan to use"));
     }
 
     public new class Handler : BaseCommandHandler, ICommandHandler

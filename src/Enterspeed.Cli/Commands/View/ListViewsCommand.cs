@@ -10,10 +10,10 @@ public class ListViewsCommand : Command
 {
     public ListViewsCommand() : base(name: "list", "List views")
     {
-        AddArgument(new Argument<string>("EnvironmentId", "Id of the environment") { Arity = ArgumentArity.ExactlyOne });
-        AddOption(new Option<string>("--SourceId", "Source ID"));
-        AddOption(new Option<string>("--SchemaAlias", "Schema Alias"));
-        AddOption(new Option<string>("--OriginId", "Source Entity Origin ID"));
+        AddArgument(new Argument<string>("environmentId", "Id of the environment") { Arity = ArgumentArity.ExactlyOne });
+        AddOption(new Option<string>("--source-id", "Source ID"));
+        AddOption(new Option<string>("--schema-alias", "Schema Alias"));
+        AddOption(new Option<string>("--origin-id", "Source Entity Origin ID"));
     }
 
     public new class Handler : BaseCommandHandler, ICommandHandler
