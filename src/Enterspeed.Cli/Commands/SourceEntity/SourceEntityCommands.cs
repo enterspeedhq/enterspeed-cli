@@ -12,6 +12,7 @@ public static class SourceEntityCommands
             new IngestSourceEntitiesCommand(),
             new DeleteSourceEntitiesCommand()
         };
+        command.AddAlias("se");
         return command;
     }
 }

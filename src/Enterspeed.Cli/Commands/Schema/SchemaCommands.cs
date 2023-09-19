@@ -15,7 +15,7 @@ namespace Enterspeed.Cli.Commands.Schema
                 new ImportSchemaCommand(),
                 new ListDeployedSchemasCommand()
             };
-
+            command.AddAlias("sc");
             return command;
         }
     }

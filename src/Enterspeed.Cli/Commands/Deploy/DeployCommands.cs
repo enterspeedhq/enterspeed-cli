@@ -11,7 +11,7 @@ namespace Enterspeed.Cli.Commands.Deploy
                 new DeployCommand(),
                 new ExtractCommand()
             };
-
+            command.AddAlias("dp");
             return command;
         }
     }

@@ -1,6 +1,8 @@
 # es-cli schema
 Reference
 
+Shortcut: `es-cli sc`
+
 Manage schemas for tenant.
 
 ## Commands

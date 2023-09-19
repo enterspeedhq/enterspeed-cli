@@ -1,6 +1,8 @@
 # es-cli source
 Reference
 
+Shortcut: `es-cli s`
+
 Manage sources for tenant.
 
 ## Commands

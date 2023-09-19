@@ -12,7 +12,7 @@ namespace Enterspeed.Cli.Commands.Schema
     {
         public ListDeployedSchemasCommand() : base("list-deployed", "Lists all deployed schemas for the environment")
         {
-            AddOption(new Option<string>(new[] { "--environment", "-e" }, "Environment name"));
+            AddOption(new Option<string>(new[] { "--environment", "-e" }, "Environment name") { IsRequired = true });
         }
 
         public new class Handler : BaseCommandHandler, ICommandHandler
@@ -37,7 +37,7 @@ namespace Enterspeed.Cli.Commands.Schema
                 var environmentToDeployTo = await GetEnvironmentToDeployTo();
                 if (environmentToDeployTo == null)
                 {
-                    _logger.LogError("Environment to deploy to was not found");
+                    _logger.LogError("Environment was not found");
                     return 1;
                 }
 

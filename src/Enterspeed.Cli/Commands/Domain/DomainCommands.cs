@@ -14,6 +14,7 @@ public static class DomainCommands
             new UpdateDomainCommand(),
             new DeleteDomainCommand()
         };
+        domain.AddAlias("d");
         return domain;
     }
 }

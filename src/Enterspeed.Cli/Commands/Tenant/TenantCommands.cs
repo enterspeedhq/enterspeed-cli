@@ -11,8 +11,8 @@ public static class TenantCommands
             new ListTenantsCommand(),
             new CurrentTenantCommand(),
             new SetActiveTenantCommand()
-            
         };
+        command.AddAlias("t");
         return command;
     }
 }

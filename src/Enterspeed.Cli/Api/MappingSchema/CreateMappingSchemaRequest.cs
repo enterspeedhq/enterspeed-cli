@@ -9,6 +9,7 @@ namespace Enterspeed.Cli.Api.MappingSchema
         public string Name { get; set; }
         public string ViewHandle { get; set; }
         public string Type { get; set; }
+        public string Format { get; set; }
     }
 
     public class CreateMappingSchemaResponse

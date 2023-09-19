@@ -1,5 +1,8 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using Enterspeed.Cli.Api.MappingSchema.Models;
+using Enterspeed.Cli.Constants;
 using Enterspeed.Cli.Domain;
 using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Services.FileService.Models;
@@ -10,9 +13,18 @@ namespace Enterspeed.Cli.Services.FileService;
 public class SchemaFileService : ISchemaFileService
 {
     private readonly ILogger<SchemaFileService> _logger;
+
     private const string SchemaDirectory = "schemas";
+
     // logic require partial folder to be a subfolder of normal schema folder
     private const string PartialSchemaDirectory = $"{SchemaDirectory}/partials";
+
+    private const string DefaultJsContent =
+        "/** @type {Enterspeed.FullSchema} */\nexport default {\n  triggers: function(context) {\n    // Example that triggers on 'mySourceEntityType' in 'mySourceGroupAlias', adjust to match your own values\n    // See documentation for triggers here: https://docs.enterspeed.com/reference/js/triggers\n    context.triggers('mySourceGroupAlias', ['mySourceEntityType'])\n  },\n  routes: function(sourceEntity, context) {\n    // Example that generates a handle with the value of 'my-handle' to use when fetching the view from the Delivery API\n    // See documentation for routes here: https://docs.enterspeed.com/reference/js/routes\n    context.handle('my-handle')\n  },\n  properties: function (sourceEntity, context) {\n    // Example that returns all properties from the source entity to the view\n    // See documentation for properties here: https://docs.enterspeed.com/reference/js/properties\n    return sourceEntity.properties\n  }\n}";
+
+    private const string DefaultJsPartialContent =
+        "/** @type {Enterspeed.PartialSchema} */\nexport default {\n  properties: function (input, context) {\n    // Example that returns all properties from the input object to the view\n    // See documentation for properties here: https://docs.enterspeed.com/reference/js/properties\n    return input\n  }\n}";
+
     public static readonly JsonSerializerOptions SerializerOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
@@ -23,7 +35,7 @@ public class SchemaFileService : ISchemaFileService
         _logger = logger;
     }
 
-    public void CreateSchema(string alias, SchemaType schemaType, string content = null)
+    public void CreateSchema(string alias, SchemaType schemaType, MappingSchemaVersion version)
     {
         EnsureSchemaFolders();
 
@@ -33,39 +45,50 @@ public class SchemaFileService : ISchemaFileService
             DeleteSchema(alias);
         }
 
-        if (content == null)
+        using var fs = File.Create(GetRelativeFilePath(alias, schemaType, version.Format));
+        if (version.Format.Equals(SchemaConstants.JavascriptFormat))
         {
-            CreateEmptySchema(alias, schemaType);
+            CreateJavascriptSchemaFile(schemaType, version, fs);
         }
         else
         {
-            CreatePopulatedSchema(alias, schemaType, content);
+            CreateJsonSchemaFile(schemaType, version, fs);
         }
     }
 
-    private void CreateEmptySchema(string alias, SchemaType schemaType)
+    private void CreateJavascriptSchemaFile(SchemaType schemaType, MappingSchemaVersion schemaVersion, FileStream fs)
     {
-        var content = schemaType == SchemaType.Partial
-            ? new SchemaBaseProperties { Properties = new() }
-            : new SchemaBaseProperties { Properties = new(), Triggers = new() };
+        _logger.LogInformation("Creating javascript schema");
 
-        CreateSchema(alias, schemaType, content);
-    }
-
-    private void CreatePopulatedSchema(string alias, SchemaType schemaType, string content)
-    {
-        CreateSchema(alias, schemaType, JsonSerializer.Deserialize<SchemaBaseProperties>(content, SerializerOptions));
-    }
-
-    private void CreateSchema(string alias, SchemaType schemaType, SchemaBaseProperties content)
-    {
-        using (var fs = File.Create(GetRelativeFilePath(alias, schemaType)))
+        // Version does not have any data. Assign default js setup for js schemas instead as a temp fix. 
+        if (schemaVersion.Data == null)
         {
-            _logger.LogInformation("Creating schema");
-
-            var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(content, SerializerOptions);
-            fs.Write(jsonBytes, 0, jsonBytes.Length);
+            var byteArray = Encoding.UTF8.GetBytes(schemaType == SchemaType.Partial ? DefaultJsPartialContent : DefaultJsContent);
+            fs.Write(byteArray, 0, byteArray.Length);
         }
+        else
+        {
+            var decoded = Convert.FromBase64String(schemaVersion.Data);
+            fs.Write(decoded, 0, decoded.Length);
+        }
+    }
+
+    private void CreateJsonSchemaFile(SchemaType schemaType, MappingSchemaVersion schemaVersion, Stream fs)
+    {
+        if (schemaVersion.Data == null)
+        {
+            var emptyContent = schemaType == SchemaType.Partial
+                ? new SchemaBaseProperties { Properties = new() }
+                : new SchemaBaseProperties { Properties = new(), Triggers = new() };
+                
+            schemaVersion.Data = JsonSerializer.Serialize(emptyContent);
+        }
+
+        _logger.LogInformation("Creating json schema");
+
+        var content = JsonSerializer.Deserialize<SchemaBaseProperties>(schemaVersion.Data, SerializerOptions);
+        var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(content, SerializerOptions);
+        fs.Write(jsonBytes, 0, jsonBytes.Length);
     }
 
     public SchemaFile GetSchema(string alias, string filePath = null)
@@ -76,17 +99,27 @@ public class SchemaFileService : ISchemaFileService
         var schemaContent = GetSchemaContent(alias, schemaFilePath);
 
         var schemaType = schemaFolderName == partialSchemaFolderName ? SchemaType.Partial : SchemaType.Normal;
-        var schemaBaseProperties = JsonSerializer.Deserialize<SchemaBaseProperties>(schemaContent, SerializerOptions);
+        var schemaFormat = schemaFilePath.EndsWith(".js") ? SchemaConstants.JavascriptFormat : SchemaConstants.JsonFormat;
 
-        return new SchemaFile(alias, schemaType, schemaBaseProperties);
+        object content;
+        if (schemaFormat.Equals(SchemaConstants.JavascriptFormat))
+        {
+            content = schemaContent;
+        }
+        else
+        {
+            content = JsonSerializer.Deserialize<SchemaBaseProperties>(schemaContent, SerializerOptions);
+        }
+
+        return new SchemaFile(alias, schemaType, content, schemaFormat);
     }
 
     public IList<SchemaFile> GetAllSchemas()
     {
         EnsureSchemaFolders();
-            
+
         var filePaths = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), SchemaDirectory), "*", SearchOption.AllDirectories);
-            
+
         return filePaths.Select(filePath =>
             {
                 var alias = GetAliasFromFilePath(filePath);
@@ -96,15 +129,15 @@ public class SchemaFileService : ISchemaFileService
             .ToList();
     }
 
-    public bool SchemaValid(string externalSchema, string schemaAlias)
+    public bool SchemaValid(MappingSchemaVersion externalSchema, string schemaAlias)
     {
         if (!SchemaExists(schemaAlias))
         {
             return false;
         }
-         
+
         var localSchema = GetSchemaContent(schemaAlias);
-        return CompareSchemaContent(externalSchema, localSchema);
+        return CompareSchemaContent(externalSchema.Data, localSchema, externalSchema.Format);
     }
 
     public bool SchemaExists(string alias)
@@ -140,22 +173,30 @@ public class SchemaFileService : ISchemaFileService
         return File.ReadAllText(schemaFilePath);
     }
 
-    private static string GetRelativeFilePath(string alias, SchemaType schemaType)
+    private static string GetRelativeFilePath(string alias, SchemaType schemaType, string format)
     {
         return schemaType == SchemaType.Normal
-            ? Path.Combine(SchemaDirectory, GetFileName(alias))
-            : Path.Combine(PartialSchemaDirectory, GetFileName(alias));
+            ? Path.Combine(SchemaDirectory, GetFileName(alias, format))
+            : Path.Combine(PartialSchemaDirectory, GetFileName(alias, format));
     }
 
-    private static string GetFileName(string alias)
+    private static string GetFileName(string alias, string format)
     {
+        if (format.Equals(SchemaConstants.JavascriptFormat))
+        {
+            return $"{alias}.js";
+        }
+
         return $"{alias}.json";
     }
 
     private static string GetFile(string alias)
     {
-        var schemaFileName = GetFileName(alias);
-        return Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), SchemaDirectory), schemaFileName, SearchOption.AllDirectories).FirstOrDefault();
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var searchDirectory = Path.Combine(currentDirectory, SchemaDirectory);
+
+        return Directory.GetFiles(searchDirectory, alias + ".json", SearchOption.AllDirectories).FirstOrDefault() ??
+               Directory.GetFiles(searchDirectory, alias + ".js", SearchOption.AllDirectories).FirstOrDefault();
     }
 
     private static string GetAliasFromFilePath(string filePath)
@@ -163,7 +204,23 @@ public class SchemaFileService : ISchemaFileService
         return Path.GetFileNameWithoutExtension(filePath);
     }
 
-    private bool CompareSchemaContent(string schema1, string schema2)
+
+    private bool CompareSchemaContent(string externalSchema, string localSchema, string schemaFormat)
+    {
+        return schemaFormat.Equals(SchemaConstants.JsonFormat)
+            ? CompareJsonSchemas(externalSchema, localSchema)
+            : CompareJavascriptSchemas(externalSchema, localSchema);
+    }
+
+    private static bool CompareJavascriptSchemas(string externalSchema, string localSchema)
+    {
+        var externalSchemaDecoded = Convert.FromBase64String(externalSchema);
+        var externalSchemaDecodedString = Encoding.UTF8.GetString(externalSchemaDecoded);
+
+        return externalSchemaDecodedString.Equals(localSchema);
+    }
+
+    private bool CompareJsonSchemas(string schema1, string schema2)
     {
         var comparer = new JsonElementComparer();
         try

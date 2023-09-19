@@ -14,6 +14,7 @@ public static class EnvironmentCommands
             new UpdateEnvironmentCommand(),
             new DeleteEnvironmentCommand()
         };
+        command.AddAlias("e");
         return command;
     }
 }

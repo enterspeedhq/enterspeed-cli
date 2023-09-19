@@ -6,9 +6,9 @@ using Enterspeed.Cli.Api.SourceGroup;
 
 namespace Enterspeed.Cli.Commands.SourceGroup;
 
-public class ListSourceGroupCommand : Command
+public class ListSourceGroupsCommand : Command
 {
-    public ListSourceGroupCommand() : base(name: "list", "List source groups")
+    public ListSourceGroupsCommand() : base(name: "list", "List source groups")
     {
     }
 

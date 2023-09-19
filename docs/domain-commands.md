@@ -1,6 +1,8 @@
 # es-cli domain
 Reference
 
+Shortcut: `es-cli d`
+
 Manage domains for tenant.
 
 ## Commands

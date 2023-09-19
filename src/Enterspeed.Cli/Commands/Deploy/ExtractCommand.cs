@@ -37,7 +37,6 @@ namespace Enterspeed.Cli.Commands.Deploy
 
             public async Task<int> InvokeAsync(InvocationContext context)
             {
-                var schemaResponses = new List<GetMappingSchemaResponse>();
                 var allEnvironments = await _mediator.Send(new GetEnvironmentsRequest());
 
                 var environment = allEnvironments.FirstOrDefault(e => e.Name == Environment);
@@ -92,7 +91,7 @@ namespace Enterspeed.Cli.Commands.Deploy
             {
                 _deploymentPlanFileService.UpdateDeploymentPlan(schemaResponse.ViewHandle, schemaResponse.Version.Id.Version);
 
-                if (_schemaFileService.SchemaValid(schemaResponse.Version.Data, schemaResponse.ViewHandle))
+                if (_schemaFileService.SchemaValid(schemaResponse.Version, schemaResponse.ViewHandle))
                 {
                     _logger.LogInformation($"Successfully extracted {schemaResponse.ViewHandle} and added it to the deployment plan");
                 }
