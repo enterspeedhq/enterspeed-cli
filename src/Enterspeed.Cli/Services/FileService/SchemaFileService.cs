@@ -195,6 +195,11 @@ public class SchemaFileService : ISchemaFileService
         var currentDirectory = Directory.GetCurrentDirectory();
         var searchDirectory = Path.Combine(currentDirectory, SchemaDirectory);
 
+        if (!Directory.Exists(searchDirectory))
+        {
+            return null;
+        }
+
         return Directory.GetFiles(searchDirectory, alias + ".json", SearchOption.AllDirectories).FirstOrDefault() ??
                Directory.GetFiles(searchDirectory, alias + ".js", SearchOption.AllDirectories).FirstOrDefault();
     }
