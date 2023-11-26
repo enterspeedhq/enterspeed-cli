@@ -6,7 +6,7 @@ namespace Enterspeed.Cli.Services.FileService;
 
 public interface ISchemaFileService
 {
-    void CreateSchema(string alias, SchemaType schemaType, MappingSchemaVersion version);
+    void CreateSchema(string alias, SchemaType schemaType, MappingSchemaVersion version, string SchemaName);
     SchemaFile GetSchema(string alias, string filePath = null);
     IList<SchemaFile> GetAllSchemas();
     bool SchemaExists(string alias);

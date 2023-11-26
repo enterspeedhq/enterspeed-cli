@@ -78,7 +78,7 @@ namespace Enterspeed.Cli.Commands.Schema
                         MappingSchemaId = createSchemaResponse.MappingSchemaGuid
                     });
 
-                    _schemaFileService.CreateSchema(Alias, schemaType.Value, schemaResponse.Version);
+                    _schemaFileService.CreateSchema(Alias, schemaType.Value, schemaResponse.Version, Name);
                 }
                 else
                 {

@@ -5,6 +5,7 @@ using Enterspeed.Cli.Api.MappingSchema.Models;
 using Enterspeed.Cli.Constants;
 using Enterspeed.Cli.Domain;
 using Enterspeed.Cli.Domain.Models;
+using Enterspeed.Cli.Extensions;
 using Enterspeed.Cli.Services.FileService.Models;
 using Microsoft.Extensions.Logging;
 
@@ -35,9 +36,9 @@ public class SchemaFileService : ISchemaFileService
         _logger = logger;
     }
 
-    public void CreateSchema(string alias, SchemaType schemaType, MappingSchemaVersion version)
+    public void CreateSchema(string alias, SchemaType schemaType, MappingSchemaVersion version, string schemaName)
     {
-        EnsureSchemaFolders();
+        EnsureSchemaFolders(schemaName);
 
         if (SchemaExists(alias))
         {
@@ -45,7 +46,7 @@ public class SchemaFileService : ISchemaFileService
             DeleteSchema(alias);
         }
 
-        using var fs = File.Create(GetRelativeFilePath(alias, schemaType, version.Format));
+        using var fs = File.Create(GetRelativeFilePath(schemaName, alias, schemaType, version.Format));
         if (version.Format.Equals(SchemaConstants.JavascriptFormat))
         {
             CreateJavascriptSchemaFile(schemaType, version, fs);
@@ -80,7 +81,7 @@ public class SchemaFileService : ISchemaFileService
             var emptyContent = schemaType == SchemaType.Partial
                 ? new SchemaBaseProperties { Properties = new() }
                 : new SchemaBaseProperties { Properties = new(), Triggers = new() };
-                
+
             schemaVersion.Data = JsonSerializer.Serialize(emptyContent);
         }
 
@@ -145,7 +146,7 @@ public class SchemaFileService : ISchemaFileService
         return GetFile(alias) is not null;
     }
 
-    private static void EnsureSchemaFolders()
+    private static void EnsureSchemaFolders(string schemaName = null)
     {
         if (!Directory.Exists(SchemaDirectory))
         {
@@ -155,6 +156,21 @@ public class SchemaFileService : ISchemaFileService
         if (!Directory.Exists(PartialSchemaDirectory))
         {
             Directory.CreateDirectory(PartialSchemaDirectory);
+        }
+
+        if (schemaName != null)
+        {
+            if (SchemaExtensions.SchemaIsInFolder(schemaName))
+            {
+                // First item in list is the top level folder
+                var folders = GetSchemaFolders(schemaName).ToArray();
+
+                var path = Path.Combine(folders);
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+            }
         }
     }
 
@@ -173,8 +189,16 @@ public class SchemaFileService : ISchemaFileService
         return File.ReadAllText(schemaFilePath);
     }
 
-    private static string GetRelativeFilePath(string alias, SchemaType schemaType, string format)
+    private static string GetRelativeFilePath(string schemaName, string alias, SchemaType schemaType, string format)
     {
+        if (SchemaExtensions.SchemaIsInFolder(schemaName))
+        {
+            var path = GetSchemaFolders(schemaName).ToList();
+            path.Add(GetFileName(alias, format));
+
+            return Path.Combine(path.ToArray());
+        }
+
         return schemaType == SchemaType.Normal
             ? Path.Combine(SchemaDirectory, GetFileName(alias, format))
             : Path.Combine(PartialSchemaDirectory, GetFileName(alias, format));
@@ -240,5 +264,19 @@ public class SchemaFileService : ISchemaFileService
         }
 
         return false;
+    }
+
+    private static IEnumerable<string> GetSchemaFolders(string schemaName)
+    {
+        var names = schemaName.Split('/');
+        // Get all folders except the last one
+        var schemaFolders = new List<string> { Directory.GetCurrentDirectory(), SchemaDirectory };
+
+        for (var i = 0; i < names.Length - 1; i++)
+        {
+            schemaFolders.Add(names[i]);
+        }
+
+        return schemaFolders;
     }
 }

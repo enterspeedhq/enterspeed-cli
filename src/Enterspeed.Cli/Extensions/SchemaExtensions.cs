@@ -14,5 +14,10 @@ namespace Enterspeed.Cli.Extensions
                 ? Convert.ToBase64String(Encoding.UTF8.GetBytes(schemaFile.Content?.ToString() ?? string.Empty))
                 : JsonSerializer.SerializeToDocument(schemaFile.Content, SchemaFileService.SerializerOptions);
         }
+
+        public static bool SchemaIsInFolder(string schemaName)
+        {
+            return schemaName.Contains('/');
+        }
     }
 }
