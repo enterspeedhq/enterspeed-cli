@@ -101,7 +101,7 @@ namespace Enterspeed.Cli.Commands.Schema
             {
                 var schema = _schemaFileService.GetSchema(Alias);
 
-                var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest
+                var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaVersionRequest
                 {
                     Format = schema.Format,
                     MappingSchemaId = mappingSchemaGuid,

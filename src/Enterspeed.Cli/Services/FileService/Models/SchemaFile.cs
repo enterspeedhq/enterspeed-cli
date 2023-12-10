@@ -8,11 +8,14 @@ public class SchemaFile
     public SchemaType SchemaType { get; }
     public object Content { get; }
     public string Format { get; }
-    public SchemaFile(string alias, SchemaType schemaType, object content, string format)
+    public string RelativeDirectoryPath { get; }
+
+    public SchemaFile(string alias, SchemaType schemaType, object content, string format, string relativeDirectoryPath)
     {
         Alias = alias;
         SchemaType = schemaType;
         Content = content;
         Format = format;
+        RelativeDirectoryPath = relativeDirectoryPath;
     }
 }

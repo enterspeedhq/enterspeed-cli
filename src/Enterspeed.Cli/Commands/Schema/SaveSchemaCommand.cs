@@ -76,7 +76,7 @@ namespace Enterspeed.Cli.Commands.Schema
                     return 1;
                 }
 
-                var updateMappingSchemaRequest = new UpdateMappingSchemaRequest
+                var updateMappingSchemaVersionRequest = new UpdateMappingSchemaVersionRequest
                 {
                     Format = existingSchema.Version.Format,
                     MappingSchemaId = existingSchema.Version.Id.MappingSchemaGuid,
@@ -85,7 +85,7 @@ namespace Enterspeed.Cli.Commands.Schema
                 };
 
                 // Create update schema request
-                var updateSchemaResponse = await _mediator.Send(updateMappingSchemaRequest);
+                var updateMappingSchemaVersionResponse = await _mediator.Send(updateMappingSchemaVersionRequest);
 
                 var updatedSchema = await _mediator.Send(
                     new GetMappingSchemaRequest

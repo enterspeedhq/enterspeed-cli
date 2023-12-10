@@ -112,7 +112,19 @@ public class SchemaFileService : ISchemaFileService
             content = JsonSerializer.Deserialize<SchemaBaseProperties>(schemaContent, SerializerOptions);
         }
 
-        return new SchemaFile(alias, schemaType, content, schemaFormat);
+        var relativeShcemaDirectory = Path.GetDirectoryName(schemaFilePath);
+
+        var rootSchemaDirectory = Path.Combine(Directory.GetCurrentDirectory(), SchemaDirectory);
+        if (!string.IsNullOrEmpty(rootSchemaDirectory))
+        {
+            relativeShcemaDirectory = relativeShcemaDirectory?.Replace(rootSchemaDirectory, "");
+            if (relativeShcemaDirectory != null && relativeShcemaDirectory.StartsWith("/"))
+            {
+                relativeShcemaDirectory = relativeShcemaDirectory.Remove(0, 1);
+            }
+        }
+
+        return new SchemaFile(alias, schemaType, content, schemaFormat, relativeShcemaDirectory);
     }
 
     public IList<SchemaFile> GetAllSchemas()
