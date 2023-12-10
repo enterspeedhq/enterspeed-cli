@@ -46,7 +46,8 @@ public class SchemaFileService : ISchemaFileService
             DeleteSchema(alias);
         }
 
-        using var fs = File.Create(GetRelativeFilePath(schemaName, alias, schemaType, version.Format));
+        var filePath = GetFilePath(schemaName, alias, schemaType, version.Format);
+        using var fs = File.Create(filePath);
         if (version.Format.Equals(SchemaConstants.JavascriptFormat))
         {
             CreateJavascriptSchemaFile(schemaType, version, fs);
@@ -94,13 +95,15 @@ public class SchemaFileService : ISchemaFileService
 
     public SchemaFile GetSchema(string alias, string filePath = null)
     {
-        var schemaFilePath = filePath ?? GetFile(alias);
-        var schemaFolderName = Path.GetFileName(Path.GetDirectoryName(schemaFilePath));
-        var partialSchemaFolderName = Path.GetFileName(Path.GetDirectoryName($"{PartialSchemaDirectory}/"));
-        var schemaContent = GetSchemaContent(alias, schemaFilePath);
+        var currentSchemaFilePath = filePath ?? GetFile(alias);
+        var currentSchemaDirectoryPath = Path.GetDirectoryName(currentSchemaFilePath);
 
-        var schemaType = schemaFolderName == partialSchemaFolderName ? SchemaType.Partial : SchemaType.Normal;
-        var schemaFormat = schemaFilePath.EndsWith(".js") ? SchemaConstants.JavascriptFormat : SchemaConstants.JsonFormat;
+        var schemaDirectoryName = Path.GetFileName(currentSchemaDirectoryPath);
+        var partialSchemaDirectoryName = Path.GetFileName(Path.GetDirectoryName($"{PartialSchemaDirectory}/"));
+        var schemaContent = GetSchemaContent(alias, currentSchemaFilePath);
+
+        var schemaType = schemaDirectoryName == partialSchemaDirectoryName ? SchemaType.Partial : SchemaType.Normal;
+        var schemaFormat = currentSchemaFilePath.EndsWith(".js") ? SchemaConstants.JavascriptFormat : SchemaConstants.JsonFormat;
 
         object content;
         if (schemaFormat.Equals(SchemaConstants.JavascriptFormat))
@@ -112,31 +115,41 @@ public class SchemaFileService : ISchemaFileService
             content = JsonSerializer.Deserialize<SchemaBaseProperties>(schemaContent, SerializerOptions);
         }
 
-        var relativeShcemaDirectory = Path.GetDirectoryName(schemaFilePath);
-
-        var rootSchemaDirectory = Path.Combine(Directory.GetCurrentDirectory(), SchemaDirectory);
-        if (!string.IsNullOrEmpty(rootSchemaDirectory))
+        // Get relative path for schema
+        var relativeSchemaDirectoryPath = GetRelativeSchemaPath(currentSchemaDirectoryPath);
+        if (!string.IsNullOrEmpty(relativeSchemaDirectoryPath) && relativeSchemaDirectoryPath.StartsWith(Path.DirectorySeparatorChar))
         {
-            relativeShcemaDirectory = relativeShcemaDirectory?.Replace(rootSchemaDirectory, "");
-            if (relativeShcemaDirectory != null && relativeShcemaDirectory.StartsWith("/"))
-            {
-                relativeShcemaDirectory = relativeShcemaDirectory.Remove(0, 1);
-            }
+            relativeSchemaDirectoryPath = relativeSchemaDirectoryPath.Remove(0, 1);
         }
 
-        return new SchemaFile(alias, schemaType, content, schemaFormat, relativeShcemaDirectory);
+        return new SchemaFile(alias, schemaType, content, schemaFormat, relativeSchemaDirectoryPath);
+    }
+
+    private static string GetRootSchemaPath()
+    {
+        return Path.Combine(Directory.GetCurrentDirectory(), SchemaDirectory);
+    }
+
+    private static string GetRelativeSchemaPath(string currentSchemaDirectoryPath)
+    {
+        var rootSchemaDirectoryPath = GetRootSchemaPath();
+        var relativeSchemaDirectoryPath = currentSchemaDirectoryPath?.Replace(rootSchemaDirectoryPath, "");
+        return relativeSchemaDirectoryPath;
+    }
+
+    private static string GetRelativeSchemaPathByName(string schemaName)
+    {
+        return Path.GetDirectoryName(schemaName.TrimEnd(Path.DirectorySeparatorChar));
     }
 
     public IList<SchemaFile> GetAllSchemas()
     {
         EnsureSchemaFolders();
 
-        var filePaths = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), SchemaDirectory), "*", SearchOption.AllDirectories);
-
+        var filePaths = Directory.GetFiles(GetRootSchemaPath(), "*", SearchOption.AllDirectories);
         return filePaths.Select(filePath =>
             {
                 var alias = GetAliasFromFilePath(filePath);
-
                 return GetSchema(alias, filePath);
             })
             .ToList();
@@ -150,7 +163,10 @@ public class SchemaFileService : ISchemaFileService
         }
 
         var localSchema = GetSchemaContent(schemaAlias);
-        return CompareSchemaContent(externalSchema.Data, localSchema, externalSchema.Format);
+
+        return externalSchema.Format.Equals(SchemaConstants.JsonFormat)
+            ? CompareJsonSchemas(externalSchema.Data, localSchema)
+            : CompareJavascriptSchemas(externalSchema.Data, localSchema);
     }
 
     public bool SchemaExists(string alias)
@@ -172,15 +188,17 @@ public class SchemaFileService : ISchemaFileService
 
         if (schemaName != null)
         {
-            if (SchemaExtensions.SchemaIsInFolder(schemaName))
+            if (SchemaExtensions.SchemaIsInDirectory(schemaName))
             {
-                // First item in list is the top level folder
-                var folders = GetSchemaFolders(schemaName).ToArray();
-
-                var path = Path.Combine(folders);
-                if (!Directory.Exists(path))
+                var schemasRootPath = GetRootSchemaPath();
+                var currentSchemaPathRelative = GetRelativeSchemaPathByName(schemaName);
+                if (!string.IsNullOrEmpty(currentSchemaPathRelative))
                 {
-                    Directory.CreateDirectory(path);
+                    var schemaDirectoryPath = Path.Combine(schemasRootPath, currentSchemaPathRelative);
+                    if (!Directory.Exists(schemaDirectoryPath))
+                    {
+                        Directory.CreateDirectory(schemaDirectoryPath);
+                    }
                 }
             }
         }
@@ -201,14 +219,19 @@ public class SchemaFileService : ISchemaFileService
         return File.ReadAllText(schemaFilePath);
     }
 
-    private static string GetRelativeFilePath(string schemaName, string alias, SchemaType schemaType, string format)
+    private static string GetFilePath(string schemaName, string alias, SchemaType schemaType, string format)
     {
-        if (SchemaExtensions.SchemaIsInFolder(schemaName))
+        // Folder structure is defined by name, therefore name is passed as parameter
+        if (SchemaExtensions.SchemaIsInDirectory(schemaName))
         {
-            var path = GetSchemaFolders(schemaName).ToList();
-            path.Add(GetFileName(alias, format));
-
-            return Path.Combine(path.ToArray());
+            // Removing last part of name to get the relative directory path
+            var currentSchemaPathRelative = GetRelativeSchemaPathByName(schemaName);
+            if (currentSchemaPathRelative != null)
+            {
+                var schemaDirectoryPath = Path.Combine(GetRootSchemaPath(), currentSchemaPathRelative);
+                var fullFilePath = Path.Combine(schemaDirectoryPath, GetFileName(alias, format));
+                return fullFilePath;
+            }
         }
 
         return schemaType == SchemaType.Normal
@@ -228,8 +251,7 @@ public class SchemaFileService : ISchemaFileService
 
     private static string GetFile(string alias)
     {
-        var currentDirectory = Directory.GetCurrentDirectory();
-        var searchDirectory = Path.Combine(currentDirectory, SchemaDirectory);
+        var searchDirectory = GetRootSchemaPath();
 
         if (!Directory.Exists(searchDirectory))
         {
@@ -243,14 +265,6 @@ public class SchemaFileService : ISchemaFileService
     private static string GetAliasFromFilePath(string filePath)
     {
         return Path.GetFileNameWithoutExtension(filePath);
-    }
-
-
-    private bool CompareSchemaContent(string externalSchema, string localSchema, string schemaFormat)
-    {
-        return schemaFormat.Equals(SchemaConstants.JsonFormat)
-            ? CompareJsonSchemas(externalSchema, localSchema)
-            : CompareJavascriptSchemas(externalSchema, localSchema);
     }
 
     private static bool CompareJavascriptSchemas(string externalSchema, string localSchema)
@@ -276,19 +290,5 @@ public class SchemaFileService : ISchemaFileService
         }
 
         return false;
-    }
-
-    private static IEnumerable<string> GetSchemaFolders(string schemaName)
-    {
-        var names = schemaName.Split('/');
-        // Get all folders except the last one
-        var schemaFolders = new List<string> { Directory.GetCurrentDirectory(), SchemaDirectory };
-
-        for (var i = 0; i < names.Length - 1; i++)
-        {
-            schemaFolders.Add(names[i]);
-        }
-
-        return schemaFolders;
     }
 }

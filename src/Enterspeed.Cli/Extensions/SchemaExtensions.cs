@@ -15,7 +15,7 @@ namespace Enterspeed.Cli.Extensions
                 : JsonSerializer.SerializeToDocument(schemaFile.Content, SchemaFileService.SerializerOptions);
         }
 
-        public static bool SchemaIsInFolder(string schemaName)
+        public static bool SchemaIsInDirectory(string schemaName)
         {
             return schemaName.Contains('/');
         }

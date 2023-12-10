@@ -1,39 +1,40 @@
-using Enterspeed.Cli.Services.EnterspeedClient;
+﻿using Enterspeed.Cli.Services.EnterspeedClient;
 using MediatR;
 using RestSharp;
 
-namespace Enterspeed.Cli.Api.MappingSchema;
-
-public class UpdateMappingSchemaRequest : IRequest<UpdateMappingSchemaResponse>
+namespace Enterspeed.Cli.Api.MappingSchema
 {
-    public string Name { get; set; }
-    public string MappingSchemaId { get; set; }
-}
-
-public class UpdateMappingSchemaResponse
-{
-    public string IdValue { get; set; }
-    public string MappingSchemaGuid { get; set; }
-    public int Version { get; set; }
-}
-
-public class UpdateMappingSchemaRequestHandler : IRequestHandler<UpdateMappingSchemaRequest, UpdateMappingSchemaResponse>
-{
-    private readonly IEnterspeedClient _enterspeedClient;
-
-    public UpdateMappingSchemaRequestHandler(IEnterspeedClient enterspeedClient)
+    public class UpdateMappingSchemaRequest : IRequest<UpdateMappingSchemaResponse>
     {
-        _enterspeedClient = enterspeedClient;
+        public string Name { get; set; }
+        public string MappingSchemaId { get; set; }
     }
 
-    public async Task<UpdateMappingSchemaResponse> Handle(UpdateMappingSchemaRequest updateMappingSchemaRequest,
-        CancellationToken cancellationToken)
+    public class UpdateMappingSchemaResponse
     {
-        var request = new RestRequest(
-            $"tenant/mapping-schemas/{updateMappingSchemaRequest.MappingSchemaId}",
-            Method.Put).AddJsonBody(updateMappingSchemaRequest);
+        public string IdValue { get; set; }
+        public string MappingSchemaGuid { get; set; }
+        public int Version { get; set; }
+    }
 
-        var response = await _enterspeedClient.ExecuteAsync<UpdateMappingSchemaResponse>(request, cancellationToken);
-        return response;
+    public class UpdateMappingSchemaRequestHandler : IRequestHandler<UpdateMappingSchemaRequest, UpdateMappingSchemaResponse>
+    {
+        private readonly IEnterspeedClient _enterspeedClient;
+
+        public UpdateMappingSchemaRequestHandler(IEnterspeedClient enterspeedClient)
+        {
+            _enterspeedClient = enterspeedClient;
+        }
+
+        public async Task<UpdateMappingSchemaResponse> Handle(UpdateMappingSchemaRequest updateMappingSchemaRequest,
+            CancellationToken cancellationToken)
+        {
+            var request = new RestRequest(
+                $"tenant/mapping-schemas/{updateMappingSchemaRequest.MappingSchemaId}",
+                Method.Put).AddJsonBody(updateMappingSchemaRequest);
+
+            var response = await _enterspeedClient.ExecuteAsync<UpdateMappingSchemaResponse>(request, cancellationToken);
+            return response;
+        }
     }
 }
