@@ -115,7 +115,7 @@ public class SchemaFileService : ISchemaFileService
             relativeSchemaDirectoryPath = relativeSchemaDirectoryPath.Remove(0, 1);
         }
 
-        var schemaType = currentSchemaFilePath.Contains(SchemaType.Normal.ToString().ToLowerInvariant()) ? SchemaType.Normal : SchemaType.Partial;
+        var schemaType = currentSchemaFilePath.Contains(SchemaType.Partial.ToString().ToLowerInvariant()) ? SchemaType.Partial : SchemaType.Normal;
         return new SchemaFile(alias, schemaType, content, schemaFormat, relativeSchemaDirectoryPath);
     }
 
@@ -229,12 +229,8 @@ public class SchemaFileService : ISchemaFileService
     private static string GetFileName(string alias, string format, SchemaType schemaType)
     {
         var schemaTypeName = schemaType.ToString().ToLowerInvariant();
-        if (format.Equals(SchemaConstants.JavascriptFormat))
-        {
-            return $"{alias}.{schemaTypeName}.js";
-        }
-
-        return $"{alias}.{schemaTypeName}.json";
+        var schemaName = schemaType.Equals(SchemaType.Partial) ? $"{alias}.{schemaTypeName}" : $"{alias}";
+        return format.Equals(SchemaConstants.JavascriptFormat) ? $"{schemaName}.js" : $"{schemaName}.json";
     }
 
     private static string GetFile(string alias)
@@ -246,13 +242,13 @@ public class SchemaFileService : ISchemaFileService
             return null;
         }
 
-        return Directory.GetFiles(searchDirectory, alias + ".*.json", SearchOption.AllDirectories).FirstOrDefault() ??
-               Directory.GetFiles(searchDirectory, alias + ".*.js", SearchOption.AllDirectories).FirstOrDefault();
+        return Directory.GetFiles(searchDirectory, alias + "*.json", SearchOption.AllDirectories).FirstOrDefault() ??
+               Directory.GetFiles(searchDirectory, alias + "*.js", SearchOption.AllDirectories).FirstOrDefault();
     }
 
     private static string GetAliasFromFilePath(string filePath)
     {
-        return Path.GetFileNameWithoutExtension(filePath);
+        return Path.GetFileNameWithoutExtension(filePath).Replace("." + SchemaType.Partial.ToString().ToLowerInvariant(), "");
     }
 
     private static bool CompareJavascriptSchemas(string externalSchema, string localSchema)
