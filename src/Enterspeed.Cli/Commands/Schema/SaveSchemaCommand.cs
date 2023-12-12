@@ -76,6 +76,14 @@ namespace Enterspeed.Cli.Commands.Schema
                     return 1;
                 }
 
+                var relativeDirectoryPathInEnterspeed = Path.GetDirectoryName(existingSchema.Name.TrimEnd(Path.DirectorySeparatorChar));
+                var relativeDirectoryPathOnDisk = schema.RelativeSchemaDirectory;
+
+                if (!relativeDirectoryPathOnDisk.Equals(relativeDirectoryPathInEnterspeed))
+                {
+                    await UpdateSchemaName(existingSchema, relativeDirectoryPathOnDisk);
+                }
+
                 var updateMappingSchemaVersionRequest = new UpdateMappingSchemaVersionRequest
                 {
                     Format = existingSchema.Version.Format,
@@ -98,6 +106,18 @@ namespace Enterspeed.Cli.Commands.Schema
                 _outputService.Write($"Successfully updated schema : {Alias} Version: {updatedSchema.LatestVersion}");
 
                 return 0;
+            }
+
+            private async Task UpdateSchemaName(GetMappingSchemaResponse existingSchema, string relativeDirectoryPathOnDisk)
+            {
+                var name = SchemaExtensions.BuildNewSchemaName(existingSchema.Name, relativeDirectoryPathOnDisk);
+                var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest()
+                {
+                    Name = name,
+                    MappingSchemaId = existingSchema.Version.Id.MappingSchemaGuid,
+                });
+
+                _outputService.Write($"Successfully updated name to: {name}");
             }
         }
     }

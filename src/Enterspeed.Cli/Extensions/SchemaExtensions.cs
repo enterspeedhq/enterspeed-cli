@@ -19,5 +19,13 @@ namespace Enterspeed.Cli.Extensions
         {
             return schemaName.Contains('/');
         }
+
+        public static string BuildNewSchemaName(string existingSchemaName, string relativeDirectoryPathOndisk)
+        {
+            var lastSegment = Path.GetFileName(existingSchemaName.TrimEnd(Path.DirectorySeparatorChar));
+            var name = relativeDirectoryPathOndisk + Path.DirectorySeparatorChar + lastSegment;
+
+            return name;
+        }
     }
 }

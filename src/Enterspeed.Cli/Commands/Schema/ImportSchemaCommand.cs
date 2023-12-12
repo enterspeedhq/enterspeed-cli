@@ -81,12 +81,12 @@ internal class ImportSchemaCommand : Command
             return 0;
         }
 
-        private async Task<bool> UpdateExistingSchema(SchemaFile schemaFile, QueryMappingSchemaResponse queryMappingSchemaResponse)
+        private async Task<bool> UpdateExistingSchema(SchemaFile schemaFile, QueryMappingSchemaResponse matchingSchema)
         {
             var existingSchema = await _mediator.Send(
                 new GetMappingSchemaRequest
                 {
-                    MappingSchemaId = queryMappingSchemaResponse.Id.MappingSchemaGuid
+                    MappingSchemaId = matchingSchema.Id.MappingSchemaGuid
                 }
             );
 
@@ -101,13 +101,13 @@ internal class ImportSchemaCommand : Command
 
             if (!relativeDirectoryPathOnDisk.Equals(relativeDirectoryPathInEnterspeed))
             {
-                await UpdateSchemaName(queryMappingSchemaResponse, existingSchema, relativeDirectoryPathOnDisk);
+                await UpdateSchemaName(existingSchema, relativeDirectoryPathOnDisk);
             }
 
             var updateMappingSchemaVersionResponse = await _mediator.Send(new UpdateMappingSchemaVersionRequest
             {
                 Format = schemaFile.Format,
-                MappingSchemaId = queryMappingSchemaResponse.Id.MappingSchemaGuid,
+                MappingSchemaId = matchingSchema.Id.MappingSchemaGuid,
                 Version = existingSchema.LatestVersion,
                 Schema = schemaFile.GetSchemaContent()
             });
@@ -117,15 +117,13 @@ internal class ImportSchemaCommand : Command
             return true;
         }
 
-        private async Task UpdateSchemaName(QueryMappingSchemaResponse queryMappingSchemaResponse, GetMappingSchemaResponse existingSchema,
-            string relativeDirectoryPathOnDisk)
+        private async Task UpdateSchemaName(GetMappingSchemaResponse existingSchema, string relativeDirectoryPathOnDisk)
         {
-            var lastSegment = Path.GetFileName(existingSchema.Name.TrimEnd(Path.DirectorySeparatorChar));
-            var name = relativeDirectoryPathOnDisk + Path.DirectorySeparatorChar + lastSegment;
+            var name = SchemaExtensions.BuildNewSchemaName(existingSchema.Name, relativeDirectoryPathOnDisk);
             var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest()
             {
                 Name = name,
-                MappingSchemaId = queryMappingSchemaResponse.Id.MappingSchemaGuid,
+                MappingSchemaId = existingSchema.Version.Id.MappingSchemaGuid,
             });
 
             _outputService.Write($"Successfully updated name to: {name}");
