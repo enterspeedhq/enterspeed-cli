@@ -1,10 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 using Enterspeed.Cli.Configuration;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.EnterspeedClient;
 using Enterspeed.Cli.Services.FileService;
-using MediatR;
 using Enterspeed.Cli.Services.StateService;
 using Serilog;
 using Serilog.Formatting.Compact;
@@ -45,7 +43,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddMediatR(Assembly.GetExecutingAssembly());
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddTransient<IEnterspeedClient, EnterspeedClient>();
         services.AddTransient<IOutputService, OutputService>();

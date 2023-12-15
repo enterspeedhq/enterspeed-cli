@@ -9,11 +9,11 @@ public class UnhandledExceptionBehaviour<TRequest, TResponse> : IPipelineBehavio
 
     public UnhandledExceptionBehaviour(ILogger<TRequest> logger) => _logger = logger;
 
-    public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+    public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         try
         {
-            return await next();
+            return next();
         }
         catch (Exception ex)
         {
