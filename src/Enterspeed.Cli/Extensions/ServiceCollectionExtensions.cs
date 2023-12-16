@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using System.CommandLine.Hosting;
 using Enterspeed.Cli.Services;
 using Enterspeed.Cli.Services.IngestService;
+using Enterspeed.Cli.Services.SchemaService;
 using Serilog.Events;
 
 namespace Enterspeed.Cli.Extensions;
@@ -50,6 +51,8 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IEnterspeedClient, EnterspeedClient>();
         services.AddTransient<IOutputService, OutputService>();
         services.AddTransient<ISchemaFileService, SchemaFileService>();
+        services.AddTransient<IFilePathService, FilePathService>();
+        services.AddTransient<ISchemaNameService, SchemaNameService>();
         services.AddTransient<IDeploymentPlanFileService, DedploymentPlanFileService>();
         services.AddTransient<IIngestService, IngestService>();
         services.AddSingleton<GlobalOptions>();

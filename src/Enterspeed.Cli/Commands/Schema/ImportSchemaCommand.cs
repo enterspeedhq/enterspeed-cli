@@ -5,6 +5,7 @@ using Enterspeed.Cli.Extensions;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;
 using Enterspeed.Cli.Services.FileService.Models;
+using Enterspeed.Cli.Services.SchemaService;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -12,7 +13,8 @@ namespace Enterspeed.Cli.Commands.Schema;
 
 internal class ImportSchemaCommand : Command
 {
-    public ImportSchemaCommand() : base(name: "import", "Imports all schemas from the /schemas folder on the disk. Will create new schemas and update existing schemas if --override is enabled.")
+    public ImportSchemaCommand() : base(name: "import",
+        "Imports all schemas from the /schemas folder on the disk. Will create new schemas and update existing schemas if --override is enabled.")
     {
         AddOption(new Option<string>(new[] { "--schema-alias", "-a" }, "Provide a schema alias to only import a single schema"));
         AddOption(new Option<bool>(new[] { "--override", "-o" }, "Override existing schemas"));
@@ -23,17 +25,20 @@ internal class ImportSchemaCommand : Command
         private readonly IMediator _mediator;
         private readonly IOutputService _outputService;
         private readonly ISchemaFileService _schemaFileService;
+        private readonly ISchemaNameService _schemaNameService;
         private readonly ILogger<CreateSchemaCommand> _logger;
 
         public Handler(IMediator mediator,
             IOutputService outputService,
             ISchemaFileService schemaFileService,
-            ILogger<CreateSchemaCommand> logger)
+            ILogger<CreateSchemaCommand> logger,
+            ISchemaNameService schemaNameService)
         {
             _mediator = mediator;
             _outputService = outputService;
             _schemaFileService = schemaFileService;
             _logger = logger;
+            _schemaNameService = schemaNameService;
         }
 
         public bool Override { get; set; }
@@ -119,7 +124,7 @@ internal class ImportSchemaCommand : Command
 
         private async Task UpdateSchemaName(GetMappingSchemaResponse existingSchema, string relativeDirectoryPathOnDisk)
         {
-            var name = SchemaExtensions.BuildNewSchemaName(existingSchema.Name, relativeDirectoryPathOnDisk);
+            var name = _schemaNameService.BuildNewSchemaName(existingSchema.Name, relativeDirectoryPathOnDisk);
             var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest()
             {
                 Name = name,
@@ -134,16 +139,7 @@ internal class ImportSchemaCommand : Command
         /// </summary>
         private async Task<bool> CreateNewSchema(SchemaFile schemaFile)
         {
-            string name;
-            if (!string.IsNullOrEmpty(schemaFile.RelativeSchemaDirectory))
-            {
-                name = Path.Combine(schemaFile.RelativeSchemaDirectory, schemaFile.Alias);
-            }
-            else
-            {
-                name = schemaFile.Alias;
-            }
-
+            var name = _schemaNameService.GetSchemaName(schemaFile);
             var createSchemaResponse = await _mediator.Send(new CreateMappingSchemaRequest
             {
                 Name = name,

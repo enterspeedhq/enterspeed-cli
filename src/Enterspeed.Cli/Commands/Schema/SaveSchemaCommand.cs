@@ -5,6 +5,7 @@ using Enterspeed.Cli.Exceptions;
 using Enterspeed.Cli.Extensions;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.FileService;
+using Enterspeed.Cli.Services.SchemaService;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -23,18 +24,21 @@ namespace Enterspeed.Cli.Commands.Schema
             private readonly IMediator _mediator;
             private readonly IOutputService _outputService;
             private readonly ISchemaFileService _schemaFileService;
+            private readonly ISchemaNameService _schemaNameService;
             private readonly ILogger<SaveSchemaCommand> _logger;
 
             public Handler(
                 IMediator mediator,
                 IOutputService outputService,
                 ISchemaFileService schemaFileService,
-                ILogger<SaveSchemaCommand> logger)
+                ILogger<SaveSchemaCommand> logger,
+                ISchemaNameService schemaNameService)
             {
                 _mediator = mediator;
                 _outputService = outputService;
                 _schemaFileService = schemaFileService;
                 _logger = logger;
+                _schemaNameService = schemaNameService;
             }
 
             public string Alias { get; set; }
@@ -110,7 +114,7 @@ namespace Enterspeed.Cli.Commands.Schema
 
             private async Task UpdateSchemaName(GetMappingSchemaResponse existingSchema, string relativeDirectoryPathOnDisk)
             {
-                var name = SchemaExtensions.BuildNewSchemaName(existingSchema.Name, relativeDirectoryPathOnDisk);
+                var name = _schemaNameService.BuildNewSchemaName(existingSchema.Name, relativeDirectoryPathOnDisk);
                 var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest()
                 {
                     Name = name,
