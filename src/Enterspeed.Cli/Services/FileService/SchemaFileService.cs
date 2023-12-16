@@ -228,8 +228,14 @@ public class SchemaFileService : ISchemaFileService
 
     private static string GetFileName(string alias, string format, SchemaType schemaType)
     {
-        var schemaTypeName = schemaType.ToString().ToLowerInvariant();
-        var schemaName = schemaType.Equals(SchemaType.Partial) ? $"{alias}.{schemaTypeName}" : $"{alias}";
+        var schemaTypeName = schemaType switch
+        {
+            SchemaType.Normal => "full",
+            SchemaType.Partial => "partial",
+            _ => throw new ArgumentOutOfRangeException(nameof(schemaType), schemaType, null)
+        };
+
+        var schemaName = $"{alias}.{schemaTypeName}";
         return format.Equals(SchemaConstants.JavascriptFormat) ? $"{schemaName}.js" : $"{schemaName}.json";
     }
 
