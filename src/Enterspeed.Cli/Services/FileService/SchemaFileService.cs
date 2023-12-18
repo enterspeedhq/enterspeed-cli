@@ -114,7 +114,8 @@ public class SchemaFileService : ISchemaFileService
             content = JsonSerializer.Deserialize<SchemaBaseProperties>(schemaContent, SerializerOptions);
         }
 
-        var relativeSchemaDirectoryPath = _filePathService.GetRelativeSchemaDirectoryPath(currentSchemaFilePath);
+        var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
+        var relativeSchemaDirectoryPath = _filePathService.GetRelativeSchemaDirectoryPath(currentSchemaFilePath, schemasDirectoryName);
         var schemaType = currentSchemaFilePath.Contains(SchemaType.Partial.ToString().ToLowerInvariant()) ? SchemaType.Partial : SchemaType.Normal;
         return new SchemaFile(alias, schemaType, content, schemaFormat, relativeSchemaDirectoryPath);
     }
@@ -123,10 +124,11 @@ public class SchemaFileService : ISchemaFileService
     {
         EnsureSchemaFolders();
 
-        var filePaths = Directory.GetFiles(_filePathService.GetRootDirectoryPath(), "*", SearchOption.AllDirectories);
+        var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
+        var filePaths = Directory.GetFiles(_filePathService.GetRootDirectoryPath(schemasDirectoryName), "*", SearchOption.AllDirectories);
         return filePaths.Select(filePath =>
             {
-                var alias = _filePathService.GetAliasFromFilePath(filePath);
+                var alias = _schemaNameService.GetAliasFromFilePath(filePath);
                 return GetSchema(alias, filePath);
             })
             .ToList();
@@ -134,16 +136,17 @@ public class SchemaFileService : ISchemaFileService
 
     private void EnsureSchemaFolders(string schemaName = null)
     {
-        if (!Directory.Exists(_filePathService.GetRelativeRootDirectoryPath()))
+        if (!Directory.Exists(_schemaNameService.GetSchemasDirectoryName()))
         {
-            Directory.CreateDirectory(_filePathService.GetRelativeRootDirectoryPath());
+            Directory.CreateDirectory(_schemaNameService.GetSchemasDirectoryName());
         }
 
         if (schemaName != null)
         {
             if (_schemaNameService.IsDirectorySchemaName(schemaName))
             {
-                var schemaDirectoryPath = _filePathService.GetDirectoryPathBySchemaName(schemaName);
+                var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
+                var schemaDirectoryPath = _filePathService.GetDirectoryPathBySchemaName(schemaName, schemasDirectoryName);
                 if (!Directory.Exists(schemaDirectoryPath))
                 {
                     Directory.CreateDirectory(schemaDirectoryPath);
@@ -188,15 +191,17 @@ public class SchemaFileService : ISchemaFileService
 
     private string GetFilePath(string schemaName, string alias, SchemaType schemaType, string format)
     {
+        var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
+
         // Folder structure is defined by name, therefore name is passed as parameter
         if (_schemaNameService.IsDirectorySchemaName(schemaName))
         {
-            var schemaDirectoryPath = _filePathService.GetDirectoryPathBySchemaName(schemaName);
+            var schemaDirectoryPath = _filePathService.GetDirectoryPathBySchemaName(schemaName, schemasDirectoryName);
             var fullFilePath = Path.Combine(schemaDirectoryPath, GetFileName(alias, format, schemaType));
             return fullFilePath;
         }
 
-        return Path.Combine(_filePathService.GetRelativeRootDirectoryPath(), GetFileName(alias, format, schemaType));
+        return Path.Combine(schemasDirectoryName, GetFileName(alias, format, schemaType));
     }
 
     private static string GetFileName(string alias, string format, SchemaType schemaType)
@@ -214,7 +219,8 @@ public class SchemaFileService : ISchemaFileService
 
     private string GetFile(string alias)
     {
-        var searchDirectory = _filePathService.GetRootDirectoryPath();
+        var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
+        var searchDirectory = _filePathService.GetRootDirectoryPath(schemasDirectoryName);
 
         if (!Directory.Exists(searchDirectory))
         {

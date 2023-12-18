@@ -101,7 +101,7 @@ internal class ImportSchemaCommand : Command
                 return false;
             }
 
-            var relativeDirectoryPathInEnterspeed = Path.GetDirectoryName(existingSchema.Name.TrimEnd(Path.DirectorySeparatorChar));
+            var relativeDirectoryPathInEnterspeed = Path.GetDirectoryName(existingSchema.Name.TrimEnd('/'));
             var relativeDirectoryPathOnDisk = schemaFile.RelativeSchemaDirectory;
 
             if (!relativeDirectoryPathOnDisk.Equals(relativeDirectoryPathInEnterspeed))

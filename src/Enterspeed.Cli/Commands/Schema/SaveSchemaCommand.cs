@@ -80,7 +80,7 @@ namespace Enterspeed.Cli.Commands.Schema
                     return 1;
                 }
 
-                var relativeDirectoryPathInEnterspeed = Path.GetDirectoryName(existingSchema.Name.TrimEnd(Path.DirectorySeparatorChar));
+                var relativeDirectoryPathInEnterspeed = Path.GetDirectoryName(existingSchema.Name.TrimEnd('/'));
                 var relativeDirectoryPathOnDisk = schema.RelativeSchemaDirectory;
 
                 if (!relativeDirectoryPathOnDisk.Equals(relativeDirectoryPathInEnterspeed))

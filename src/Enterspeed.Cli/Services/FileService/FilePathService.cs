@@ -1,24 +1,15 @@
-using Enterspeed.Cli.Domain.Models;
-
 namespace Enterspeed.Cli.Services.FileService;
 
 public class FilePathService : IFilePathService
 {
-    private const string SchemaDirectory = "schemas";
-
-    public string GetRelativeRootDirectoryPath()
+    public string GetRootDirectoryPath(string schemasDirectory)
     {
-        return SchemaDirectory;
-    }
-
-    public string GetRootDirectoryPath()
-    {
-        return Path.Combine(Directory.GetCurrentDirectory(), SchemaDirectory);
+        return Path.Combine(Directory.GetCurrentDirectory(), schemasDirectory);
     }
 
     private static string GetRelativeDirectoryPathBySchemaName(string schemaName)
     {
-        return Path.GetDirectoryName(schemaName.TrimEnd(Path.DirectorySeparatorChar));
+        return Path.GetDirectoryName(schemaName.TrimEnd('/'));
     }
 
     private static string GetDirectoryPathByFilePath(string filePath)
@@ -26,9 +17,9 @@ public class FilePathService : IFilePathService
         return Path.GetDirectoryName(filePath);
     }
 
-    public string GetRelativeSchemaDirectoryPath(string currentSchemaFilePath)
+    public string GetRelativeSchemaDirectoryPath(string currentSchemaFilePath, string schemasDirectory)
     {
-        var rootSchemaDirectoryPath = GetRootDirectoryPath();
+        var rootSchemaDirectoryPath = GetRootDirectoryPath(schemasDirectory);
         var currentSchemaDirectoryPath = GetDirectoryPathByFilePath(currentSchemaFilePath);
         var relativeSchemaDirectoryPath = currentSchemaDirectoryPath?.Replace(rootSchemaDirectoryPath, "");
 
@@ -40,16 +31,10 @@ public class FilePathService : IFilePathService
         return relativeSchemaDirectoryPath;
     }
 
-    public string GetAliasFromFilePath(string filePath)
-    {
-        return Path.GetFileNameWithoutExtension(filePath).Replace(".partial", "")
-            .Replace(".full", "");
-    }
-
-    public string GetDirectoryPathBySchemaName(string schemaName)
+    public string GetDirectoryPathBySchemaName(string schemaName, string schemasDirectory)
     {
         var currentSchemaPathRelative = GetRelativeDirectoryPathBySchemaName(schemaName);
-        var schemaDirectoryPath = Path.Combine(GetRootDirectoryPath(), currentSchemaPathRelative);
+        var schemaDirectoryPath = Path.Combine(GetRootDirectoryPath(schemasDirectory), currentSchemaPathRelative);
         return schemaDirectoryPath;
     }
 }

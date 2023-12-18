@@ -4,6 +4,8 @@ namespace Enterspeed.Cli.Services.SchemaService;
 
 public class SchemaNameService : ISchemaNameService
 {
+    private const string SchemaDirectory = "schemas";
+
     public bool IsDirectorySchemaName(string schemaName)
     {
         return schemaName.Contains('/');
@@ -11,10 +13,10 @@ public class SchemaNameService : ISchemaNameService
 
     public string BuildNewSchemaName(string existingSchemaName, string relativeDirectoryPathOnDisk)
     {
-        var lastSegment = Path.GetFileName(existingSchemaName.TrimEnd(Path.DirectorySeparatorChar));
+        var lastSegment = Path.GetFileName(existingSchemaName.TrimEnd('/'));
         if (!string.IsNullOrEmpty(relativeDirectoryPathOnDisk))
         {
-            return relativeDirectoryPathOnDisk + Path.DirectorySeparatorChar + lastSegment;
+            return relativeDirectoryPathOnDisk + "/" + lastSegment;
         }
 
         return lastSegment;
@@ -28,5 +30,16 @@ public class SchemaNameService : ISchemaNameService
         }
 
         return schemaFile.Alias;
+    }
+
+    public string GetAliasFromFilePath(string filePath)
+    {
+        return Path.GetFileNameWithoutExtension(filePath).Replace(".partial", "")
+            .Replace(".full", "");
+    }
+
+    public string GetSchemasDirectoryName()
+    {
+        return SchemaDirectory;
     }
 }

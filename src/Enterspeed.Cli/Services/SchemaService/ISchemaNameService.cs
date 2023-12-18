@@ -7,4 +7,6 @@ public interface ISchemaNameService
     bool IsDirectorySchemaName(string schemaName);
     string BuildNewSchemaName(string existingSchemaName, string relativeDirectoryPathOnDisk);
     string GetSchemaName(SchemaFile schemaFile);
+    string GetAliasFromFilePath(string filePath);
+    string GetSchemasDirectoryName();
 }
