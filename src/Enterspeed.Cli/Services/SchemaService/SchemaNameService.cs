@@ -6,7 +6,7 @@ public class SchemaNameService : ISchemaNameService
 {
     public bool IsDirectorySchemaName(string schemaName)
     {
-        return schemaName.Contains(Path.DirectorySeparatorChar);
+        return schemaName.Contains('/');
     }
 
     public string BuildNewSchemaName(string existingSchemaName, string relativeDirectoryPathOnDisk)
