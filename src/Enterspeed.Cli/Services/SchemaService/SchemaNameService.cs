@@ -16,7 +16,7 @@ public class SchemaNameService : ISchemaNameService
         var lastSegment = Path.GetFileName(existingSchemaName.TrimEnd('/'));
         if (!string.IsNullOrEmpty(relativeDirectoryPathOnDisk))
         {
-            return relativeDirectoryPathOnDisk + "/" + lastSegment;
+            return $"{relativeDirectoryPathOnDisk}/{lastSegment}";
         }
 
         return lastSegment;
