@@ -14,9 +14,10 @@ public class SchemaNameService : ISchemaNameService
     public string BuildNewSchemaName(string existingSchemaName, string relativeDirectoryPathOnDisk)
     {
         var lastSegment = Path.GetFileName(existingSchemaName.TrimEnd('/'));
+
         if (!string.IsNullOrEmpty(relativeDirectoryPathOnDisk))
         {
-            return $"{relativeDirectoryPathOnDisk}/{lastSegment}";
+            return $"{relativeDirectoryPathOnDisk.Replace("\\", "/")}/{lastSegment}";
         }
 
         return lastSegment;
