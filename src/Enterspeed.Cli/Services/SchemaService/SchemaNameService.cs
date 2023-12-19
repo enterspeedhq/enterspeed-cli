@@ -27,7 +27,7 @@ public class SchemaNameService : ISchemaNameService
     {
         if (!string.IsNullOrEmpty(schemaFile.RelativeSchemaDirectory))
         {
-            return Path.Combine(schemaFile.RelativeSchemaDirectory, schemaFile.Alias);
+            return $"{schemaFile.RelativeSchemaDirectory.Replace("\\", "/")}/{schemaFile.Alias}";
         }
 
         return schemaFile.Alias;
