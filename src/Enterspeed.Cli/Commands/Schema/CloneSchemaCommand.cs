@@ -46,7 +46,7 @@ internal class CloneSchemaCommand : Command
 
             foreach (var schema in schemaResponses)
             {
-                _schemaFileService.CreateSchema(schema.ViewHandle, schema.Type, schema.Version);
+                _schemaFileService.CreateSchema(schema.ViewHandle, schema.Type, schema.Version, schema.Name);
             }
 
             _outputService.Write("Successfully cloned all schemas");

@@ -6,6 +6,7 @@ using Enterspeed.Cli.Constants;
 using Enterspeed.Cli.Domain;
 using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Services.FileService.Models;
+using Enterspeed.Cli.Services.SchemaService;
 using Microsoft.Extensions.Logging;
 
 namespace Enterspeed.Cli.Services.FileService;
@@ -13,11 +14,6 @@ namespace Enterspeed.Cli.Services.FileService;
 public class SchemaFileService : ISchemaFileService
 {
     private readonly ILogger<SchemaFileService> _logger;
-
-    private const string SchemaDirectory = "schemas";
-
-    // logic require partial folder to be a subfolder of normal schema folder
-    private const string PartialSchemaDirectory = $"{SchemaDirectory}/partials";
 
     private const string DefaultJsContent =
         "/** @type {Enterspeed.FullSchema} */\nexport default {\n  triggers: function(context) {\n    // Example that triggers on 'mySourceEntityType' in 'mySourceGroupAlias', adjust to match your own values\n    // See documentation for triggers here: https://docs.enterspeed.com/reference/js/triggers\n    context.triggers('mySourceGroupAlias', ['mySourceEntityType'])\n  },\n  routes: function(sourceEntity, context) {\n    // Example that generates a handle with the value of 'my-handle' to use when fetching the view from the Delivery API\n    // See documentation for routes here: https://docs.enterspeed.com/reference/js/routes\n    context.handle('my-handle')\n  },\n  properties: function (sourceEntity, context) {\n    // Example that returns all properties from the source entity to the view\n    // See documentation for properties here: https://docs.enterspeed.com/reference/js/properties\n    return sourceEntity.properties\n  }\n}";
@@ -30,14 +26,23 @@ public class SchemaFileService : ISchemaFileService
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public SchemaFileService(ILogger<SchemaFileService> logger)
+    private readonly IFilePathService _filePathService;
+
+    private readonly ISchemaNameService _schemaNameService;
+
+    public SchemaFileService(
+        ILogger<SchemaFileService> logger,
+        IFilePathService filePathService,
+        ISchemaNameService schemaNameService)
     {
         _logger = logger;
+        _filePathService = filePathService;
+        _schemaNameService = schemaNameService;
     }
 
-    public void CreateSchema(string alias, SchemaType schemaType, MappingSchemaVersion version)
+    public void CreateSchema(string alias, SchemaType schemaType, MappingSchemaVersion version, string schemaName)
     {
-        EnsureSchemaFolders();
+        EnsureSchemaFolders(schemaName);
 
         if (SchemaExists(alias))
         {
@@ -45,7 +50,8 @@ public class SchemaFileService : ISchemaFileService
             DeleteSchema(alias);
         }
 
-        using var fs = File.Create(GetRelativeFilePath(alias, schemaType, version.Format));
+        var filePath = GetFilePath(schemaName, alias, schemaType, version.Format);
+        using var fs = File.Create(filePath);
         if (version.Format.Equals(SchemaConstants.JavascriptFormat))
         {
             CreateJavascriptSchemaFile(schemaType, version, fs);
@@ -80,7 +86,7 @@ public class SchemaFileService : ISchemaFileService
             var emptyContent = schemaType == SchemaType.Partial
                 ? new SchemaBaseProperties { Properties = new() }
                 : new SchemaBaseProperties { Properties = new(), Triggers = new() };
-                
+
             schemaVersion.Data = JsonSerializer.Serialize(emptyContent);
         }
 
@@ -93,15 +99,12 @@ public class SchemaFileService : ISchemaFileService
 
     public SchemaFile GetSchema(string alias, string filePath = null)
     {
-        var schemaFilePath = filePath ?? GetFile(alias);
-        var schemaFolderName = Path.GetFileName(Path.GetDirectoryName(schemaFilePath));
-        var partialSchemaFolderName = Path.GetFileName(Path.GetDirectoryName($"{PartialSchemaDirectory}/"));
-        var schemaContent = GetSchemaContent(alias, schemaFilePath);
+        var currentSchemaFilePath = filePath ?? GetFile(alias);
+        var schemaFormat = currentSchemaFilePath.EndsWith(".js") ? SchemaConstants.JavascriptFormat : SchemaConstants.JsonFormat;
 
-        var schemaType = schemaFolderName == partialSchemaFolderName ? SchemaType.Partial : SchemaType.Normal;
-        var schemaFormat = schemaFilePath.EndsWith(".js") ? SchemaConstants.JavascriptFormat : SchemaConstants.JsonFormat;
-
+        var schemaContent = GetSchemaContent(alias, currentSchemaFilePath);
         object content;
+
         if (schemaFormat.Equals(SchemaConstants.JavascriptFormat))
         {
             content = schemaContent;
@@ -111,22 +114,45 @@ public class SchemaFileService : ISchemaFileService
             content = JsonSerializer.Deserialize<SchemaBaseProperties>(schemaContent, SerializerOptions);
         }
 
-        return new SchemaFile(alias, schemaType, content, schemaFormat);
+        var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
+        var relativeSchemaDirectoryPath = _filePathService.GetRelativeSchemaDirectoryPath(currentSchemaFilePath, schemasDirectoryName);
+        var schemaType = currentSchemaFilePath.Contains(SchemaType.Partial.ToString().ToLowerInvariant()) ? SchemaType.Partial : SchemaType.Normal;
+        return new SchemaFile(alias, schemaType, content, schemaFormat, relativeSchemaDirectoryPath);
     }
 
     public IList<SchemaFile> GetAllSchemas()
     {
         EnsureSchemaFolders();
 
-        var filePaths = Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), SchemaDirectory), "*", SearchOption.AllDirectories);
-
+        var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
+        var filePaths = Directory.GetFiles(_filePathService.GetRootDirectoryPath(schemasDirectoryName), "*", SearchOption.AllDirectories);
         return filePaths.Select(filePath =>
             {
-                var alias = GetAliasFromFilePath(filePath);
-
+                var alias = _schemaNameService.GetAliasFromFilePath(filePath);
                 return GetSchema(alias, filePath);
             })
             .ToList();
+    }
+
+    private void EnsureSchemaFolders(string schemaName = null)
+    {
+        if (!Directory.Exists(_schemaNameService.GetSchemasDirectoryName()))
+        {
+            Directory.CreateDirectory(_schemaNameService.GetSchemasDirectoryName());
+        }
+
+        if (schemaName != null)
+        {
+            if (_schemaNameService.IsDirectorySchemaName(schemaName))
+            {
+                var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
+                var schemaDirectoryPath = _filePathService.GetDirectoryPathBySchemaName(schemaName, schemasDirectoryName);
+                if (!Directory.Exists(schemaDirectoryPath))
+                {
+                    Directory.CreateDirectory(schemaDirectoryPath);
+                }
+            }
+        }
     }
 
     public bool SchemaValid(MappingSchemaVersion externalSchema, string schemaAlias)
@@ -137,7 +163,10 @@ public class SchemaFileService : ISchemaFileService
         }
 
         var localSchema = GetSchemaContent(schemaAlias);
-        return CompareSchemaContent(externalSchema.Data, localSchema, externalSchema.Format);
+
+        return externalSchema.Format.Equals(SchemaConstants.JsonFormat)
+            ? CompareJsonSchemas(externalSchema.Data, localSchema)
+            : CompareJavascriptSchemas(externalSchema.Data, localSchema);
     }
 
     public bool SchemaExists(string alias)
@@ -145,20 +174,7 @@ public class SchemaFileService : ISchemaFileService
         return GetFile(alias) is not null;
     }
 
-    private static void EnsureSchemaFolders()
-    {
-        if (!Directory.Exists(SchemaDirectory))
-        {
-            Directory.CreateDirectory(SchemaDirectory);
-        }
-
-        if (!Directory.Exists(PartialSchemaDirectory))
-        {
-            Directory.CreateDirectory(PartialSchemaDirectory);
-        }
-    }
-
-    private static void DeleteSchema(string alias)
+    private void DeleteSchema(string alias)
     {
         var file = GetFile(alias);
         if (file is not null)
@@ -167,54 +183,52 @@ public class SchemaFileService : ISchemaFileService
         }
     }
 
-    private static string GetSchemaContent(string alias, string filePath = null)
+    private string GetSchemaContent(string alias, string filePath = null)
     {
         var schemaFilePath = filePath ?? GetFile(alias);
         return File.ReadAllText(schemaFilePath);
     }
 
-    private static string GetRelativeFilePath(string alias, SchemaType schemaType, string format)
+    private string GetFilePath(string schemaName, string alias, SchemaType schemaType, string format)
     {
-        return schemaType == SchemaType.Normal
-            ? Path.Combine(SchemaDirectory, GetFileName(alias, format))
-            : Path.Combine(PartialSchemaDirectory, GetFileName(alias, format));
-    }
+        var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
 
-    private static string GetFileName(string alias, string format)
-    {
-        if (format.Equals(SchemaConstants.JavascriptFormat))
+        // Folder structure is defined by name, therefore name is passed as parameter
+        if (_schemaNameService.IsDirectorySchemaName(schemaName))
         {
-            return $"{alias}.js";
+            var schemaDirectoryPath = _filePathService.GetDirectoryPathBySchemaName(schemaName, schemasDirectoryName);
+            var fullFilePath = Path.Combine(schemaDirectoryPath, GetFileName(alias, format, schemaType));
+            return fullFilePath;
         }
 
-        return $"{alias}.json";
+        return Path.Combine(schemasDirectoryName, GetFileName(alias, format, schemaType));
     }
 
-    private static string GetFile(string alias)
+    private static string GetFileName(string alias, string format, SchemaType schemaType)
     {
-        var currentDirectory = Directory.GetCurrentDirectory();
-        var searchDirectory = Path.Combine(currentDirectory, SchemaDirectory);
+        var schemaTypeName = schemaType switch
+        {
+            SchemaType.Normal => "full",
+            SchemaType.Partial => "partial",
+            _ => throw new ArgumentOutOfRangeException(nameof(schemaType), schemaType, null)
+        };
+
+        var schemaName = $"{alias}.{schemaTypeName}";
+        return format.Equals(SchemaConstants.JavascriptFormat) ? $"{schemaName}.js" : $"{schemaName}.json";
+    }
+
+    private string GetFile(string alias)
+    {
+        var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
+        var searchDirectory = _filePathService.GetRootDirectoryPath(schemasDirectoryName);
 
         if (!Directory.Exists(searchDirectory))
         {
             return null;
         }
 
-        return Directory.GetFiles(searchDirectory, alias + ".json", SearchOption.AllDirectories).FirstOrDefault() ??
-               Directory.GetFiles(searchDirectory, alias + ".js", SearchOption.AllDirectories).FirstOrDefault();
-    }
-
-    private static string GetAliasFromFilePath(string filePath)
-    {
-        return Path.GetFileNameWithoutExtension(filePath);
-    }
-
-
-    private bool CompareSchemaContent(string externalSchema, string localSchema, string schemaFormat)
-    {
-        return schemaFormat.Equals(SchemaConstants.JsonFormat)
-            ? CompareJsonSchemas(externalSchema, localSchema)
-            : CompareJavascriptSchemas(externalSchema, localSchema);
+        return Directory.GetFiles(searchDirectory, alias + ".*.json", SearchOption.AllDirectories).FirstOrDefault() ??
+               Directory.GetFiles(searchDirectory, alias + ".*.js", SearchOption.AllDirectories).FirstOrDefault();
     }
 
     private static bool CompareJavascriptSchemas(string externalSchema, string localSchema)

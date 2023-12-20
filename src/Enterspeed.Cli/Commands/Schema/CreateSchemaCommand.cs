@@ -63,9 +63,11 @@ namespace Enterspeed.Cli.Commands.Schema
                     Format = SchemaConstants.JavascriptFormat;
                 }
 
+                var name = Name ?? Alias;
+
                 var createSchemaResponse = await _mediator.Send(new CreateMappingSchemaRequest
                 {
-                    Name = Name ?? Alias,
+                    Name = name,
                     ViewHandle = Alias,
                     Type = schemaType.Value.ToApiString(),
                     Format = Format
@@ -78,7 +80,7 @@ namespace Enterspeed.Cli.Commands.Schema
                         MappingSchemaId = createSchemaResponse.MappingSchemaGuid
                     });
 
-                    _schemaFileService.CreateSchema(Alias, schemaType.Value, schemaResponse.Version);
+                    _schemaFileService.CreateSchema(Alias, schemaType.Value, schemaResponse.Version, name);
                 }
                 else
                 {
@@ -101,7 +103,7 @@ namespace Enterspeed.Cli.Commands.Schema
             {
                 var schema = _schemaFileService.GetSchema(Alias);
 
-                var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaRequest
+                var updateSchemaResponse = await _mediator.Send(new UpdateMappingSchemaVersionRequest
                 {
                     Format = schema.Format,
                     MappingSchemaId = mappingSchemaGuid,
