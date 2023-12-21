@@ -8,6 +8,7 @@ using Enterspeed.Cli.Domain.Models;
 using Enterspeed.Cli.Services.FileService.Models;
 using Enterspeed.Cli.Services.SchemaService;
 using Microsoft.Extensions.Logging;
+using ArgumentOutOfRangeException = System.ArgumentOutOfRangeException;
 
 namespace Enterspeed.Cli.Services.FileService;
 
@@ -20,6 +21,9 @@ public class SchemaFileService : ISchemaFileService
 
     private const string DefaultJsPartialContent =
         "/** @type {Enterspeed.PartialSchema} */\nexport default {\n  properties: function (input, context) {\n    // Example that returns all properties from the input object to the view\n    // See documentation for properties here: https://docs.enterspeed.com/reference/js/properties\n    return input\n  }\n}";
+
+    private const string DefaultJsCollectionContent =
+        "/** @type {Enterspeed.CollectionSchema} */\nexport default {\n  triggers: function(context) {\n    // Example that triggers on 'mySourceEntityType' in 'mySourceGroupAlias', adjust to match your own values\n    // See documentation for triggers here: https://docs.enterspeed.com/reference/js/triggers\n    context.triggers('mySourceGroupAlias', ['mySourceEntityType'])\n  },\n  routes: function(sourceEntity, context) {\n    // Example that generates a handle with the value of 'my-handle' to use when fetching the view from the Delivery API\n    // See documentation for routes here: https://docs.enterspeed.com/reference/js/routes\n    context.handle('my-handle')\n  },\n  items: function (sourceEntity, context) {\n    return context.reference('anotherSchema').children();\n  }\n}";
 
     public static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -69,7 +73,15 @@ public class SchemaFileService : ISchemaFileService
         // Version does not have any data. Assign default js setup for js schemas instead as a temp fix. 
         if (schemaVersion.Data == null)
         {
-            var byteArray = Encoding.UTF8.GetBytes(schemaType == SchemaType.Partial ? DefaultJsPartialContent : DefaultJsContent);
+            var defaultJsContent = schemaType switch
+            {
+                SchemaType.Normal => DefaultJsContent,
+                SchemaType.Partial => DefaultJsPartialContent,
+                SchemaType.Collection => DefaultJsCollectionContent,
+                _ => throw new ArgumentOutOfRangeException(nameof(schemaType), schemaType, null)
+            };
+
+            var byteArray = Encoding.UTF8.GetBytes(defaultJsContent);
             fs.Write(byteArray, 0, byteArray.Length);
         }
         else
@@ -116,8 +128,28 @@ public class SchemaFileService : ISchemaFileService
 
         var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
         var relativeSchemaDirectoryPath = _filePathService.GetRelativeSchemaDirectoryPath(currentSchemaFilePath, schemasDirectoryName);
-        var schemaType = currentSchemaFilePath.Contains(SchemaType.Partial.ToString().ToLowerInvariant()) ? SchemaType.Partial : SchemaType.Normal;
+        var schemaType = GetSchemaTypeFromPath(currentSchemaFilePath);
         return new SchemaFile(alias, schemaType, content, schemaFormat, relativeSchemaDirectoryPath);
+    }
+
+    private static SchemaType GetSchemaTypeFromPath(string currentSchemaFilePath)
+    {
+        if (currentSchemaFilePath.EndsWith("partial.js") || currentSchemaFilePath.EndsWith("partial.json"))
+        {
+            return SchemaType.Partial;
+        }
+
+        if (currentSchemaFilePath.EndsWith("full.js") || currentSchemaFilePath.EndsWith("full.json"))
+        {
+            return SchemaType.Normal;
+        }
+
+        if (currentSchemaFilePath.EndsWith("collection.js"))
+        {
+            return SchemaType.Collection;
+        }
+
+        throw new Exception("Schema type not found for " + currentSchemaFilePath);
     }
 
     public IList<SchemaFile> GetAllSchemas()
@@ -147,7 +179,7 @@ public class SchemaFileService : ISchemaFileService
             {
                 var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
                 var schemaDirectoryPath = _filePathService.GetDirectoryPathBySchemaName(schemaName, schemasDirectoryName);
-                if (!Directory.Exists(schemaDirectoryPath))
+                if (!Directory.Exists(schemaDirectoryPath) && !string.IsNullOrEmpty(schemaDirectoryPath))
                 {
                     Directory.CreateDirectory(schemaDirectoryPath);
                 }
@@ -210,6 +242,7 @@ public class SchemaFileService : ISchemaFileService
         {
             SchemaType.Normal => "full",
             SchemaType.Partial => "partial",
+            SchemaType.Collection => "collection",
             _ => throw new ArgumentOutOfRangeException(nameof(schemaType), schemaType, null)
         };
 

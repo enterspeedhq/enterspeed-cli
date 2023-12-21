@@ -35,8 +35,10 @@ public class SchemaNameService : ISchemaNameService
 
     public string GetAliasFromFilePath(string filePath)
     {
-        return Path.GetFileNameWithoutExtension(filePath).Replace(".partial", "")
-            .Replace(".full", "");
+        return Path.GetFileNameWithoutExtension(filePath)
+            .Replace(".partial", "")
+            .Replace(".full", "")
+            .Replace(".collection", "");
     }
 
     public string GetSchemasDirectoryName()
