@@ -204,6 +204,7 @@ public class SchemaFileService : ISchemaFileService
 
         return Path.Combine(schemasDirectoryName, GetFileName(alias, format, schemaType));
     }
+    
     private SchemaType GetSchemaTypeFromFilePath(string filePath)
     {
         if (Regex.IsMatch(filePath, ".*.full.(?:js|json)$"))
