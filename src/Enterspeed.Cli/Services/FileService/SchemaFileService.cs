@@ -117,7 +117,7 @@ public class SchemaFileService : ISchemaFileService
 
         var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
         var relativeSchemaDirectoryPath = _filePathService.GetRelativeSchemaDirectoryPath(currentSchemaFilePath, schemasDirectoryName);
-        var schemaType = GetSchemaTypeFromFilePath(currentSchemaFilePath); // currentSchemaFilePath.Contains(SchemaType.Partial.ToString().ToLowerInvariant()) ? SchemaType.Partial : SchemaType.Normal;
+        var schemaType = GetSchemaTypeFromFilePath(currentSchemaFilePath);
         return new SchemaFile(alias, schemaType, content, schemaFormat, relativeSchemaDirectoryPath);
     }
 
