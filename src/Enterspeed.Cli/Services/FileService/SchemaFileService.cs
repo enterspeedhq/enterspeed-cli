@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Enterspeed.Cli.Api.MappingSchema.Models;
 using Enterspeed.Cli.Constants;
 using Enterspeed.Cli.Domain;
@@ -116,7 +117,7 @@ public class SchemaFileService : ISchemaFileService
 
         var schemasDirectoryName = _schemaNameService.GetSchemasDirectoryName();
         var relativeSchemaDirectoryPath = _filePathService.GetRelativeSchemaDirectoryPath(currentSchemaFilePath, schemasDirectoryName);
-        var schemaType = currentSchemaFilePath.Contains(SchemaType.Partial.ToString().ToLowerInvariant()) ? SchemaType.Partial : SchemaType.Normal;
+        var schemaType = GetSchemaTypeFromFilePath(currentSchemaFilePath); // currentSchemaFilePath.Contains(SchemaType.Partial.ToString().ToLowerInvariant()) ? SchemaType.Partial : SchemaType.Normal;
         return new SchemaFile(alias, schemaType, content, schemaFormat, relativeSchemaDirectoryPath);
     }
 
@@ -202,6 +203,19 @@ public class SchemaFileService : ISchemaFileService
         }
 
         return Path.Combine(schemasDirectoryName, GetFileName(alias, format, schemaType));
+    }
+    private SchemaType GetSchemaTypeFromFilePath(string filePath)
+    {
+        if (Regex.IsMatch(filePath, ".*.full.(?:js|json)$"))
+        {
+            return SchemaType.Normal;
+        }
+        if (Regex.IsMatch(filePath, ".*.partial.(?:js|json)$"))
+        {
+            return SchemaType.Partial;
+        }
+
+        throw new Exception($"file: '{filePath}' is missing a valid schema type. e.g. schemaAlias.full.js or schemaAlias.partial.js");
     }
 
     private static string GetFileName(string alias, string format, SchemaType schemaType)
