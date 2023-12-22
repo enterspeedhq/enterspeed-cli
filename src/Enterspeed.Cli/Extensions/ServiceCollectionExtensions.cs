@@ -1,10 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 using Enterspeed.Cli.Configuration;
 using Enterspeed.Cli.Services.ConsoleOutput;
 using Enterspeed.Cli.Services.EnterspeedClient;
 using Enterspeed.Cli.Services.FileService;
-using MediatR;
 using Enterspeed.Cli.Services.StateService;
 using Serilog;
 using Serilog.Formatting.Compact;
@@ -14,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using System.CommandLine.Hosting;
 using Enterspeed.Cli.Services;
 using Enterspeed.Cli.Services.IngestService;
+using Enterspeed.Cli.Services.SchemaService;
 using Serilog.Events;
 
 namespace Enterspeed.Cli.Extensions;
@@ -45,11 +44,13 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddMediatR(Assembly.GetExecutingAssembly());
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddTransient<IEnterspeedClient, EnterspeedClient>();
         services.AddTransient<IOutputService, OutputService>();
         services.AddTransient<ISchemaFileService, SchemaFileService>();
+        services.AddTransient<IFilePathService, FilePathService>();
+        services.AddTransient<ISchemaNameService, SchemaNameService>();
         services.AddTransient<IDeploymentPlanFileService, DedploymentPlanFileService>();
         services.AddTransient<IIngestService, IngestService>();
         services.AddSingleton<GlobalOptions>();
