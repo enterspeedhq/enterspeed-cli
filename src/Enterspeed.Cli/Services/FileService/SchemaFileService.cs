@@ -228,6 +228,11 @@ public class SchemaFileService : ISchemaFileService
             return SchemaType.Partial;
         }
 
+        if (Regex.IsMatch(filePath, ".*.collection.(?:js)$"))
+        {
+            return SchemaType.Collection;
+        }
+        
         throw new Exception($"file: '{filePath}' is missing a valid schema type. e.g. schemaAlias.full.js or schemaAlias.partial.js");
     }
 
