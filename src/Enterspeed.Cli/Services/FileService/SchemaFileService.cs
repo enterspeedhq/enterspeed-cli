@@ -229,7 +229,7 @@ public class SchemaFileService : ISchemaFileService
             return SchemaType.Partial;
         }
 
-        if (Regex.IsMatch(filePath, ".*.partial.(?:js|json)$"))
+        if (Regex.IsMatch(filePath, ".*.collection.(?:js|json)$"))
         {
             return SchemaType.Collection;
         }
