@@ -17,7 +17,7 @@ namespace Enterspeed.Cli.Commands.Schema
         public CreateSchemaCommand() : base(name: "create", "Creates schema")
         {
             AddArgument(new Argument<string>("alias", "Alias of the schema"));
-            AddOption(new Option<string>(new[] { "--type", "-t" }, "Type of the schema (full or partial). Default value is full"));
+            AddOption(new Option<string>(new[] { "--type", "-t" }, "Type of the schema (full, partial or collection). Default value is full"));
             AddOption(new Option<string>(new[] { "--name", "-n" }, "Name of the schema"));
             AddOption(new Option<string>(new[] { "--format", "-f" }, "Format of the schema (json or javascript). Default is javascript"));
         }

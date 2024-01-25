@@ -6,5 +6,6 @@ namespace Enterspeed.Cli.Domain.Models;
 public enum SchemaType
 {
     Normal,
-    Partial
+    Partial,
+    Collection
 }
