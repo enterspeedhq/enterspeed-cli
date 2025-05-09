@@ -7,5 +7,5 @@ public enum SchemaType
 {
     Normal,
     Partial,
-    Collection
+    Index
 }
