@@ -38,7 +38,7 @@ public class SchemaNameService : ISchemaNameService
         return Path.GetFileNameWithoutExtension(filePath)
             .Replace(".partial", "")
             .Replace(".full", "")
-            .Replace(".collection", "");
+            .Replace(".index", "");
     }
 
     public string GetSchemasDirectoryName()

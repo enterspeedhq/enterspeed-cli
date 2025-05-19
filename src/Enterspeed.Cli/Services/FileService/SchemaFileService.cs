@@ -23,8 +23,8 @@ public class SchemaFileService : ISchemaFileService
     private const string DefaultJsPartialContent =
         "/** @type {Enterspeed.PartialSchema} */\nexport default {\n  properties: function (input, context) {\n    // Example that returns all properties from the input object to the view\n    // See documentation for properties here: https://docs.enterspeed.com/reference/js/partial-schema/properties\n    return input\n  }\n}";
 
-    private const string DefaultJsCollectionContent =
-        "/** @type {Enterspeed.CollectionSchema} */\nexport default {\n  triggers: function(context) {\n    // Example that triggers on 'mySourceEntityType' in 'mySourceGroupAlias', adjust to match your own values\n    // See documentation for triggers here: https://docs.enterspeed.com/reference/js/triggers\n    context.triggers('mySourceGroupAlias', ['mySourceEntityType'])\n  },\n  routes: function(sourceEntity, context) {\n    // Example that generates a handle with the value of 'my-handle' to use when fetching the view from the Delivery API\n    // See documentation for routes here: https://docs.enterspeed.com/reference/js/routes\n    context.handle('my-handle')\n  },\n  items: function (sourceEntity, context) {\n    return context.reference('anotherSchema').children();\n  }\n}";
+    private const string DefaultJsIndexContent =
+        "/** @type {Enterspeed.IndexSchema} */\nexport default {\n  triggers: function(context) {\n    // Example that triggers on 'mySourceEntityType' in 'mySourceGroupAlias', adjust to match your own values\n    // See documentation for triggers here: https://docs.enterspeed.com/reference/js/index-schema/triggers\n    context.triggers('mySourceGroupAlias', ['mySourceEntityType'])\n  },\n  index: {\n    // All fields that should be indexed in the search index\n    // See documentation for index here: https://docs.enterspeed.com/reference/js/index-schema/indexMethod\n    fields: {\n      // Example of a searchable field with type keyword\n      searchableField: { type: \"keyword\" }\n    }\n  },\n  properties: function (sourceEntity) {\n    // Example that returns all properties from the source entity to the view\n    // See documentation for properties here: https://docs.enterspeed.com/reference/js/index-schema/properties\n    return {\n      searchableField: sourceEntity.originId\n    }\n  }\n}";
 
     public static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -78,7 +78,7 @@ public class SchemaFileService : ISchemaFileService
             {
                 SchemaType.Normal => DefaultJsFullContent,
                 SchemaType.Partial => DefaultJsPartialContent,
-                SchemaType.Collection => DefaultJsCollectionContent,
+                SchemaType.Index => DefaultJsIndexContent,
                 _ => throw new ArgumentOutOfRangeException(nameof(schemaType), schemaType, null)
             };
 
@@ -229,12 +229,12 @@ public class SchemaFileService : ISchemaFileService
             return SchemaType.Partial;
         }
 
-        if (Regex.IsMatch(filePath, ".*.collection.(?:js|json)$"))
+        if (Regex.IsMatch(filePath, ".*.index.(?:js|json)$"))
         {
-            return SchemaType.Collection;
+            return SchemaType.Index;
         }
 
-        throw new Exception($"file: '{filePath}' is missing a valid schema type. e.g. schemaAlias.full.js or schemaAlias.partial.js");
+        throw new Exception($"file: '{filePath}' is missing a valid schema type. e.g. schemaAlias.full.js, schemaAlias.partial.js or schemaAlias.index.js");
     }
 
     private static string GetFileName(string alias, string format, SchemaType schemaType)
@@ -243,7 +243,7 @@ public class SchemaFileService : ISchemaFileService
         {
             SchemaType.Normal => "full",
             SchemaType.Partial => "partial",
-            SchemaType.Collection => "collection",
+            SchemaType.Index => "index",
             _ => throw new ArgumentOutOfRangeException(nameof(schemaType), schemaType, null)
         };
 
