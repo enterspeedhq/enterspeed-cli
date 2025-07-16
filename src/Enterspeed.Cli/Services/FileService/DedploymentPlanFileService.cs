@@ -39,7 +39,10 @@ namespace Enterspeed.Cli.Services.FileService
 
             using (var fs = File.Create(DefaultDeploymentPlanFileName))
             {
-                var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(deploymentPlanProperties);
+                var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(deploymentPlanProperties, new JsonSerializerOptions
+                {
+                     WriteIndented = true
+                });
                 fs.Write(jsonBytes, 0, jsonBytes.Length);
             }
         }
