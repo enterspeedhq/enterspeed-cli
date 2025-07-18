@@ -28,7 +28,8 @@ public class SchemaFileService : ISchemaFileService
 
     public static readonly JsonSerializerOptions SerializerOptions = new()
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        WriteIndented = true
     };
 
     private readonly IFilePathService _filePathService;

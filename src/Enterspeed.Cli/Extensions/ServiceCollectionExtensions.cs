@@ -51,7 +51,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ISchemaFileService, SchemaFileService>();
         services.AddTransient<IFilePathService, FilePathService>();
         services.AddTransient<ISchemaNameService, SchemaNameService>();
-        services.AddTransient<IDeploymentPlanFileService, DedploymentPlanFileService>();
+        services.AddTransient<IDeploymentPlanFileService, DeploymentPlanFileService>();
         services.AddTransient<IIngestService, IngestService>();
         services.AddSingleton<GlobalOptions>();
         return services;

@@ -37,7 +37,7 @@ public class DeployCommand : Command
 
         public string Environment { get; set; }
 
-        public string DeploymentPlan { get; set; } = DedploymentPlanFileService.DefaultDeploymentPlanFileName;
+        public string DeploymentPlan { get; set; } = DeploymentPlanFileService.DefaultDeploymentPlanFileName;
 
         public async Task<int> InvokeAsync(InvocationContext context)
         {
