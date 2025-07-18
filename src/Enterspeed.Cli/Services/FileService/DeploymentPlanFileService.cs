@@ -3,9 +3,14 @@ using System.Text.Json;
 
 namespace Enterspeed.Cli.Services.FileService
 {
-    public class DedploymentPlanFileService : IDeploymentPlanFileService
+    public class DeploymentPlanFileService : IDeploymentPlanFileService
     {
         public const string DefaultDeploymentPlanFileName = "deploymentplan.json";
+
+        public static readonly JsonSerializerOptions SerializerOptions = new()
+        {
+            WriteIndented = true
+        };
 
         private bool DeploymentPlanExist => File.Exists(Path.Combine(Directory.GetCurrentDirectory(), DefaultDeploymentPlanFileName));
 
@@ -39,10 +44,7 @@ namespace Enterspeed.Cli.Services.FileService
 
             using (var fs = File.Create(DefaultDeploymentPlanFileName))
             {
-                var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(deploymentPlanProperties, new JsonSerializerOptions
-                {
-                     WriteIndented = true
-                });
+                var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(deploymentPlanProperties, SerializerOptions);
                 fs.Write(jsonBytes, 0, jsonBytes.Length);
             }
         }
